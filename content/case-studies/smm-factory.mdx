@@ -1,0 +1,89 @@
+---
+slug: smm-factory
+title: smm-factory
+tagline: An Instagram team of zero humans. Eight agents, three-tap Slack approval.
+role: Personal · solo
+stack:
+  - Python
+  - Claude Opus 4.7
+  - Claude Sonnet 4.6
+  - Claude Haiku 4.5
+  - Playwright
+  - FFmpeg
+  - Supabase
+  - Slack Bolt
+  - Render.com
+  - GitHub Actions
+year: "2026"
+status: in-progress
+publishedAt: "2026-06-08"
+readingTime: 4
+---
+
+> A multi-agent SMM system that ran a barbershop-SaaS Instagram for 2 months on its own — 40 posts, 13 niche followers, zero moderator violations, ~$0.40/week in AI costs. Built as Noble's in-house marketing team, minus the team.
+
+`Python · Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5 · Playwright + FFmpeg · Supabase · Slack Bolt · Render.com · GitHub Actions · June–July 2026`
+
+## Context
+
+Noble is a booking SaaS for barbershops and independent salons — the kind of business that lives on Instagram but rarely has time for it. Solo owners already juggle staff, chairs, and no-shows. Marketing consistently falls off the table.
+
+I built smm-factory as Noble's Instagram team: a system that plans a week of content, generates it, posts it, engages with the community, and reports back — end to end — with human approval only where it actually matters.
+
+## Problem
+
+Noble had a chicken-and-egg: acquire barbershops on Instagram, but need Instagram credibility first. Doing it manually meant either a full-time SMM specialist ($2–3K/month), an agency ($5K+ and generic B2B templates), or founder-posting (a pattern that collapses in week two).
+
+I wanted something that runs itself but where I stay the taste-maker. Not *"AI writes everything"* — *"AI does everything except the taste calls."*
+
+## Division of Labor
+
+| Layer | Who does it |
+|---|---|
+| Strategy (ICP, pillars, voice) | Me → Claude Sonnet distills into per-client strategy in DB |
+| Weekly content plan (7 posts) | Claude Opus (1×/week, cost amortized) |
+| Captions, comments, hashtags | Claude Haiku (fast + cheap, high volume) |
+| Media (reels, carousels, posts) | Playwright screenshots + FFmpeg + Pexels/Jamendo assets |
+| Approval | Human, always — Slack cards, three buttons |
+| Posting + engagement | Autonomous, gated by Orchestrator state machine |
+| Learning | Analytics Agent (weekly) + Self-Improvement (monthly) → **I approve, doesn't auto-apply** |
+
+Model stratification wasn't premature optimization. First month running Opus for everything ≈ $8/day. After stratification: ~$0.30–0.50/client/week. Same output quality where it matters, 20× cheaper.
+
+## Prompt Architecture
+
+The system's superpower is the `knowledge/` directory — 12 markdown files, one per agent (`00_overview` through `11_orchestrator`). One rule I set for myself: **Rules = Code.** If a rule lives only in markdown, it doesn't exist. Every markdown rule must be in code.
+
+That flipped every Claude session from *"here's a codebase, please read it all"* into *"here's the spec and the one file we're touching."* Sessions got sharp.
+
+## Iteration Moment — a decision I unwound in 21 minutes
+
+**June 12, 00:11** — integrated Playwright + FFmpeg for reel rendering. First working commit.
+**June 12, 00:32** — fix commit: screenshot-per-frame instead of WebM recording.
+
+The original design used Playwright's native `page.video()`. Defensible on paper. In practice: animation timings weren't frame-aligned, jittery output, dropped frames. Ship, test, kill in 21 minutes. Switched to screenshot-per-frame at 30fps → FFmpeg compositing → deterministic output every time. Slower to render, but rendering runs once on GitHub Actions free tier.
+
+**What this taught me**: with Claude, the useful skill isn't defending design-pass decisions — it's the speed to unwind them once reality argues back.
+
+## Trade-Offs I'd Explain to a Client
+
+- **GitHub Actions as render farm** instead of a GPU box. 5–15 min latency, offloaded to free tier. Would break past ~50 clients — good problem.
+- **Slack as the only UI.** Every approval, status, insight — Slack. Custom dashboard would've cost weeks; Slack costs zero. Rate limits push me toward batching, which turned out to be a UX win.
+- **Self-Improvement never auto-applies.** Monthly it writes a new strategy version, archives the old, posts summary in Slack. I approve or ignore. Costs me weekly attention. Prevents silent drift into whatever Claude currently thinks is right.
+
+## Results — 2 months of autonomous operation
+
+- **40 posts published**, zero manual editing
+- **0 → 13 followers** in a niche B2B segment (independent barbershop owners actively on Instagram)
+- **0 – 200 views per post**
+- **Zero Instagram violations, bans, or shadowbans** — Orchestrator's safety pauses worked
+- **AI cost**: ~$0.30–0.50/client/week
+- **Human time after setup**: ~1 hour/week
+
+**The honest read**: 13 followers is small. This is a genuinely narrow audience (specific service tier, specific behavior). The system proved it can run at cost. The current work — where I'm now — is whether we can lift the creative ceiling enough for the same targeting to convert.
+
+## Reflection
+
+1. **Model stratification is a UX decision, not just a cost one.** Opus writing a comment reads as *"AI-trying-too-hard."* Haiku writing a comment reads as human. Match model personality to task.
+2. **Human-in-the-loop only works if the loop is fast.** Three-tap Slack approval = 2-minute weekly review. A dashboard would have died by month two.
+3. **"AI can now do everything" is technically true, operationally false.** The wins come from architecture: state machines, safety valves, approval gates, version histories. AI is a component; the system is what ships.

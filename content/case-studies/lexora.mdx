@@ -1,0 +1,72 @@
+---
+slug: lexora
+title: Lexora
+tagline: Vocabulary that plays like a podcast — eyes anywhere but the phone.
+role: Personal · solo
+stack:
+  - Flutter
+  - Supabase
+  - Google TTS Neural2
+  - Gemini 3.6 Flash
+year: "2026"
+status: in-review
+publishedAt: "2026-08-30"
+readingTime: 4
+---
+
+**Lexora is a vocabulary app that never asks you to look at your phone — playlists of word pairs play through Neural2 voices while you drive, run, or cook.**
+
+`Flutter · Supabase · GCP TTS · Gemini · 2026-08-30 → 2026-09-19`
+
+## Context
+
+Language learners already have vocabulary — in Quizlet, Anki, Google Sheets. What they don't have is a way to *use* it hands-free. Duolingo demands eyes on a screen. Anki demands taps. Lexora just plays.
+
+## Problem
+
+Every vocabulary app treats audio as an extra. In real use — commutes, workouts, chores — screens don't work. You need something that runs from a lock screen, plays in background, works offline (subways, flights), and doesn't force a language-pair schema (I want *Ukrainian definitions of English business terms*, not a preset "en→uk" course).
+
+## Division of Labor
+
+| Layer | Who |
+|---|---|
+| Product decisions (12 languages, drop Farsi when Google has no fa-IR voice) | Me |
+| Feature spec (`.md` file first, always) | Claude via `/speckit-specify` |
+| Task breakdown & priorities | Claude via `/speckit-plan` + `/speckit-tasks` |
+| Implementation | Claude via `/speckit-implement` |
+| Device QA, Transporter, entitlements, Supabase seed SQL | Me |
+| DEVLOG entry after each session | Claude |
+
+## Prompt Architecture — Spec-First Discipline
+
+Every feature — even sub-hour changes — writes a **markdown spec before code**. The `/speckit-*` family (specify → plan → tasks → implement → checklist) is a rail Claude runs on. There are 19 custom skills in `.claude/skills/` — the speckit family plus a shiploop family for QA, brainstorm, and observer roles.
+
+**The rule:** if the change touches more than 3 files or takes more than an hour, it goes through speckit. If it's a bug, Claude diagnoses → fixes → verifies → DEVLOGs. No exceptions to the DEVLOG step — that's what makes the next session cheap.
+
+## Iteration Moment — Claude API → Gemini
+
+- **Before:** 2026-09-14, v0.2.4 — AI Generate feature calls Anthropic's API. `.env` had `CLAUDE_API_KEY=` empty. Users hit 401. Feature was silently broken until QA.
+- **After:** same day — migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had TTS + Translation, so this collapsed three API keys into two providers. `responseMimeType: application/json` guaranteed clean JSON. 20-word playlists generate in ~1.5s. Free tier.
+
+**Lesson:** *When the stack already has a cloud provider, use their model. Two API keys is a bug factory; one is a feature.*
+
+## Trade-Offs
+
+1. **Silent MP3 assets over `SilenceAudioSource`.** Just_audio's silence source crashed with error 9999999 on real devices. Solution: pre-generated MP3s for 1–5s pauses, checked into `assets/`. Cost: +2 MB bundle. Value: playback that actually works.
+2. **Gemini over Claude / GPT-4 for generation.** Free, one API key, JSON-guaranteed. Less nuanced on terminology — acceptable trade at MVP.
+3. **Postgres trigger for `word_count`.** Trigger on `words` INSERT/DELETE updates `playlists.word_count` atomically. No app-level reconciliation. Cost: tiny latency. Value: zero stale counts, ever.
+4. **Offline-first cache with dual-write.** Generate audio → save local file → queue Supabase upload. Playback latency `<100ms`. Cost: if the app crashes pre-upload, Supabase is stale — re-sync on next open.
+
+## Results (honest)
+
+- **Build 13** in Apple review as of 2026-09-19 (Build 12 → hotfix Build 13, same day)
+- **61 unit tests** (mocktail + Freezed), 7 integration flows
+- **12 supported languages** (dropped Persian when Google TTS had no fa-IR voice)
+- **26–28 MB** iOS bundle, 59 MB Android
+- **0** paying users. The build hasn't been reviewed yet.
+
+## Reflection
+
+1. **Spec-first isn't ceremony — it's cache.** The `specs/` folder is a durable record. Next session, Claude re-reads the spec instead of me re-explaining. Front-load once, save every session after.
+2. **Real devices ≠ simulators.** Both crashes that made it into DEVLOG (`SilenceAudioSource`, stale env keys) only reproduced on hardware. Simulator green means nothing.
+3. **A rotating API key is a runtime dependency, not a config.** Two Build resubmissions came from key rotations that shell env didn't pick up. Now `--dart-define-from-file=.env` is the only build path.

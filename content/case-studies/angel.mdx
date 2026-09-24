@@ -1,0 +1,68 @@
+---
+slug: angel
+title: Angel Trucking
+tagline: Five-stage AI pipeline before a single production line of code.
+role: Client · lead
+stack:
+  - Next.js 16
+  - TypeScript
+  - Supabase
+  - Tailwind v4
+  - Claude Sonnet 4.6
+year: "2026"
+status: sprint-4
+publishedAt: "2026-05-12"
+readingTime: 4
+---
+
+**Angel replaces four disconnected trucking systems — HR screening, maintenance shop, marketplace, fleet ops — with one platform that a driver can log into from a phone in a cab.**
+
+`Next.js 16 · Supabase · Claude Sonnet 4.6 · 2026-05-12 → present`
+
+## Context
+
+Angel Trucking is a real ~100-truck carrier in Ohio. ~150 people touch the system: 1–2 admins, 3–5 managers, 5–10 mechanics, 50–70 drivers, plus candidates and the public marketplace. This is the only client project in my portfolio — the rest are personal.
+
+## Problem
+
+Every existing trucking SaaS handles one slice: TMS, or maintenance, or hiring. None cover all four *and* work on a phone in a cab with no signal. Screening drivers manually is slow. Booking shop time by phone is chaos. Marketplace listings never get to Facebook. The client didn't need better software for one problem — they needed one system for four.
+
+## Division of Labor
+
+| Layer | Who |
+|---|---|
+| Business rules (e.g. "3-year speeding = auto-reject") | Me |
+| Task in plain language | Me (Ukrainian or English) |
+| Clarification, spec, design, code, review | Claude (5-stage pipeline) |
+| Sprint approval | Me |
+| Deployment | Me |
+
+## Prompt Architecture — the 5-stage pipeline
+
+Every task passes through **five roles**, in order: Orchestrator → PM → Designer → Developer → Reviewer. Each role has its own `AGENTS.md`-declared contract. **The PM asks up to 5 clarifying questions and then writes a Task Brief. The Designer never codes. The Developer never re-designs. The Reviewer validates against three docs: Brief, Design Spec, V9 tokens.**
+
+The rule that keeps sessions sharp: **"Spec + one file, not the codebase."** Claude never reads the whole tree — every task hands it the Brief and the specific files by name. This is what stops mid-session context rot.
+
+## Iteration Moment
+
+Only one commit exists (`b652cd3`, 2026-05-12) — the entire agent architecture and 4-sprint roadmap were built *before* production code. That's the pivot: instead of jumping into features and refactoring later, I front-loaded the agent design. Sprint 1–3 (auth, HR, marketplace) shipped from that scaffold; Sprint 4 (shop + fleet) is in progress. **Lesson: for a 4-module product, an hour designing the pipeline saves a week of rewrites.**
+
+## Trade-Offs
+
+1. **Driver auth = phone-cookie, not Supabase Auth.** Drivers log in with a phone number and a cookie, offline. Supabase Auth needs email + connectivity. Cost: I maintain two auth systems.
+2. **3-year speeding violation = auto-reject.** No manual appeal. Insurance risk in trucking makes the appeal path a liability, not a feature.
+3. **30-min shop slots, not dynamic.** Admin configures hours + bay count; slots are a fixed grid. Predictable UX beats optimal packing.
+4. **Marketplace is fully public.** No login, no saved favorites. Maximizes reach; loses buyer tracking.
+
+## Results (honest)
+
+- 1 commit, 4 sprints scoped, 3 shipped
+- 6 agent role files + 4 module knowledge packs
+- Zero production users yet — Sprint 4 gates go-live
+- V9 design system: mobile-first at 375px, Ohio timezone hard-coded
+
+## Reflection
+
+1. **Multi-stage prompts scale where single prompts collapse.** By Sprint 3, one-prompt "just build the shop module" would have produced slop. Five-stage forced explicit design decisions before code.
+2. **Business rules belong in code, not docs.** The 3-year speeding rule lives in `lib/ai/screening.ts`, not a policy PDF. If the rule changes, one file changes.
+3. **The most valuable file in the repo is `AGENTS.md`, not the code.** Anyone reading it can predict how the next feature will get built.

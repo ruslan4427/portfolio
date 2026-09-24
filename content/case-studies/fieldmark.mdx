@@ -1,0 +1,72 @@
+---
+slug: fieldmark
+title: Fieldmark
+tagline: PDF floor plan → live installation checklist. Rejected & resubmitted in 18h.
+role: Personal · solo
+stack:
+  - Flutter
+  - Riverpod
+  - Supabase
+  - Firebase
+  - Apple Sign-In
+year: "2026"
+status: in-review
+publishedAt: "2026-09-12"
+readingTime: 4
+---
+
+**Fieldmark is a Flutter app that turns a PDF floor plan into a live installation checklist — foremen drop numbered pins, installers pick up tasks offline in the field.**
+
+`Flutter · Supabase · Riverpod · Firebase FCM · 2026-09-12 → 2026-09-19`
+
+## Context
+
+Installer crews (electric, HVAC, low-voltage) work off paper plans and text messages. A foreman marks up a PDF, hands it out, and then chases status by phone all day. Fieldmark makes the same PDF interactive: pins are tasks, tasks have photos and voice notes, status flows back automatically.
+
+## Problem
+
+Existing task apps (Asana, ClickUp, Fieldwire) treat plans as attachments. In practice, installers navigate by *where on the plan* the work is, not by task title. And they lose signal in mechanical rooms. Todo apps don't survive that. Fieldmark starts from the PDF and works offline first.
+
+## Division of Labor
+
+| Layer | Who |
+|---|---|
+| Field validation (test with crews) | Me |
+| One-sentence spec | Me |
+| Impact analysis, options, trade-offs | Claude |
+| Implementation, Riverpod codegen, git | Claude |
+| Device test | Me |
+| DEVLOG entry (Problem → Decision → Result → Lesson) | Claude, after every session |
+
+## Prompt Architecture — Analyze → Propose → Decide → Implement
+
+CLAUDE.md defines a **four-stage gate**: I state the problem, Claude analyzes and proposes 2–3 options with trade-offs, I decide, then Claude implements. No code before decision. Any change touching more than 2 files or a UX flow gets a written plan first.
+
+The knowledge layer is **DEVLOG.md**, structured as Problem/Decision/Result/Lesson blocks. It's not a diary — it's the memory Claude loads next session so we don't re-litigate solved problems. `.claude/settings.local.json` pre-permits 30+ flutter/git commands so nothing stalls on approval prompts.
+
+## Iteration Moment — Apple Sign-In rewrite
+
+- **Before:** 2026-09-12 `f05b752` — initial build used Supabase's web-based `signInWithOAuth` for Apple. Apple review rejected Build 20 with Guideline 2.1(a): sign-in flow broken.
+- **After:** 2026-09-18 `8b18221` `feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)` — pivoted to native `ASAuthorization` with nonce + sha256 validation. 5 files changed. Submitted the next morning, 2026-09-19 `071b10c`.
+
+**Lesson:** *When Apple bounces you on auth UX, Claude can implement the native replacement in one session — but only if DEVLOG already contains the rejection text verbatim. Feelings don't route back into code; error strings do.*
+
+## Trade-Offs
+
+1. **Riverpod over Bloc.** Less boilerplate, code generation, faster velocity on a solo project. Cost: fewer middleware plugins.
+2. **Supabase Postgres RLS over Firebase.** Real row-level security in SQL. Cost: no built-in offline sync — handled by `connectivity_plus` + a local queue.
+3. **Native ASAuthorization over web OAuth.** No redirect dance, Apple review passes. Cost: Apple client secret rotates every 6 months — automated with a Python script and a calendar reminder before the first user signed up.
+4. **PKCE flow.** Required for native Apple Sign-In. Cost: nonce validation complexity — mitigated by codegen.
+
+## Results (honest)
+
+- **7 days** from first commit to App Store submission
+- **7 commits**, 5 of them in the final 24h auth sprint
+- **Build 20** rejected → **Build 21** submitted → waiting for review as of 2026-09-19
+- **0** shipped users at the time of writing — this is the first submission that passed the auth gate
+
+## Reflection
+
+1. **Rejection emails are the best specs.** Guideline 2.1(a) with the reviewer's screenshot was cleaner than any AC I would have written myself.
+2. **A DEVLOG that captures *why* survives context resets.** Claude Code hits context limits mid-project; DEVLOG is what lets the next session pick up without me re-explaining.
+3. **Automating the boring future task pays off before the future arrives.** The 6-month Apple secret rotation script was written the same day as the auth pivot — because the pivot's context was the only time I'd remember to.
