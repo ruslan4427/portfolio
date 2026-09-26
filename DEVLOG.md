@@ -5,6 +5,751 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-09-26 · Domain + surname rename → hrekov.dev / Hrekov
+
+**Problem.** Two long-standing placeholders throughout the codebase:
+(1) canonical URL was `ruslan.dev` — chosen in Phase 0 discovery as
+aspirational, never verified; RDAP now confirms it's registered by
+someone else and unavailable. (2) surname was written "Grekov"
+(Russian romanization) in bio, JSON-LD author, OG images, and footer,
+but Ruslan's actual preferred romanization is "Hrekov" (Ukrainian
+standard Г→H, per Cabinet of Ministers). Contact email
+`rusgrekovua@gmail.com` uses the old spelling and must not be touched
+(it's a real live account).
+
+**Decision.** After surveying ~40 candidate domains via RDAP and
+weighing pros/cons of `.dev` / `.com` / `.io` / `.org` / geo-TLDs,
+picked **`hrekov.dev`** — surname + tech-signal TLD, standard price
+(~$12/yr at Cloudflare), HSTS preload out-of-the-box, matches the
+target audience (CTOs, tech-founders) who read `.dev` as
+professional-tech signal. Site-wide sed replacement scoped
+explicitly to production files only (17 files), skipping historical
+records (DEVLOG, specs/, memory/) which document what we thought at
+the time.
+
+- `ruslan.dev` → `hrekov.dev` (21 occurrences across: `app/layout.tsx`
+  metadataBase, `app/robots.ts`, `app/sitemap.ts`, all 5 OG image
+  routes, `lib/og-template.tsx` footer, case-study JSON-LD, README
+  env-var example, CLAUDE.md project description)
+- `Ruslan Grekov` → `Ruslan Hrekov` (17 occurrences: author name in
+  JSON-LD, OG image bylines, footer copyright, `content/about.ts`
+  bio paragraph, Hero.tsx bio, page-level `<Metadata>` titles/descs)
+- `rusgrekovua@gmail.com` left intact (sed pattern was case-sensitive
+  full-name-only `Ruslan Grekov`, never matched lowercase substring
+  inside email).
+
+**Result.** Grep sweep returns zero remaining production hits for
+`ruslan.dev` or `Ruslan Grekov`. Typecheck clean. Playwright sweep
+across `/`, `/about`, `/services`, `/work`, `/work/noble`,
+`/contact` at 1440×900 all render 200 with zero console errors and
+zero string-leaks in the rendered HTML. New user-facing identity is
+now consistent everywhere.
+
+**Lesson.** When placeholders are load-bearing (canonical URLs, OG
+metadata, JSON-LD author), they compound cost over time. Ship the
+real value in one atomic swap, not gradual per-file fixes — a single
+sed pass + Playwright sweep is cheaper and more auditable than 21
+separate diffs. Also: user's own romanization preference is a
+first-class fact worth capturing in memory (`user_name_romanization.md`)
+so future sessions don't reintroduce "Grekov".
+
+---
+
+## 2026-09-25 · Motion pattern propagation to all pages
+
+**Problem.** The Hero soften/asymmetric-hover pass only touched Home.
+The other routes (`/about`, `/services`, `/work`, `/work/[slug]`,
+`/contact`) still rendered their heros and section bodies with plain
+static markup — no mask reveal on titles, no fade-up on badges/copy,
+no stagger on grids/lists, and no asymmetric hover on filter chips or
+social pills. Feel was inconsistent between Home and everything else.
+
+**Decision.** Establish a single site-wide header pattern and apply it
+uniformly:
+
+- SectionBadge → `<Reveal>`
+- Page `<h1>` → `<MaskReveal mode="mount" delay={0.15}>`
+- Tagline `<p>` → `<Reveal delay={0.25}>`
+- Meta/CTA rows → `<Reveal delay={0.35+}>`
+- Grids/timelines/socials → `<Stagger>` + `<StaggerItem>` (with
+  `as="ul|ol|li|article"` where semantic HTML matters)
+- Interactive chips/pills → framer `motion.*` with the asymmetric
+  hover contract (slow `whileHover.transition`, fast base `transition`)
+
+Applied to:
+`app/(marketing)/about/page.tsx`, `.../services/page.tsx`,
+`.../work/page.tsx`, `.../work/[slug]/page.tsx`, `.../contact/page.tsx`,
+plus the section components they compose: `AiStack`, `Values`,
+`Experience`, `ServicesFull`, `WorkIndex`. Extended `Stagger.tsx` with
+a generic `as` prop so lists stay semantic (`ol > li`, `ul > li`).
+Extracted `SocialPill` client component so contact-page socials get
+asymmetric hover without leaking `"use client"` to the page shell.
+
+**Result.** Playwright sweep across `/`, `/about`, `/services`,
+`/work`, `/work/noble`, `/contact`: all 200, all render expected
+`<h1>` text, zero console/page errors. Typecheck clean. Every route
+now opens with the same badge-fade → title-mask → tagline-fade →
+grid-stagger cascade, and every interactive tile snaps back faster
+than it eases in.
+
+**Lesson.** When a motion pattern is worth applying, apply it
+everywhere in one pass — inconsistent motion reads worse than no
+motion at all. A generic `as` prop on stagger primitives is cheap and
+prevents the "div-soup for semantics" tradeoff.
+
+---
+
+## 2026-09-25 · Hero soften v2 + asymmetric hover
+
+**Problem.** User feedback on the previous pass: (1) the "Available for
+new Project" pill still felt "flat" — needed to be softer and slower on
+mount; (2) the RG monogram hover felt too clipped; (3) the return to
+rest state after removing the cursor was too slow — the tile should snap
+back quickly.
+
+**Decision.** Widen mount timings on the pill, split the monogram into
+mount-wrapper + hover-inner so mount and hover can carry different
+transitions, and set an **asymmetric hover pattern** for the two
+interactive tiles: slow `whileHover` transition for the enter, short
+default `transition` on the element for the leave.
+
+- **StatusPill** (`StatusPill.tsx`) — outer fade 0.5 → 0.75s, dot scale
+  0.5 → 0.75s, label unfold 0.75 → 1.15s. Delays widened so the beats
+  don't stack: pill (t=chrome) → dot (+0.1) → label (+0.6).
+- **RG monogram** (`Hero.tsx`) — split into outer mount wrapper (opacity
+  + scale 0 → 1 over 1.05s) and inner hover element. Inner element:
+  `whileHover.transition: { duration: 0.65, easeSmooth }` for the slow
+  hover-in; base `transition: { duration: 0.22, easeSmooth }` for the
+  fast return-to-rest.
+- **FloatingEmailCTA** (`FloatingEmailCTA.tsx`) — same asymmetric
+  split: positioning wrapper owns the mount slide-up (`y: 60 → 0`,
+  duration 0.9s, delay 1.5s), inner anchor owns hover with
+  `whileHover.transition: 0.55s` and base `transition: 0.22s` for the
+  quick release.
+
+**Result.** Playwright: pill takes noticeably longer to finish unfolding
+(text still growing at t=900ms). Hover-hold screenshot on RG confirms
+scaled+rotated state; 100 ms after mouse leaves the tile is already
+back at identity — leave completes visibly faster than enter, matching
+the reference feel. Zero console errors, typecheck clean.
+
+**Lesson.** Framer's `whileHover` uses the target variant's transition
+for the *enter*; the leave uses the component's base `transition`. If
+you want asymmetric enter/leave, split the element: outer element owns
+mount (its `transition` is consumed by initial → animate), inner
+element owns hover (its `transition` is consumed on leave, and
+`whileHover.transition` on enter). Trying to do all three on one
+element makes at least one of them wrong.
+
+---
+
+## 2026-09-25 · Hero micro-refinements (4 touch-ups)
+
+**Problem.** After the softening pass, user pointed at four moments on the
+Hero that still felt flat: (1) the RG monogram just faded in at ~92% scale,
+never announcing itself; (2) it had no hover state; (3) the "Available for
+new Project" pill appeared as a finished object rather than assembling; (4)
+the floating email CTA popped into place without a mount gesture and had a
+minimal hover response.
+
+**Decision.** Four scoped changes, all gated by `usePrefersReducedMotion`:
+
+- **RG monogram** (`Hero.tsx`) — initial scale bumped 0.92 → **0** so it
+  grows from nothing. Added `whileHover: { scale: 1.06, rotate: -5,
+  transition: 0.3s easeSmooth }` — plays a distinct playful tilt on hover
+  without borrowing the 0.8s mount timing.
+- **StatusPill unfold** (`StatusPill.tsx`) — component became a client
+  motion component with an opt-in `revealDelay?: number`. When provided,
+  sequences: pill container fade in → dot scales 0 → 1 → label span
+  animates `maxWidth: 0 → 320px` with fade, unfolding the pill sideways
+  from a dot-only chip to full text. Removed the outer `motion.div` wrap
+  in Hero (previously did a plain fade) so the pill's own choreography
+  isn't buried under a parent fade.
+- **FloatingEmailCTA** (`FloatingEmailCTA.tsx`) — converted to client,
+  wrapped anchor in a fixed positioning `<div>` so framer's `y` transform
+  no longer fights tailwind's `-translate-x-1/2`. Mount: `y: 60 → 0` +
+  fade, delay 1.5s (fires after Hero settles). Hover/focus: `y: -6,
+  scale: 1.04` — bigger jump than the old `-translate-y-0.5` and adds a
+  scale beat. Kept single `hover` config reused for `whileHover` and
+  `whileFocus` for keyboard parity.
+
+**Result.** Playwright multi-timestamp capture (t=180, 380, 700, 1100,
+1600, 2400 ms) confirms the intended assembly: at t=380 the pill is a
+tight dot-only chip and the monogram is mid-scale; at t=700 the pill has
+unfolded to full text and monogram is at rest; at t=1600 title lines are
+seated and email CTA has emerged from below. Hover screenshot on the
+monogram shows the -5° left tilt. Zero page errors, zero console errors,
+typecheck clean.
+
+**Lesson.** When a tailwind class uses `transform` (like `-translate-x-1/2`)
+on an element you also want framer to animate, framer wins — its
+`translate3d` overwrites the tailwind transform. Move positioning to a
+wrapper div and let the motion element own its transform. Same pattern
+applies to `whileHover` scale+rotate: give it its own `transition` object,
+or it inherits the parent's mount timing (0.8s with a 0.28s delay) and the
+hover feels broken.
+
+---
+
+## 2026-09-25 · Softer motion timing (плавніше pass)
+
+**Problem.** After the reveal choreography landed the cadence felt too
+snappy — mask reveals slammed open, section stagger fired too tightly,
+Hero mount felt hurried against the editorial voice. User asked for
+"плавніше" (smoother) across the board.
+
+**Decision.** Introduced a second easing curve and widened every timing
+knob rather than tweaking values in-place, so both curves stay callable
+if a future component needs the punchier one:
+
+- `lib/motion.ts` — added `easeSmooth: [0.16, 1, 0.3, 1]` (gentler
+  ease-out than `easeOutExpo`) and bumped `staggerPresets.line`
+  0.12 → 0.14.
+- `Reveal.tsx` — duration 0.55 → 0.85, ease → `easeSmooth`, y default
+  kept at 32.
+- `MaskReveal.tsx` — duration 0.85 → 1.15, ease → `easeSmooth`.
+- `Stagger.tsx` — `staggerChildren` 0.08 → 0.14, `delayChildren`
+  0.05 → 0.12, `StaggerItem` duration 0.55 → 0.85 with `easeSmooth`.
+- `Counter.tsx` — duration 0.7 → 1.1, ease → `easeSmooth`.
+- `Hero.tsx` — full recadence: chrome 0.1s → monogram 0.28s → title
+  line 1 0.48s → title line 2 0.72s → socials 1.05s → tagline 1.2s →
+  CTA 1.4s. Base fade duration 0.55 → 0.85 with y 12 → 14. Socials
+  `staggerChildren` 0.06 → 0.09 with item duration 0.4 → 0.7 and
+  matching y bump. Monogram scale 0.9 → 0.92 over 0.8s. All eases
+  swapped to `easeSmooth`.
+- `ProjectAccordionRow.tsx` — row entry duration 0.55 → 0.85 with
+  per-row delay factor 0.08 → 0.14 and `easeSmooth`. Kept
+  `easeOutExpo` for the inner expand animations (accordion opening
+  should still feel decisive when clicked).
+- Section h2 `MaskReveal` delays widened 0.10 → 0.15 (line 1) and
+  0.22 → 0.32 (line 2) across SelectedWork, Services, HowItWorks,
+  Benefits, Testimonials so both lines have room to breathe.
+
+**Result.** Playwright multi-viewport sweep (desktop 1440×900, mobile
+390×844, desktop reduced-motion) captured mid-flight frames at 180,
+380, 700, 1100, 1600 ms. Confirmed:
+
+- t=380ms: chrome + monogram + status pill in, title still masked.
+- t=700ms: line 1 fully in, line 2 arriving.
+- t=1100ms: title done, socials staggered in, tagline arriving.
+- After scroll to `#work`: accordion header + all rows render clean.
+- Zero page errors, zero console errors on every profile.
+
+**Lesson.** When soft-easing a whole system, add a *new* easing curve
+alongside the existing one rather than mutating the shared constant.
+`easeOutExpo` still fits interactive moments (accordion click, hover)
+where crispness reads as responsive — `easeSmooth` fits ambient
+choreography where crispness reads as impatience. Same file, two
+tools, no regression on the components that were already right.
+
+---
+
+## 2026-09-25 · Full-page reveal choreography
+
+**Problem.** After the accordion shipped, the rest of the home page still
+mounted "all at once" — no orchestrated first-paint, section headings just
+appeared without ceremony, list content had no stagger. User shared a
+reference video (Nova-style scroll+mount reveals with big text mask-reveals,
+staggered card entry, number counters) and asked for the same feeling
+adapted to our editorial monochrome.
+
+**Decision.** Four small motion primitives + a Hero rewrite + a light touch
+on every home section, all under existing gates (`prefers-reduced-motion` +
+`matchMedia("(hover: hover)")`):
+
+1. `components/ui/Reveal.tsx` — `whileInView` fade+y=32 (bigger than
+   `FadeUp`'s y=8, kept `FadeUp` for micro-uses so other pages don't
+   regress).
+2. `components/ui/MaskReveal.tsx` — overflow-hidden wrapper with inner
+   translateY 110% → 0. Applied to every h2 heading line on home
+   (SelectedWork, Services, HowItWorks, Benefits, Testimonials). Editorial
+   analogue of the reference's MAVKA horizontal-split reveal.
+3. `components/ui/Stagger.tsx` — `Stagger` + `StaggerItem` pair, framer
+   variants with `staggerChildren: 0.08` / `delayChildren: 0.05`. Wraps
+   Services/HowItWorks/Benefits/Testimonials card containers.
+4. `components/ui/Counter.tsx` — splits arbitrary text on numeric tokens
+   and ticks each 0 → target via framer's `animate()`. Wired into
+   `ProjectAccordionRow` metric line, fires on `expanded` state change
+   (e.g., "151 commits" ticks up when the row opens).
+5. `Hero.tsx` — converted to client, mount choreography sequences chrome
+   (0.05s) → RG monogram scale-in (0.15s) → title line 1 mask (0.28s) →
+   title line 2 mask (0.45s) → socials 4-item stagger (0.62s) → tagline
+   (0.72s) → Discover CTA (0.86s). Total ~1.3s. Under reduce-motion all
+   delays collapse to 0 and transforms drop to opacity.
+
+**Result.** Playwright at 1440×900 + 390×844 across 7 runs (initial load,
++1.4s post-load, 3 scroll fractions, reduce-motion, mobile): zero page
+errors, zero console errors. Home now feels assembled (first paint) and
+alive (scroll). Typecheck clean.
+
+**Lesson.** For editorial mask-reveals, `overflow-hidden` + inner
+`translateY: 110%` beats `clip-path` — cheaper on paint, animates on every
+browser, and composes cleanly with framer's `whileInView`. For heading
+choreography, per-line children with staggered `delay` props keep the
+primitive dumb (no line-splitting inside) — callers just pass one
+`MaskReveal` per visual line. Never conflate the animation primitive with
+line-detection logic.
+
+---
+
+## 2026-09-25 · SelectedWork → interactive accordion
+
+**Problem.** The three featured cards on `/` were static — three
+identical 16:8 tiles in a grid, no interaction beyond hover-lift. User
+shared a reference video (numbered accordion, expand/collapse with
+colorful blob backgrounds) with the note "щось типу такого але може і
+цікавіше" — asking for the pattern adapted, but more interesting.
+
+**Decision.** Rewrite `SelectedWork` as a vertical accordion stack,
+staying strictly monochrome (no blobs — that would break the design
+rule that green `#22C55E` is the only chromatic accent). Row layout:
+big Playfair number · sans name + status/year · `+` toggle. Expanded
+panel reveals the tagline in a Playfair pull-quote (word-by-word
+stagger), metric in small caps, stack chips, `Read case study →`
+link. "Цікавіше" moves: (a) `+` rotates 45° into `×`, (b) number scales
+1 → 1.05, (c) tagline word-stagger reveal, (d) magnetic number on
+hover (±8px/±4px, spring-tracked), (e) row-entry stagger on scroll-in
+(80ms between siblings). All magnetic + row motion gated on
+`prefers-reduced-motion` AND `matchMedia("(hover: hover)")`.
+
+**Result.** `components/sections/ProjectAccordionRow.tsx` (client,
+framer-motion) + rewrite of `components/sections/SelectedWork.tsx`
+(server, renders the featured 3 as accordion children). Playwright at
+1440×900 + 390×844: aria-expanded flips correctly, zero console
+errors, expanded panel reads editorial. Contrast on `#111` × `#F5F4EF`
+= 17.15:1 (AAA). Ships in place of the 3-card grid on home.
+
+**Lesson.** Reference videos with a distinctive visual signature
+(colorful blobs) can be adapted structurally without importing the
+signature — the interaction pattern (numbered accordion, +/× toggle,
+tagline reveal) carries the "feel", the palette stays true to the
+project. Also: `useSpring` from framer-motion beats hand-rolled rAF
+for magnetic effects — one line to add momentum, and it composes with
+`useMotionValue` cleanly.
+
+---
+
+## 2026-09-25 · Sprint 9 polish batch (6 items, no blockers)
+
+**Problem.** After DualCTA removal and the CSS-cascade fix stabilized
+the site, six polish items were left blocking a "shippable" state:
+duplicated `<a>` CTA class strings across ~8 sites (drift risk after the
+next class change), no `not-found.tsx` at either the root or
+`/work/[slug]` (Next serves a raw stub), no JSON-LD (Article schema
+missing → poor SEO surface for case studies), sitemap `lastmod` faked
+with `new Date()` (crawlers can't tell when a study was updated),
+missing MDX-bundling skeleton on `/work/[slug]` (blank flash during
+navigation), OG images falling back to system serif (satori doesn't
+ship Playfair Display).
+
+**Decision.** Shipped all six in one batch since none blocked another:
+
+1. `not-found.tsx` at `app/` (Home + Selected work CTAs) and
+   `app/(marketing)/work/[slug]/` (Back to work CTA). Both use
+   `SectionBadge` + Playfair h1 + design-token pill.
+2. Person JSON-LD in `app/layout.tsx` `<body>` (sameAs → GitHub + X);
+   Article JSON-LD in `/work/[slug]/page.tsx` (headline, tagline,
+   datePublished, author.Person, keywords ← frontmatter.stack).
+3. `sitemap.ts` now `async`, reads `getAllCaseStudies()` and emits
+   per-study `lastModified: new Date(publishedAt)`. Home + `/work`
+   index use the most-recent study's date.
+4. `app/(marketing)/work/[slug]/loading.tsx` — matched-layout skeleton
+   (badge + title + tagline + stack pills + 8 body lines), all
+   `animate-pulse` on `--hairline` tone.
+5. `lib/og-fonts.ts` fetches Playfair Display 700 TTF from Google Fonts
+   using `User-Agent: Mozilla/4.0` (WOFF2 magic bytes `wOF2` are
+   unsupported by satori; only pre-modern UAs get the TTF endpoint).
+   In-memory cache per weight. `lib/og-template.tsx` and the two
+   inline OG generators (`app/opengraph-image.tsx`,
+   `app/(marketing)/work/[slug]/opengraph-image.tsx`) switched from
+   `fontFamily: "serif"` to `"Playfair Display"` and pass
+   `{ fonts }` to `ImageResponse`.
+6. `components/ui/CTAButton.tsx` rewritten as `CTALink` + `CTAButton`
+   primitives with `variant: primary | outline`, `size: sm | md`.
+   Base/variants/sizes composed via helper. Swapped 6 sites: Footer
+   "Let's talk", ContactForm "Send message" (submit), root 404 (Home +
+   Selected work), CS 404 (Back to work), `/about` DualCTA pair,
+   `/services` triple. `BackToWork` fixed-pill and `FloatingEmailCTA`
+   avatar-pill kept separate — different visual affordances.
+
+**Gotchas.** Variable Playfair TTF from google/fonts GitHub raw
+(`PlayfairDisplay[wght].ttf`) crashed satori with `Cannot read
+properties of undefined (reading '256')` — satori can't resolve weight
+axis from variable fonts. Static single-weight TTF via legacy-UA
+Google Fonts endpoint works. Also: `/work/[slug]` returns HTTP 200
+with `next-error` meta and not-found body in dev (Turbopack quirk);
+in production this correctly becomes 404.
+
+**Result.** All six pages verified via Playwright. All 6 OG images
+render 45–75KB PNGs with Playfair headline. All CTA pills computed
+`rgb(250,250,247)` on `rgb(10,10,10)` (primary) or `rgb(17,17,17)` on
+`rgb(255,255,255)` (outline) — both pass WCAG AAA. Sitemap emits
+correct per-study `<lastmod>2026-04-08T00:00:00.000Z</lastmod>` etc.
+
+**Lesson.** For satori font embedding, always fetch a static
+single-weight TTF, never a variable font. And Google Fonts serves
+different formats per UA — set `User-Agent: Mozilla/4.0` to force TTF.
+
+---
+
+## 2026-09-25 · CSS layer bug — real root cause of "invisible CTA text"
+
+**Problem.** After the DEVLOG-in-Tailwind-scan fix landed and the CSS
+bundle compiled cleanly, I reverted the three inline-style workarounds
+back to `text-[color:var(--cta-ink)]`. Playwright audit immediately
+regressed — every anchor-based CTA (`FloatingEmailCTA`, footer
+`Let's talk`, DualCTA `Book a fractional call`) computed color
+`rgb(42, 42, 40)` (`--ink-body`) on `rgb(10, 10, 10)` background,
+invisible. But `<button>` CTAs on `/contact` (`Send message`) and
+`/work` (chip filters) rendered `rgb(250, 250, 247)` correctly. Same
+utility class, different tag.
+
+The tag mattered because `globals.css` had `a { color: inherit; }`
+sitting **unlayered**. Tailwind v4 emits utility rules inside
+`@layer utilities`. In CSS cascade order, **any unlayered rule beats
+any layered rule regardless of specificity** — so `a { color:
+inherit }` (spec 0,0,1, unlayered) always won against
+`.text-\[color\:var\(--cta-ink\)\] { color: var(--cta-ink) }` (spec
+0,1,0, in `@layer utilities`). Anchors inherited `--ink-body` from
+`body`; buttons don't inherit color, so they were unaffected.
+
+This is the **actual** root cause of every "invisible CTA pill"
+symptom this session — not JIT ordering, not markdown scanning, not
+HMR cache. Both prior fixes (inline styles, then Tailwind
+constraints) were treating symptoms of layered vs unlayered cascade.
+The bug had been latent since day one; it only surfaced now because
+`FloatingEmailCTA` was the first anchor-based CTA using `--cta-ink`.
+
+**Decision.** Wrapped `html`, `body`, `::selection`, and
+`a { color: inherit }` in `@layer base { ... }` in
+`app/globals.css`. Base and utilities are both declared layers in
+Tailwind v4 (order: `theme, base, components, utilities`), so
+utilities now beat these element defaults in the normal cascade —
+which is exactly how Tailwind expects a project's base styles to be
+authored. Reverted the three inline-style workarounds so the code
+reads cleanly with utility classes.
+
+**Result.** Playwright sweep across `/`, `/about`, `/work`,
+`/work/noble-saas`, `/services`, `/contact`: every element carrying
+`text-[color:var(--cta-ink)]` computes `rgb(250, 250, 247)`. No
+inline color/background workarounds remain in `FloatingEmailCTA`,
+`Footer`, or `DualCTA`. Bundle is clean.
+
+**Lesson.** Two things.
+1. **Any element-level style in `globals.css` must live in
+   `@layer base`**, or it will beat every Tailwind utility and every
+   component style regardless of specificity. This is the *defining*
+   cascade rule of Tailwind v4 authorship — treat unlayered CSS as
+   `!important` shipped by accident.
+2. When "the same class works on one tag but not another" — that's a
+   cascade problem, not a bundle problem. Look at layers before you
+   look at content-scan, JIT, or HMR. The tag is the tell.
+
+---
+
+## 2026-09-25 · Tailwind v4 scans markdown — dead-end diagnosis
+
+*Superseded by the CSS layer entry above. Retained for the file
+integrity record: the `@source not` directives are still correct
+hygiene (docs shouldn't feed the utility compiler) but they were
+not the cause of the invisible-CTA regression.*
+
+---
+
+## 2026-09-25 · Tailwind v4 scans markdown — root cause of "JIT bug"
+
+**Problem.** Right after shipping the footer redesign, the dev server
+threw `Parsing CSS source code failed` at `app/globals.css:1104`:
+`.text-\[color\:var\(--\.\.\.\)\] { color: var(--...); }`. Tailwind v4
+had scanned this same DEVLOG file, found the literal string
+`text-[color:var(--...)]` inside a code fence in the prior entry's
+Lesson section, treated it as a real arbitrary-value class token, and
+tried to emit CSS for it. `var(--...)` is invalid — `.` is not a valid
+identifier character — so the entire CSS bundle failed to compile.
+
+The bigger realisation: this is the actual root cause of the earlier
+"Tailwind JIT bug" I kept blaming this session. When the CSS bundle
+fails partway through compilation, every utility rule after the
+offending one gets dropped silently. That's why `text-[color:var(--
+cta-ink)]` "wasn't generated" for `FloatingEmailCTA`, why `Let's talk`
+rendered dark-on-dark, why `Book a fractional call` did too — the
+rules WERE valid; they just never made it into the output because
+Tailwind aborted the compile after hitting a broken sibling. I misread
+this as an HMR ordering issue and papered over it with inline styles
+three times.
+
+**Decision.** Two-part fix.
+- Rename the placeholder in the offending DEVLOG entry from
+  `--...` to `--token` (valid CSS identifier so even if scanned it
+  emits valid `color: var(--token)`).
+- Add `@source not "..."` directives at the top of `app/globals.css`
+  to exclude `DEVLOG.md`, `STABLE_LOGIC.md`, `AGENTS.md`, `CLAUDE.md`,
+  `README.md`, `specs/**/*.md`, and `content/case-studies/**/*.mdx`
+  from Tailwind's content scan. Tailwind v4 does whole-project
+  auto-detection by default; these files legitimately contain
+  class-shaped strings in code fences and reference material, but
+  never need their contents compiled into utilities. MDX case study
+  bodies checked with `grep -E 'className='` — zero matches; styling
+  lives in `components/mdx/MdxComponents.tsx` (a `.tsx` file, still in
+  scope).
+
+**Result.** Home compiles to 200. CSS bundle
+`/_next/static/chunks/[root-of-the-server]__*.css` now contains
+proper `.text-\[color\:var\(--cta-ink\)\]` (with the correct
+`color:var(--cta-ink)` rule body) and no `--...` or bogus `--accent`
+tokens. Footer + DualCTA pills still render white-on-black — the
+inline-style workarounds from an hour ago are now belt-and-braces
+rather than load-bearing, but I'm leaving them because they're
+harmless and revert-costs > revert-value.
+
+**Lesson.** Tailwind v4's default content scan is aggressive:
+markdown, mdx, everything under the project root that isn't
+`node_modules` or `.gitignore`d. Any doc-in-tree that contains
+class-shaped strings in code fences is a live grenade. Two rules
+going forward:
+1. Constrain scope with `@source not "..."` for every non-code file
+   type you keep in the tree (docs, specs, plans, memory dumps).
+2. When you see one bad class-token in emitted CSS, **do not assume
+   HMR quirk** — read the whole `.next/static/chunks/*.css` bundle;
+   a broken sibling rule silently kills every rule below it, and
+   "the utility isn't being generated" is the symptom, not the
+   diagnosis.
+
+---
+
+## 2026-09-25 · Footer simplification + CTA color-bug sweep
+
+**Problem.** Reference screenshot shipped for footer redesign: clean
+elevated card with just the big serif closer and a "Let's talk" pill,
+followed by a 3-col row `[© left, empty center for FloatingCTA overlay,
+socials + icon-only ↑ right]`. Actual footer had extra "I'm Ruslan 👋"
+badge, four corner Screws, a dotted-texture background inside the card,
+and a footer row of `[email left, © center, socials + text "Back to
+top" right]`. Separately, the `Let's talk` pill and the primary
+`DualCTA` pill both rendered dark-text-on-dark background — same
+Tailwind JIT bug that hit `FloatingEmailCTA` earlier this session
+(`text-[color:var(--cta-ink)]` arbitrary-value class not generated for
+components created/edited in-session under Turbopack HMR). Also two
+elements shared `id="contact"` — Footer and DualCTA — a leftover from
+the single-page-scroll era before `/contact` became a real route.
+
+**Decision.**
+- Footer: dropped the badge, the four `Screw` components, the `Screw`
+  helper function, and the `dot-texture dot-texture-fade` classes on
+  the card. Rebuilt the footer row as `[© left, empty div center, GH X
+  IN @ + icon-only h-9 w-9 ↑ button right]` — no more email link (the
+  FloatingEmailCTA overlays that column visually), no more text on the
+  back-to-top button.
+- CTA color-bug: switched both `Let's talk` (Footer) and `Book a
+  fractional call` (DualCTA) primary pills to inline
+  `style={{ color: "var(--cta-ink)", background: "var(--cta)" }}` —
+  identical fix pattern to `FloatingEmailCTA`. The Tailwind class
+  version stays elsewhere (works fine on stable files); inline style
+  is only the escape hatch for elements the JIT scanner missed.
+- Duplicate id: removed `id="contact"` from both Footer and DualCTA.
+  Grep confirmed no anchors point to `#contact` anywhere in code (only
+  a doc mention in old spec text).
+
+**Result.** Playwright desktop + mobile screenshots against reference:
+footer card is clean centered composition, both CTA pills read
+white-on-black, `document.querySelectorAll("[id]")` returns 0 with id
+"contact", mobile stack (`[card, ©, socials row + ↑]`) reflows
+properly at 390px. Files touched: `components/layout/Footer.tsx`,
+`components/sections/DualCTA.tsx`.
+
+**Lesson.** Two things. (1) The Tailwind arbitrary-value JIT bug isn't
+a one-off — it hits any new element using a `text-[color:var(--token)]`-shaped
+class under Turbopack dev. Reach for inline styles the first time a CTA pill
+renders invisible instead of debugging Tailwind config. (2) When
+copying a legacy anchor id forward through a restructure, check it
+first — single-page-scroll routes bake ids into components as "nav
+targets" and those become duplicate-id a11y bugs the moment you split
+into real routes.
+
+---
+
+## 2026-09-25 · Nav Home + per-page OG + a11y fix
+
+**Problem.** Post-Sprint-9 polish trio: (1) Nav had no `Home` link — you
+could reach every sub-page from any page but couldn't get back to `/`
+without editing the URL or hitting logo (there is no logo). (2) Only
+`/` and `/work/[slug]` had `opengraph-image.tsx` — sub-pages shared the
+generic Next.js default social card. (3) QA prog on 6 top-level routes
+surfaced 1 fail out of 34 a11y checks: mobile menu Escape closed the
+sheet but stranded focus (was calling `setOpen(false)` instead of
+`closeMenu()`).
+
+**Decision.**
+- Nav: prepended `{href: "/", label: "Home"}` to `NAV_LINKS`. The
+  route-based active predicate already handles `href === "/"` as an
+  exact match (no prefix collision), so `Home` only lights up on `/`.
+- OG: extracted `lib/og-template.tsx` (single `OgLayout` component
+  taking `eyebrow`, `title`, `subtitle`, `footerLeft`, `footerRight`).
+  Wrote 4 new `opengraph-image.tsx` files under `(marketing)/{about,
+  services,work,contact}/`. Rewrote home + slug OGs to drop
+  `fontStyle: "italic"` (violates CLAUDE.md rule 2 post-font-pivot;
+  satori resolves `fontFamily: "serif"` to system fallback anyway, so
+  italic was cosmetic drift not intentional design). Real Playfair
+  Display embedding via `@resvg/resvg-js` fonts option deferred —
+  current OGs are on-brand monochrome and ship-safe.
+- Nav Escape: replaced `setOpen(false)` with the inline
+  `setOpen(false); toggleRef.current?.focus();` pair. Not extracted to
+  `closeMenu()` helper because `closeMenu` isn't in the effect's deps
+  and adding it would need `useCallback` — cheaper to inline the two
+  lines.
+
+**Result.** `npm run build` clean, 25 static pages (was 21, +4 OG
+routes). QA a11y prog: **34/34 pass, 0 console errors**. Nav Playwright
+across 6 routes confirms `Home` active on `/`, other pills unchanged
+on their routes, prefix match still works on `/work/noble-saas`.
+
+**Lesson.** `next/og` `ImageResponse` doesn't respect `fontFamily:
+"serif"` as a real Playfair Display face — it falls back to satori's
+default sans, so any `fontStyle: "italic"` there was aesthetic noise
+not brand alignment. If we want actual Playfair in OGs, we need to
+`fetch` the font file (Google Fonts URL) or bundle it under
+`public/fonts/` and pass to `ImageResponse({ fonts: [...] })`.
+
+---
+
+## 2026-09-24 · Sprint 9 · Site restructure — single-page → multi-page IA
+
+**Problem.** Single-page scroll was collapsing two distinct audiences
+(fractional/consulting clients + full-time employers) into one linear read.
+No shareable deep-links for `/services`, `/work`, `/about`, `/contact`.
+Nav was section-anchor based (`IntersectionObserver`, `#hash` targets) which
+made it impossible to land on a specific concern from the outside.
+
+**Decision.**
+- Site tree: `/`, `/about`, `/work`, `/work/[slug]`, `/services`, `/contact`.
+  Route group `(marketing)` for sub-pages (no URL impact).
+- Nav rewritten to route-based: `usePathname()` + prefix match so
+  `/work/noble-saas` keeps the `Work` pill active (`href === pathname ||
+  pathname.startsWith(href + "/")`). Mobile menu keeps focus-trap +
+  Escape + body-lock + auto-close on route change.
+- Global chrome (`DotGrid`, `Nav`, `Footer`) mounted once in root
+  `app/layout.tsx`; `{children}` + `Footer` wrapped in
+  `<div className="relative z-10">` so content sits above the fixed
+  z-0 canvas. Sub-page `<main>` elements dropped their
+  `bg-[color:var(--bg-page)]` (was painting over the canvas).
+- Home condensed to 8-section composition: Hero → SelectedWork
+  (top-3 featured) → Services (3-card teaser) → HowItWorks → Benefits →
+  ExperienceMini (top-3) → Testimonials → DualCTA. New sections:
+  `SelectedWork`, `ExperienceMini`, `DualCTA`.
+- `/services` gets the full 5-format engagement grid (`ServicesFull`);
+  home Services becomes a 3-card teaser reading `services.slice(0, 3)`
+  with a "How I engage →" link. Investment ranges left as
+  `"TBD"` with `// TODO(ruslan):`.
+- `/work` gets `WorkIndex` — client component with 3 filter chip rows
+  (Role / Stack / Year), `Set<T>` state per row, OR-within-row match
+  (`p.roleTags?.some((t) => roles.has(t))`), empty state with
+  Clear-filters. `projects.ts` extended with optional `roleTags` +
+  `stackTags` typed unions, backfilled across 5 projects.
+- `BackToWork` retargeted from `/#work` → `/work`; `FloatingEmailCTA`
+  and `ProjectsGrid` deleted (superseded by Nav Contact link and
+  `SelectedWork` + `WorkIndex` respectively).
+- Contact form was already in place from Sprint 9 Phase A; verified
+  form token pairs against contrast (all AA pass).
+- Sitemap extended: `/services` + `/work` added (priority 0.9).
+
+**Result.** `npm run build` clean (21 static pages: 9 top-level
+routes + 5 case studies × 2 with per-slug OG images). All 12 routes
+return 200. Playwright confirms Nav-pill activation on all four sub-
+pages, home has no active pill (correct — Home not in nav), prefix
+match works on `/work/noble-saas` (Work stays active alongside the
+BackToWork pill in the upper left). Zero console errors during route
+traversal + mobile viewport.
+
+**Lesson.** Global chrome in root layout needs a `relative z-10`
+content wrapper when the ambient canvas is `fixed z-0` — otherwise
+sub-page `<main>` backgrounds paint over it silently. Also: route-
+based Nav active state is strictly better than `IntersectionObserver`
+once the site has real pages — the observer approach only made sense
+while everything was one scroll, and prefix matching handles nested
+routes like `/work/[slug]` with one predicate instead of per-anchor
+observation.
+
+---
+
+## 2026-09-24 · Font pivot to Playfair Display + ambient dot wave
+
+**Problem.** User sent two reference shots asking for (1) an upright,
+high-contrast Didone-style display face instead of the italic Fraunces
+currently rendering "Software, shipped honestly.", and (2) actually-visible
+animated background dots. Two secondary bugs surfaced during investigation:
+
+- The DotGrid canvas *was* drawing (probe: `getImageData` returned
+  `[17,17,17,26]` at dot centers), but composited screenshots showed uniform
+  page bg. Root cause: `body { background: var(--bg-page) }` — body's own
+  opaque background painted on top of the canvas because `z-index: -10` on
+  a fixed child doesn't punch through parent background layers reliably.
+- The static-fallback dot pattern (used for touch/reduced-motion) sat at
+  `rgba(...,0.10)` which was invisible on the warm-paper bg.
+
+**Decision.**
+
+- Display face: swap Fraunces (variable, italic, `opsz`+`SOFT`) for
+  Playfair Display (400–900 weights). Renamed the CSS variable
+  `--font-fraunces → --font-display` so the name doesn't lie about what's
+  loaded. Set `.font-serif` to `font-style: normal`, `font-weight: 500`,
+  tighter tracking `-0.02em`.
+- Background: keep the mouse-reactive canvas but layer a diagonal
+  travelling-wave modulation (`sin((x+y)/λ − 2π·f·t)`) on top of every
+  dot's alpha + radius, so the field breathes continuously without cursor
+  input. Bumped `BASE_A 0.10 → 0.16`, `AMBIENT_AMP 0.06 → 0.12`,
+  `STEP 28 → 26` so dots read clearly against the warm bg.
+- Move page background from `body` to `html` only, so canvas can sit at
+  `z-0` (was `-z-10`) and still show through transparent sections.
+
+**Result.** Playfair Display now renders across all H1/H2s (verified
+Hero + all six section headers). Zoomed screenshot of the empty right-side
+Hero area shows the wave pattern cleanly — some dots visibly larger/darker
+than their neighbors, cycling on a 7-second period. Build clean
+(`✓ Compiled successfully in 1968ms`, 17 static pages).
+
+**Lesson.** Setting an opaque background on both `html` *and* `body` is
+double-jeopardy — the body's copy silently blocks anything at negative
+z-index. If you want a fixed underlay to show through, only the root
+element should paint the page color. And when a probe says "the canvas
+has pixels" but the screenshot says "no it doesn't," suspect the
+compositor's layer stack before you suspect your draw loop.
+
+---
+
+## 2026-09-23 · Sprint 8 QA · dot-texture mask leak + HTML-entity strings
+
+**Problem.** Two visual bugs discovered only via browser screenshots (not the
+diff, not the build):
+
+1. Benefits + Services + Footer cards used `dot-texture dot-texture-fade`
+   directly on the container. `mask-image` on the container was applied to
+   the entire subtree, so body text and CTA buttons (e.g. footer "Let's
+   talk") became semi-transparent at the fade edges — the Services left
+   column ("SaaS Web Apps") was nearly illegible.
+2. HowItWorks + Testimonials + Experience described copy inside JS string
+   literals containing `&rsquo;` and `&ldquo;` — those are only parsed by
+   the HTML parser inside JSX text nodes, not inside JS strings, so they
+   rendered as raw entities: "we&rsquo;re not ready to spec".
+
+**Decision.** Move the dot pattern to a `::before` pseudo-element on
+`.dot-texture{,-lg}` so the mask only clips the decorative layer. Rely on
+default paint order (::before before element children) for stacking — no
+`> *` positioning override, since that broke the footer's absolutely-
+positioned "screw" markers by pinning them to (0,0). For the string
+literals, swap to real Unicode `’ “ ”`.
+
+**Result.** Confirmed via playwright screenshot sweep at 900px steps: all
+six section panels now render body copy at full opacity, footer screws sit
+at the four corners as intended, and the CTA pills are solid black.
+Build clean (`✓ Compiled successfully in 239ms`, 17 static pages).
+
+**Lesson.** `mask-image` inherits down the subtree — never put it on a
+content container. It belongs on a decorative pseudo-element. And in React,
+HTML entities are a JSX-parser feature, not a JS-string feature; use real
+Unicode inside string arrays.
+
+---
+
 ## 2026-09-23 · Sprint 7 · redesign to minimalist editorial portfolio
 
 **Problem.** Sprint 6 shipped a dark, WebGL-heavy "Lusion-immersive" first

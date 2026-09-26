@@ -21,8 +21,10 @@ two sessions or one full sprint.
 - **Radii** come from tokens: `--radius-card` (16px), `--radius-tile` (12px),
   `--radius-pill` (999px). No arbitrary `rounded-[Npx]`. If a shape wants
   something else, add a token or reshape the composition.
-- **Font families cap at 2**: Fraunces (serif, italic display) + Inter (sans,
-  body/nav/chrome). No third family. No mono.
+- **Font families cap at 2**: Playfair Display (serif, upright display,
+  weights 400–900) + Inter (sans, body/nav/chrome). No third family. No
+  mono. Italic display was pivoted out on 2026-09-24; do not reintroduce
+  without a fresh spec.
 
 ## Motion
 
@@ -42,6 +44,26 @@ two sessions or one full sprint.
   this file. Never duplicate.
 - Design tokens live in one place: `app/globals.css` `:root` block. Never
   inline hex values in components.
+
+## CSS authorship (Tailwind v4)
+
+- **Every element-level rule in `app/globals.css` lives inside
+  `@layer base { ... }`.** Never author `html { ... }`, `body { ... }`,
+  `a { ... }`, `::selection { ... }` etc. unlayered. Reason: Tailwind v4
+  declares the layer order `theme, base, components, utilities`; any
+  *unlayered* rule beats every layered rule regardless of specificity —
+  so an unlayered `a { color: inherit }` will silently defeat every
+  `text-[color:var(--x)]` utility applied to an anchor. Regression path
+  is anchor-based CTA pills rendering dark-on-dark; symptom always
+  looks like a JIT/HMR bug and it never is.
+- **`@source not "..."` directives in `globals.css` exclude docs from
+  the utility scan.** Tailwind v4 auto-scans the whole project including
+  `.md`/`.mdx`. `DEVLOG.md`, `STABLE_LOGIC.md`, `AGENTS.md`, `CLAUDE.md`,
+  `README.md`, `specs/**/*.md`, and `content/case-studies/**/*.mdx` are
+  excluded because they contain class-shaped strings in code fences
+  that would otherwise get compiled into (potentially broken) utility
+  rules. If you add a new doc file type at the project root, add it to
+  the exclude list.
 
 ## Sprint history — locked directions
 
