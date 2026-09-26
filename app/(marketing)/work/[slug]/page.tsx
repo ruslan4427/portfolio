@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
+import { MaskReveal } from "@/components/ui/MaskReveal";
+import { Reveal } from "@/components/ui/Reveal";
 import { SectionBadge } from "@/components/ui/SectionBadge";
+import { Stagger, StaggerItem } from "@/components/ui/Stagger";
 import { getCaseStudy } from "@/content/case-studies";
 import { projects } from "@/content/projects";
 
@@ -42,40 +45,67 @@ export default async function CaseStudyPage({
   if (!study) notFound();
   const { frontmatter, source } = study;
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: frontmatter.title,
+    description: frontmatter.tagline,
+    datePublished: frontmatter.publishedAt,
+    author: {
+      "@type": "Person",
+      name: "Ruslan Hrekov",
+      url: "https://hrekov.dev",
+    },
+    keywords: frontmatter.stack,
+    url: `https://hrekov.dev/work/${frontmatter.slug}`,
+    mainEntityOfPage: `https://hrekov.dev/work/${frontmatter.slug}`,
+  };
+
   return (
-    <article
-      id="main"
-      className="relative min-h-screen bg-[color:var(--bg-page)]"
-    >
+    <main id="main" className="relative min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <article>
       <BackToWork />
       <header className="px-[var(--gutter)] pt-40 pb-16">
         <div className="mx-auto max-w-[65ch]">
-          <div className="mb-8 flex justify-center">
+          <Reveal className="mb-8 flex justify-center">
             <SectionBadge label={frontmatter.status} />
-          </div>
+          </Reveal>
           <h1 className="text-center font-serif text-[clamp(56px,9vw,120px)] leading-[0.95] text-[color:var(--ink-primary)]">
-            {frontmatter.title}
+            <MaskReveal mode="mount" delay={0.15}>
+              {frontmatter.title}
+            </MaskReveal>
           </h1>
-          <p className="mt-8 text-center text-xl leading-[1.55] text-[color:var(--ink-body)]">
-            {frontmatter.tagline}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 font-sans text-xs text-[color:var(--ink-muted)]">
-            <span>{frontmatter.role}</span>
-            <span aria-hidden>·</span>
-            <span>{frontmatter.year}</span>
-            <span aria-hidden>·</span>
-            <span>{frontmatter.readingTime} min read</span>
-          </div>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <Reveal delay={0.25}>
+            <p className="mt-8 text-center text-xl leading-[1.55] text-[color:var(--ink-body)]">
+              {frontmatter.tagline}
+            </p>
+          </Reveal>
+          <Reveal delay={0.35}>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3 font-sans text-xs text-[color:var(--ink-muted)]">
+              <span>{frontmatter.role}</span>
+              <span aria-hidden>·</span>
+              <span>{frontmatter.year}</span>
+              <span aria-hidden>·</span>
+              <span>{frontmatter.readingTime} min read</span>
+            </div>
+          </Reveal>
+          <Stagger
+            className="mt-6 flex flex-wrap justify-center gap-2"
+            delayChildren={0.45}
+            stagger={0.06}
+          >
             {frontmatter.stack.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-full border border-[color:var(--hairline)] px-3 py-1 font-sans text-xs text-[color:var(--ink-body)]"
-              >
-                {tech}
-              </span>
+              <StaggerItem key={tech} y={12} duration={0.6}>
+                <span className="rounded-full border border-[color:var(--hairline)] px-3 py-1 font-sans text-xs text-[color:var(--ink-body)]">
+                  {tech}
+                </span>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </header>
       <div className="px-[var(--gutter)] pb-32">
@@ -83,6 +113,7 @@ export default async function CaseStudyPage({
           <CaseStudyBody source={source} />
         </div>
       </div>
-    </article>
+      </article>
+    </main>
   );
 }

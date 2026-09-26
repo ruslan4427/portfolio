@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
 import { getCaseStudy } from "@/content/case-studies";
+import { playfairFonts } from "@/lib/og-fonts";
 import { projects } from "@/content/projects";
 
-export const alt = "Case study — Ruslan Grekov";
+export const alt = "Case study — Ruslan Hrekov";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -24,6 +25,7 @@ export default async function Image({
   const status = study?.frontmatter.status ?? "";
   const project = projects.find((p) => p.slug === slug);
   const index = project?.index ?? "";
+  const fonts = await playfairFonts();
 
   return new ImageResponse(
     (
@@ -36,7 +38,7 @@ export default async function Image({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px",
-          fontFamily: "serif",
+          fontFamily: "Playfair Display",
           color: "#111111",
         }}
       >
@@ -80,7 +82,6 @@ export default async function Image({
               fontSize: 116,
               lineHeight: 0.95,
               letterSpacing: "-0.02em",
-              fontStyle: "italic",
               color: "#111111",
             }}
           >
@@ -94,7 +95,6 @@ export default async function Image({
                 maxWidth: 1000,
                 lineHeight: 1.4,
                 fontFamily: "sans-serif",
-                fontStyle: "normal",
               }}
             >
               {tagline}
@@ -111,11 +111,11 @@ export default async function Image({
             fontFamily: "sans-serif",
           }}
         >
-          <span>Ruslan Grekov · {role}</span>
-          <span style={{ color: "#111111" }}>ruslan.dev/work/{slug}</span>
+          <span>Ruslan Hrekov · {role}</span>
+          <span style={{ color: "#111111" }}>hrekov.dev/work/{slug}</span>
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, fonts },
   );
 }
