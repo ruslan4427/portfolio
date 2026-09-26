@@ -1,10 +1,12 @@
 import { ImageResponse } from "next/og";
+import { playfairFonts } from "@/lib/og-fonts";
 
-export const alt = "Ruslan Grekov — software, shipped honestly";
+export const alt = "Ruslan Hrekov — software, shipped honestly";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function Image() {
+  const fonts = await playfairFonts();
   return new ImageResponse(
     (
       <div
@@ -16,7 +18,7 @@ export default async function Image() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px",
-          fontFamily: "serif",
+          fontFamily: "Playfair Display",
           color: "#111111",
         }}
       >
@@ -46,7 +48,7 @@ export default async function Image() {
           >
             RG
           </div>
-          <span style={{ fontFamily: "sans-serif" }}>Ruslan Grekov · Portfolio 2026</span>
+          <span style={{ fontFamily: "sans-serif" }}>Ruslan Hrekov · Portfolio 2026</span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -57,7 +59,6 @@ export default async function Image() {
               fontSize: 132,
               lineHeight: 0.95,
               letterSpacing: "-0.02em",
-              fontStyle: "italic",
               color: "#111111",
             }}
           >
@@ -71,7 +72,6 @@ export default async function Image() {
               maxWidth: 900,
               lineHeight: 1.4,
               fontFamily: "sans-serif",
-              fontStyle: "normal",
             }}
           >
             Five AI-collaboration case studies with commit hashes and honest
@@ -104,6 +104,6 @@ export default async function Image() {
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, fonts },
   );
 }

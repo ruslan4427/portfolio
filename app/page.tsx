@@ -1,23 +1,21 @@
-import { DotGrid } from "@/components/canvas/DotGrid";
-import { Nav } from "@/components/layout/Nav";
-import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
-import { ProjectsGrid } from "@/components/sections/ProjectsGrid";
-import { AboutStack } from "@/components/sections/AboutStack";
+import { SelectedWork } from "@/components/sections/SelectedWork";
+import { Services } from "@/components/sections/Services";
+import { HowItWorks } from "@/components/sections/HowItWorks";
+import { Benefits } from "@/components/sections/Benefits";
+import { ExperienceMini } from "@/components/sections/ExperienceMini";
+import { Testimonials } from "@/components/sections/Testimonials";
 
 export default function Home() {
   return (
-    <>
-      <DotGrid />
-      <div className="relative z-10">
-        <Nav />
-        <main id="main">
-          <Hero />
-          <ProjectsGrid />
-          <AboutStack />
-        </main>
-        <Footer />
-      </div>
-    </>
+    <main id="main">
+      <Hero />
+      <SelectedWork />
+      <Services />
+      <HowItWorks />
+      <Benefits />
+      <ExperienceMini />
+      <Testimonials />
+    </main>
   );
 }

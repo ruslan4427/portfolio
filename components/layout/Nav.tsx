@@ -1,21 +1,27 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { easeOutExpo } from "@/lib/motion";
 
-const sections = [
-  { id: "top", label: "Top" },
-  { id: "work", label: "Work" },
-  { id: "stack", label: "Practice" },
-  { id: "contact", label: "Contact" },
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "About" },
+  { href: "/services", label: "Services" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
-const NAV_LINKS = sections.filter((s) => s.id !== "top");
+function isActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function Nav() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState<(typeof sections)[number]["id"]>("top");
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -25,26 +31,6 @@ export function Nav() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const targets = sections
-      .map((s) => document.getElementById(s.id))
-      .filter((el): el is HTMLElement => el !== null);
-    if (targets.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(visible.target.id as (typeof sections)[number]["id"]);
-      },
-      { rootMargin: "-40% 0px -55% 0px", threshold: [0, 0.25, 0.5, 1] },
-    );
-    targets.forEach((t) => observer.observe(t));
-    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -65,6 +51,7 @@ export function Nav() {
       if (e.key === "Escape") {
         e.preventDefault();
         setOpen(false);
+        toggleRef.current?.focus();
         return;
       }
       if (e.key !== "Tab") return;
@@ -86,6 +73,10 @@ export function Nav() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   const closeMenu = () => {
     setOpen(false);
     toggleRef.current?.focus();
@@ -101,29 +92,23 @@ export function Nav() {
             : "border-b border-transparent"
         }`}
       >
-        <div className="flex items-center justify-between px-[var(--gutter)] py-5">
-          <a
-            href="#top"
-            onClick={closeMenu}
-            className="font-sans text-sm font-semibold text-[color:var(--ink-primary)]"
-          >
-            Ruslan Grekov
-          </a>
+        <div className="mx-auto flex max-w-[var(--content-max)] items-center justify-end px-[var(--gutter)] py-5">
           <ul className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => {
-              const isActive = active === link.id;
+              const active = isActive(pathname ?? "/", link.href);
               return (
-                <li key={link.id}>
-                  <a
-                    href={`#${link.id}`}
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
                     className={`inline-flex items-center rounded-full px-4 py-1.5 font-sans text-sm transition-colors ${
-                      isActive
+                      active
                         ? "bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)] shadow-[var(--shadow-card)]"
                         : "text-[color:var(--ink-muted)] hover:text-[color:var(--ink-primary)]"
                     }`}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               );
             })}
@@ -161,26 +146,30 @@ export function Nav() {
             className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[color:var(--bg-page)] md:hidden"
           >
             <ul className="flex flex-col items-center gap-8 font-serif text-[clamp(44px,10vw,72px)]">
-              {NAV_LINKS.map((link, i) => (
-                <motion.li
-                  key={link.id}
-                  initial={{ y: 12, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.35, delay: 0.08 + i * 0.05, ease: easeOutExpo }}
-                >
-                  <a
-                    href={`#${link.id}`}
-                    onClick={closeMenu}
-                    className={`italic transition-colors ${
-                      active === link.id
-                        ? "text-[color:var(--ink-primary)]"
-                        : "text-[color:var(--ink-muted)]"
-                    }`}
+              {NAV_LINKS.map((link, i) => {
+                const active = isActive(pathname ?? "/", link.href);
+                return (
+                  <motion.li
+                    key={link.href}
+                    initial={{ y: 12, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.35, delay: 0.08 + i * 0.05, ease: easeOutExpo }}
                   >
-                    {link.label}
-                  </a>
-                </motion.li>
-              ))}
+                    <Link
+                      href={link.href}
+                      onClick={closeMenu}
+                      aria-current={active ? "page" : undefined}
+                      className={`italic transition-colors ${
+                        active
+                          ? "text-[color:var(--ink-primary)]"
+                          : "text-[color:var(--ink-muted)]"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.li>
+                );
+              })}
             </ul>
           </motion.div>
         )}

@@ -1,3 +1,10 @@
+export type ProjectRoleTag =
+  | "frontend"
+  | "full-stack"
+  | "cto"
+  | "consulting";
+export type ProjectStackTag = "react" | "next" | "flutter" | "node" | "ai";
+
 export type Project = {
   slug: string;
   index: string;
@@ -10,6 +17,8 @@ export type Project = {
   metric: string;
   span: "wide" | "tall" | "square";
   featured?: boolean;
+  roleTags?: ProjectRoleTag[];
+  stackTags?: ProjectStackTag[];
 };
 
 export const projects: Project[] = [
@@ -25,6 +34,8 @@ export const projects: Project[] = [
     metric: "151 commits in first 10 days · 16 named bugs, 0 regressed",
     span: "wide",
     featured: true,
+    roleTags: ["full-stack"],
+    stackTags: ["next", "react", "node"],
   },
   {
     slug: "angel",
@@ -37,6 +48,9 @@ export const projects: Project[] = [
     status: "sprint-4",
     metric: "3 sprints shipped, zero rewrites",
     span: "square",
+    featured: true,
+    roleTags: ["cto", "consulting", "full-stack"],
+    stackTags: ["next", "react", "ai"],
   },
   {
     slug: "fieldmark",
@@ -49,6 +63,8 @@ export const projects: Project[] = [
     status: "in-review",
     metric: "7 days empty repo to App Review",
     span: "tall",
+    roleTags: ["full-stack"],
+    stackTags: ["flutter"],
   },
   {
     slug: "lexora",
@@ -61,6 +77,8 @@ export const projects: Project[] = [
     status: "in-review",
     metric: "12 languages · 61 unit tests · 5 silent MP3s",
     span: "square",
+    roleTags: ["full-stack"],
+    stackTags: ["flutter", "ai"],
   },
   {
     slug: "smm-factory",
@@ -73,5 +91,8 @@ export const projects: Project[] = [
     status: "in-progress",
     metric: "40 posts · 0 violations · $0.40/wk to run",
     span: "wide",
+    featured: true,
+    roleTags: ["full-stack"],
+    stackTags: ["ai", "node"],
   },
 ];

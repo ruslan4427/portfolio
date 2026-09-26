@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Tailwind v4 scans the whole project by default (including markdown).
+   Exclude DEVLOG / STABLE_LOGIC / specs so class-shaped tokens inside
+   code fences never get compiled into real CSS. */
+@source not "../DEVLOG.md";
+@source not "../STABLE_LOGIC.md";
+@source not "../AGENTS.md";
+@source not "../CLAUDE.md";
+@source not "../README.md";
+@source not "../specs/**/*.md";
+@source not "../content/case-studies/**/*.mdx";
+
 /* ---------- Design tokens (minimalist editorial, warm off-white) ---------- */
 
 :root {
@@ -30,7 +41,7 @@
   --radius-pill: 999px;
 
   /* Rhythm */
-  --section-py: clamp(96px, 14vh, 176px);
+  --section-py: clamp(72px, 10vh, 128px);
   --content-max: 1200px;
   --gutter: clamp(24px, 5vw, 80px);
 }
@@ -48,7 +59,7 @@
   --color-cta-ink: var(--cta-ink);
   --color-status-live: var(--status-live);
 
-  --font-serif: var(--font-fraunces);
+  --font-serif: var(--font-display);
   --font-sans: var(--font-inter);
 
   --radius-card: 16px;
@@ -56,50 +67,49 @@
   --radius-pill: 999px;
 }
 
-/* ---------- Reset ---------- */
+/* ---------- Reset (Tailwind Preflight handles most; keep only additions) ---------- */
+/* Must live in @layer base so utility classes (in @layer utilities) beat
+   these element-level defaults via normal cascade order. Unlayered rules
+   always outrank layered ones regardless of specificity — moving these
+   into `base` is what lets `text-[color:var(--cta-ink)]` override
+   `a { color: inherit }` on CTA pills. */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer base {
+  html {
+    background: var(--bg-page);
+    color: var(--ink-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-html {
-  background: var(--bg-page);
-  color: var(--ink-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+  body {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(1rem, 0.9vw + 0.8rem, 1.0625rem);
+    line-height: 1.6;
+    color: var(--ink-body);
+    overflow-x: hidden;
+  }
 
-body {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(1rem, 0.9vw + 0.8rem, 1.0625rem);
-  line-height: 1.6;
-  background: var(--bg-page);
-  color: var(--ink-body);
-  overflow-x: hidden;
-}
+  ::selection {
+    background: var(--ink-primary);
+    color: var(--bg-page);
+  }
 
-::selection {
-  background: var(--ink-primary);
-  color: var(--bg-page);
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* ---------- Typography primitives ---------- */
 
 .font-serif {
   font-family: var(--font-serif), ui-serif, Georgia, serif;
-  font-style: italic;
+  font-style: normal;
+  font-weight: 500;
   font-optical-sizing: auto;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   line-height: 1.02;
 }
 
@@ -124,6 +134,47 @@ html.lenis body {
 
 .lenis.lenis-stopped {
   overflow: hidden;
+}
+
+/* ---------- Utilities ---------- */
+
+/* Dot textures render on a ::before layer so masking (dot-texture-fade)
+   only fades the pattern — content stays fully opaque. */
+.dot-texture,
+.dot-texture-lg {
+  position: relative;
+}
+
+.dot-texture::before,
+.dot-texture-lg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dot-texture::before {
+  background-image: radial-gradient(
+    circle,
+    rgba(17, 17, 17, 0.1) 1px,
+    transparent 1px
+  );
+  background-size: 14px 14px;
+}
+
+.dot-texture-lg::before {
+  background-image: radial-gradient(
+    circle,
+    rgba(17, 17, 17, 0.08) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+}
+
+.dot-texture-fade::before {
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }
 
 /* ---------- Focus (a11y) ---------- */

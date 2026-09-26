@@ -1,43 +1,84 @@
-type Props = {
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
+type Variant = "primary" | "outline";
+type Size = "sm" | "md";
+
+type CommonProps = {
+  children: ReactNode;
+  variant?: Variant;
+  size?: Size;
+  className?: string;
+};
+
+type LinkProps = CommonProps & {
   href: string;
-  label: string;
-  avatarSrc?: string;
   external?: boolean;
 };
 
-export function CTAButton({ href, label, avatarSrc, external }: Props) {
+type ButtonProps = CommonProps & {
+  type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
+  disabled?: boolean;
+  onClick?: ButtonHTMLAttributes<HTMLButtonElement>["onClick"];
+  ariaLabel?: string;
+};
+
+const base =
+  "inline-flex items-center justify-center gap-2 rounded-full font-sans text-sm shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0";
+
+const variants: Record<Variant, string> = {
+  primary: "bg-[color:var(--cta)] text-[color:var(--cta-ink)]",
+  outline:
+    "border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)]",
+};
+
+const sizes: Record<Size, string> = {
+  sm: "px-5 py-2",
+  md: "px-6 py-3",
+};
+
+function classes(variant: Variant, size: Size, extra: string) {
+  return `${base} ${variants[variant]} ${sizes[size]} ${extra}`.trim();
+}
+
+export function CTALink({
+  children,
+  href,
+  external,
+  variant = "primary",
+  size = "sm",
+  className = "",
+}: LinkProps) {
   const isMail = href.startsWith("mailto:");
   return (
     <a
       href={href}
       {...(external && !isMail ? { target: "_blank", rel: "noreferrer" } : {})}
-      className="group inline-flex items-center gap-3 rounded-full bg-[color:var(--cta)] py-2 pl-2 pr-5 text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5"
+      className={classes(variant, size, className)}
     >
-      {avatarSrc ? (
-        <span
-          className="block h-8 w-8 overflow-hidden rounded-full bg-[color:var(--ink-body)]"
-          aria-hidden
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={avatarSrc}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        </span>
-      ) : (
-        <span
-          aria-hidden
-          className="block h-8 w-8 rounded-full bg-[color:var(--ink-body)]"
-        />
-      )}
-      <span className="font-sans text-sm">{label}</span>
-      <span
-        aria-hidden
-        className="text-sm transition-transform duration-200 group-hover:translate-x-0.5"
-      >
-        ↗
-      </span>
+      {children}
     </a>
+  );
+}
+
+export function CTAButton({
+  children,
+  variant = "primary",
+  size = "sm",
+  className = "",
+  type = "button",
+  disabled,
+  onClick,
+  ariaLabel,
+}: ButtonProps) {
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className={classes(variant, size, className)}
+    >
+      {children}
+    </button>
   );
 }
