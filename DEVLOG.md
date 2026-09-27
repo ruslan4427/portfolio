@@ -5,6 +5,116 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-09-26 · Sprint 11 — Blog foundation + case study L2/L3 + GA4
+
+**Problem.** Three things the portfolio was missing before it could
+start doing marketing work: (1) a place for anything shorter than a
+full case study (there was `/work` and nothing else — a debugging
+trace, a field note, a pattern write-up had nowhere to land), (2) a
+way to serve the same case study to a recruiter *and* a technical
+reviewer without either audience feeling patronised (recruiters were
+skipping straight to "Results"; engineers wanted the commit hashes
+and the STABLE_LOGIC rationale), and (3) analytics — measurable
+distribution is the whole point of the journal, but not at the cost
+of dropping cookies on EU visitors before they can consent.
+
+**Decision.** Three-phase build inside one sprint:
+
+- **Phase A · Blog foundation** — new content type `content/blog.ts`
+  (types + loader in one file, matches the `content/case-studies.ts`
+  convention; deviated from spec which proposed a subdirectory). Four
+  post formats: `case-study`, `build-log`, `skeptic`, `pattern`.
+  MDX bodies at `content/blog/<slug>.mdx` with frontmatter validated
+  at build time (throws on invalid format, non-YYYY-MM-DD dates,
+  duplicate slugs, filename≠slug mismatch, featured post without a
+  substantive tagline). `/blog` index (featured grid + chronological
+  list, empty state ships too), `/blog/[slug]` (BlogPosting JSON-LD,
+  BackToJournal pill, per-format container width, "Receipts" aside,
+  manual `related:` frontmatter). `/rss.xml` route handler with
+  CDATA descriptions and RFC-822 dates, RSS autodiscovery `<link>`
+  emitted from `app/layout.tsx` metadata. `Journal` slot added to
+  `Nav` between Work and About. `getBlogPosts()` folded into
+  `app/sitemap.ts` with `updatedAt || publishedAt` as lastmod. Per-page
+  OG images for `/blog` and `/blog/[slug]` via the existing satori
+  template. Five MDX-only components (`Artifact`, `Cost`, `PromptLog`,
+  `Diff`, `TechnicalDetail`) registered in a shared `blogComponents`
+  map that both `BlogPostBody` and `CaseStudyBody` spread.
+
+- **Phase B · Case study L2/L3** — extended
+  `CaseStudyFrontmatter` with optional `recruiterSummary`,
+  `supportingArtifacts`, `devlogRefs` (with an `Artifact` type
+  imported from `content/blog.ts` so both content types share one
+  vocabulary). New `<ArtifactList>` and `<DevlogRefs>` components,
+  and a fixed-position `<ViewToggle>` that flips
+  `article[data-view]` between `executive` and `technical` (persisted
+  in localStorage). Show/hide is CSS-driven — three rules in
+  `globals.css` gate `[data-mode="technical"]`, `.devlog-full`,
+  `.artifact-detail`, `.devlog-summary`, `.recruiter-only`. No
+  React re-render; toggle is instant. `<TechnicalDetail>` inside
+  case-study MDX is invisible in executive view. Toggle only mounts
+  when at least one of the enhanced fields is present (`hasEnhanced`
+  flag), so the four case studies without the new fields render
+  unchanged. Backfilled `noble-saas.mdx` with 7 real
+  `supportingArtifacts` extracted from the body (2 timeline, 2 cost,
+  2 commit hashes, 1 link to STABLE_LOGIC). `recruiterSummary` and
+  `devlogRefs` left blank on Noble deliberately — the summary needs
+  a Ruslan draft (recruiter-facing prose), and Noble's DEVLOG lives
+  in a different repo.
+
+- **Phase C · GA4 with EU consent** — `proxy.ts` at repo root reads
+  Vercel's `x-vercel-ip-country` and writes a `geo-eu=1|0` cookie
+  for one day. `lib/consent-geo.ts` lists 27 EU members + GB + NO/IS/LI
+  + CH. `lib/consent.ts` provides client cookie helpers,
+  `lib/analytics.ts` is a one-line `track()` around `window.gtag`.
+  `ConsentProvider` reads consent state + geo cookie on mount;
+  `analyticsAllowed` derives to `mounted && (consent === "accepted"
+  || (!isEu && consent !== "rejected"))`. `<GA4>` only renders the
+  gtag script when allowed. `<PageViews>` sends a manual `config`
+  call on every route change with `anonymize_ip: true` (init disables
+  `send_page_view`). `<ConsentBanner>` shows only for EU visitors
+  with `consent === "unset"`. `<ConsentResetLink>` in the footer lets
+  either audience change their mind. Four events wired:
+  `blog_post_read` (IO sentinel at 20% from viewport bottom, once
+  per slug), `case_study_view_toggle`, `contact_form_submit` (on
+  Server Action success, includes the intent value),
+  `external_link_click` (delegated `document` listener, skips
+  hrekov.dev / www / localhost).
+
+- **Phase D · Seed post + docs** — first entry
+  `content/blog/launching-the-journal.mdx` (build-log format,
+  featured, distribution row for RSS live + LinkedIn/dev.to planned).
+  README updated with an "Analytics + consent" section covering the
+  event list, geo flow, and local testing shortcut. `.env.example`
+  gained `NEXT_PUBLIC_GA_ID` and `NEXT_PUBLIC_GSC_VERIFICATION` with
+  inline docs.
+
+**Result.** `npx tsc --noEmit` clean. Dev-server smoke: `/`, `/blog`,
+`/blog/launching-the-journal`, `/rss.xml`, `/work/noble-saas` all
+return 200. RSS is a valid feed with one `<item>` (the seed post).
+Proxy sets `geo-eu=0` on every response for a US-originating request.
+Middleware convention deprecation caught on first curl — Next.js 16
+renamed `middleware.ts` → `proxy.ts` and the exported function from
+`middleware` → `proxy`; migrated in-place before continuing. Blog
+frontmatter validator also caught the seed post's filename convention
+on first load (`YYYY-MM-DD-<slug>.mdx` vs. slug-only); renamed to
+`launching-the-journal.mdx` to match the case-studies convention.
+Total: 15 new files across analytics, blog, and case-study components;
+7 modified (layout.tsx, Footer, ContactForm, ViewToggle,
+CaseStudyBody, case-studies.ts, noble-saas frontmatter, README,
+sitemap, .env.example).
+
+**Lesson.** Two things. (1) *CSS-driven view toggles beat React
+re-renders when the whole point is a fast audience switch* — one
+data-attribute on `<article>`, three CSS rules, no state coupling
+between server-rendered MDX and a client interaction; the toggle
+never desyncs from the DOM because it *is* the DOM. (2) *Consent
+belongs at the loading boundary, not at the sending boundary* — the
+GA4 script simply doesn't ship for a user who hasn't opted in, so
+there is no "well-behaved tracking to disable"; there is nothing to
+disable. That collapses a whole class of consent-management bugs.
+
+---
+
 ## 2026-09-26 · Domain + surname rename → hrekov.dev / Hrekov
 
 **Problem.** Two long-standing placeholders throughout the codebase:

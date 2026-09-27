@@ -9,6 +9,7 @@ import { easeOutExpo } from "@/lib/motion";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/work", label: "Work" },
+  { href: "/blog", label: "Journal" },
   { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/contact", label: "Contact" },

@@ -132,41 +132,74 @@ Single source of truth: `app/globals.css` `:root { ... }` block and the
 ## File layout
 
 ```
+proxy.ts                Edge proxy (Next.js 16 convention, was middleware.ts)
+                        — sets `geo-eu=1|0` cookie from x-vercel-ip-country
 app/                    Next.js App Router
-  layout.tsx            Fonts + providers + GLOBAL chrome (DotGrid, Nav, Footer)
+  layout.tsx            Fonts + ConsentProvider + GLOBAL chrome (DotGrid, Nav,
+                        Footer) + GA4/PageViews/ConsentBanner/ExternalLinkTracker
                         — children wrapped in `<div class="relative z-10">`
   page.tsx              Home: Hero → SelectedWork → Services (teaser) → HowItWorks
                         → Benefits → ExperienceMini → Testimonials (Footer card
                         in layout.tsx is the sole closer — no per-page CTA)
-  globals.css           Tokens (:root) + @theme inline mapping
+  globals.css           Tokens (:root) + @theme inline mapping + case-study
+                        view toggle rules ([data-view] show/hide)
   not-found.tsx         Root 404 (SectionBadge + Playfair h1 + Home/Selected work CTAs)
   opengraph-image.tsx   Home OG (Playfair embedded via lib/og-fonts)
-  sitemap.ts            Async — pulls per-study lastmod from case-study frontmatter
+  sitemap.ts            Async — pulls per-study + per-blog-post lastmod
+  rss.xml/route.ts      RSS 2.0 feed (CDATA descriptions, RFC-822 dates,
+                        atom:link self-reference) — force-static, revalidate=3600
   (marketing)/
     about/page.tsx      Long-form bio, values, principles, full experience
     services/page.tsx   Full 5-format engagement grid (ServicesFull) + full-time card
     work/page.tsx       Work index with WorkIndex (Role/Stack/Year filters)
     work/[slug]/
-      page.tsx          Case study (BackToWork pill → /work, Article JSON-LD)
+      page.tsx          Case study (BackToWork pill → /work, Article JSON-LD,
+                        ViewToggle mounted only if hasEnhanced fields present)
       loading.tsx       MDX-bundle skeleton (badge/title/tagline/body pulse)
       not-found.tsx     Case study 404 (SectionBadge + Playfair h1 + Back to work CTA)
       opengraph-image.tsx  Per-slug OG (Playfair embedded)
+    blog/page.tsx       Journal index (featured grid + chronological list;
+                        empty state ships too)
+    blog/[slug]/
+      page.tsx          Blog post (BlogPosting JSON-LD, BackToJournal pill,
+                        per-format container width, Receipts aside,
+                        BlogReadTracker sentinel at end)
+      loading.tsx       MDX-bundle skeleton
+      not-found.tsx     Blog 404 (Back to journal CTA)
+      opengraph-image.tsx  Per-slug OG with format label in eyebrow
+    blog/opengraph-image.tsx  Journal index OG
     contact/
       page.tsx          Contact form (ContactForm)
       actions.ts        Resend server action
       types.ts          Form types
 components/
+  analytics/            ConsentProvider (context), ConsentBanner (EU-gated),
+                        ConsentResetLink (footer), GA4 (script gate),
+                        PageViews (route-change gtag config),
+                        ExternalLinkTracker (delegated document click),
+                        BlogReadTracker (IO sentinel per slug)
+  blog/                 PostCard (featured grid), PostRow (chronological)
   canvas/DotGrid.tsx    Cursor-reactive canvas (mounted once in root layout)
-  layout/               Nav (route-based, prefix match), Footer, SmoothScroll,
-                        SkipToMain, BackToWork
+  case-study/           ArtifactList, DevlogRefs, ViewToggle
+                        (fixed pos, data-view flip, localStorage-persisted)
+  layout/               Nav (route-based, prefix match; Journal between Work +
+                        About), Footer, SmoothScroll, SkipToMain, BackToWork,
+                        BackToJournal
   sections/             Hero, SelectedWork, ProjectCard, Services (teaser),
                         ServicesFull, WorkIndex, HowItWorks, Benefits,
                         Experience, ExperienceMini, Testimonials,
                         ContactForm, AboutStack, AiStack, Values
   ui/                   SectionBadge, StatusPill, CTAButton (CTALink + CTAButton
                         primitives — variant primary|outline, size sm|md), FadeUp
-  mdx/                  CaseStudyBody, MdxComponents
+  mdx/                  CaseStudyBody, BlogPostBody, MdxComponents,
+                        BlogComponents (Artifact, Cost, PromptLog, Diff,
+                        TechnicalDetail — TechnicalDetail is CSS-hidden in
+                        case-study executive view)
 lib/
+  analytics.ts          track(event, params) — wraps window.gtag
+  consent.ts            Cookie helpers (consent + geo readers/writers)
+  consent-geo.ts        EU_COUNTRIES set (27 EU + GB + NO/IS/LI + CH) +
+                        isEuCountry() helper
   og-fonts.ts           Playfair TTF loader for satori (legacy-UA Google trick)
   og-template.tsx       Shared OG layout (about/services/work/contact)
   motion.ts             reduce-motion hook, easing presets
@@ -175,7 +208,15 @@ content/
   services.ts           5 engagement formats (investment ranges = TODO)
   experience.ts         Timeline entries (ExperienceMini + Experience source)
   about.ts              Bio paragraphs + principles (about page source)
-  case-studies/         MDX bodies + frontmatter loader
+  case-studies.ts       Types + loader; CaseStudyFrontmatter extended with
+                        optional recruiterSummary / supportingArtifacts / devlogRefs
+                        (Artifact type imported from content/blog.ts)
+  case-studies/         MDX bodies (filename must match slug — no date prefix)
+  blog.ts               Types + loader (mirror of case-studies.ts convention);
+                        BlogFormat, Artifact, BlogFrontmatter, BlogPost;
+                        validators throw on invalid format/date/duplicate slug/
+                        filename mismatch/featured-without-tagline
+  blog/                 MDX bodies at content/blog/<slug>.mdx
 ```
 
 ## Contribution rules

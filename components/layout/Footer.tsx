@@ -1,3 +1,4 @@
+import { ConsentResetLink } from "@/components/analytics/ConsentResetLink";
 import { CTALink } from "@/components/ui/CTAButton";
 
 const socials = [
@@ -25,8 +26,9 @@ export function Footer() {
         </div>
 
         <div className="mt-12 grid grid-cols-1 items-center gap-6 md:grid-cols-3">
-          <div className="font-sans text-sm text-[color:var(--ink-muted)] md:text-left">
-            © Ruslan Hrekov {year}. All rights reserved.
+          <div className="flex flex-col gap-2 font-sans text-sm text-[color:var(--ink-muted)] md:text-left">
+            <span>© Ruslan Hrekov {year}. All rights reserved.</span>
+            <ConsentResetLink />
           </div>
           <div aria-hidden className="hidden md:block" />
           <div className="flex flex-wrap items-center gap-2 md:justify-end">

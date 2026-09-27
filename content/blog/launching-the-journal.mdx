@@ -1,0 +1,54 @@
+---
+slug: launching-the-journal
+title: Launching the journal
+tagline: Why hrekov.dev now has a /blog — four formats, one RSS feed, no analytics until you say yes.
+format: build-log
+publishedAt: "2026-09-27"
+readingTime: 3
+tags:
+  - meta
+  - portfolio
+featured: true
+distribution:
+  - channel: rss
+    status: live
+    url: "https://hrekov.dev/rss.xml"
+  - channel: linkedin
+    status: planned
+  - channel: devto
+    status: planned
+artifacts:
+  - type: commit
+    label: Sprint 11 · Blog foundation
+    detail: content/blog + /blog route + RSS + GA4 with EU consent
+  - type: link
+    label: RSS feed
+    href: /rss.xml
+---
+
+The site had five case studies and no place to put anything shorter. Everything I wanted to write about — a debugging trace, a pattern that keeps paying off, a skeptical read on a tool the timeline is excited about — needed the same weight as a full case study or it got dropped. That's the wrong shape.
+
+## What this is
+
+`/blog` supports four formats:
+
+- **Case Study** — long-form, receipts attached, commit hashes referenced.
+- **Build Log** — chronological, dated, mid-work. This post is one.
+- **Field Note** — skeptical take on something popular. Short, arguable.
+- **Pattern** — a rule I keep applying, why, and when it breaks.
+
+Each post lands with reading time, tags, and (where relevant) a **Receipts** aside — links to the actual commits, prompts, or artifacts behind the claims. If I can't cite it, I don't write it.
+
+## Under the hood
+
+- MDX with frontmatter validated at build time (invalid frontmatter throws).
+- `/rss.xml` is generated from the same source with CDATA descriptions.
+- Google Search Console meta tag ships via env var, so the feed shows up.
+- Analytics: GA4 with IP anonymisation, off by default for EU visitors until you click accept. `middleware.ts` reads Vercel's edge country header and sets a `geo-eu` cookie so the client knows which path to render.
+- No third-party tracking beyond that. No newsletter form yet.
+
+## What's next
+
+First real posts land over the next two weeks — one Field Note on prompt patterns that stopped working when I moved from Sonnet to Opus, one Build Log on Sprint 11 itself, and a Pattern write-up of `STABLE_LOGIC.md` (the file that keeps AI collaboration from unwinding your own fixes).
+
+Subscribe via [RSS](/rss.xml), or wait for LinkedIn cross-posts once the distribution automation lands in Sprint 12.

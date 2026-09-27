@@ -9,6 +9,7 @@ import {
   type ContactState,
 } from "@/app/(marketing)/contact/types";
 import { CTAButton } from "@/components/ui/CTAButton";
+import { track } from "@/lib/analytics";
 
 const INTENT_OPTIONS = [
   { value: "fractional", label: "Fractional / consulting" },
@@ -43,8 +44,11 @@ export function ContactForm() {
   const successHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
-    if (state.status === "success") successHeadingRef.current?.focus();
-  }, [state.status]);
+    if (state.status === "success") {
+      successHeadingRef.current?.focus();
+      track("contact_form_submit", { intent: prefillIntent });
+    }
+  }, [state.status, prefillIntent]);
 
   if (state.status === "success") {
     return (

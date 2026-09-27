@@ -65,6 +65,73 @@ two sessions or one full sprint.
   rules. If you add a new doc file type at the project root, add it to
   the exclude list.
 
+## Next.js 16 conventions
+
+- **`proxy.ts` at repo root, not `middleware.ts`.** Next.js 16 renamed
+  the edge-runtime file convention; the exported function is `proxy`
+  (previously `middleware`). Both still ship in 16 but `middleware.ts`
+  emits a deprecation warning on every dev boot and is queued for
+  removal. If you're writing edge code (geo cookies, redirects, auth
+  gates), use `proxy.ts`.
+
+## Content authorship
+
+- **MDX filenames must match `frontmatter.slug` exactly** — no date
+  prefix, no directory nesting. `content/blog/<slug>.mdx` and
+  `content/case-studies/<slug>.mdx`. The validator throws on
+  mismatch. Reason: RSS + sitemap + JSON-LD all key on the slug, so
+  a filename/slug drift is silently wrong until a reader lands on
+  a broken URL. Keep them stapled.
+- **Blog frontmatter is validated at build time and throws on
+  invalid data.** `format` must be one of the four known values,
+  dates must be `YYYY-MM-DD`, `slug` must be unique across posts,
+  and a `featured: true` post must have a `tagline` longer than 20
+  characters. No fallback rendering — the build fails loudly.
+- **Case-study "L2/L3" enhancement is opt-in per study.** The
+  ViewToggle only mounts when at least one of
+  `recruiterSummary | supportingArtifacts | devlogRefs` is present
+  (`hasEnhanced` flag on the page). Case studies with none of those
+  fields render unchanged — no regression, no forced-empty
+  toggle. When adding L2/L3 fields, use real data only; if a
+  recruiter summary would need invented facts, leave the field
+  blank and let the body carry the weight.
+
+## Analytics + consent
+
+- **GA4 loads conditionally on `analyticsAllowed`, not on `consent
+  === "accepted"`.** The rule collapses to
+  `mounted && (consent === "accepted" || (!isEu && consent !== "rejected"))`.
+  Non-EU visitors are opted in by default, EU visitors stay opted
+  out until they click Accept in the banner, and either audience
+  can flip via the footer reset link. The GA4 `<Script>` component
+  simply doesn't render when disallowed — nothing to disable, no
+  cookies dropped.
+- **`send_page_view` is off at init; `<PageViews>` fires a manual
+  `config` on every route change** with `anonymize_ip: true`. This is
+  the App-Router-safe pattern — a plain gtag config sends a page
+  view on script load and then never again, because SPA route
+  changes aren't full loads.
+- **Consent state lives in a first-party `consent` cookie**
+  (`accepted | rejected | unset`), and geo is a first-party
+  `geo-eu=1|0` cookie set by `proxy.ts` from Vercel's
+  `x-vercel-ip-country` edge header. No third-party call to detect
+  location; the middleware runs at the edge before rendering. `proxy.ts`
+  matcher excludes `_next/static`, `_next/image`, `favicon.ico`,
+  `rss.xml`, `sitemap.xml`, `robots.txt`, and any dotted-extension
+  file.
+
+## View toggles (case study Executive/Technical)
+
+- **CSS-driven, not React-re-render.** The toggle flips
+  `article[data-view]` between `executive` and `technical` and
+  three CSS rules in `globals.css` show/hide by class name
+  (`.artifact-detail`, `.devlog-full`, `.devlog-summary`,
+  `.recruiter-only`) or by `[data-mode="technical"]` on the
+  `<TechnicalDetail>` element. Reason: the MDX body is
+  server-rendered; a re-render on toggle would tear it down and
+  refetch. The DOM stays; the presentation flips. No state
+  desync possible.
+
 ## Sprint history — locked directions
 
 - **Sprint 7 (2026-09-23)** established the current minimalist editorial

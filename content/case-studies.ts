@@ -1,6 +1,14 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
+import type { Artifact } from "@/content/blog";
+
+export type DevlogRef = {
+  date: string;
+  entry: string;
+  summary: string;
+  href?: string;
+};
 
 export type CaseStudyFrontmatter = {
   slug: string;
@@ -13,6 +21,9 @@ export type CaseStudyFrontmatter = {
   featured?: boolean;
   publishedAt: string;
   readingTime: number;
+  recruiterSummary?: string;
+  supportingArtifacts?: Artifact[];
+  devlogRefs?: DevlogRef[];
 };
 
 export type CaseStudy = {

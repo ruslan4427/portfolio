@@ -16,6 +16,35 @@ status: shipped
 featured: true
 publishedAt: "2026-04-08"
 readingTime: 7
+recruiterSummary: |
+  Multi-tenant booking SaaS for solo barbershops — full build, solo, 227 commits over five months. Stripe subscriptions, Twilio A2P 10DLC SMS (passing US carrier compliance), Supabase row-level security for tenant isolation, and an autonomous weekly marketing pipeline running on GitHub Actions.
+
+  151 of the 227 commits landed in the first ten days: empty repo to working multi-tenant SaaS. That velocity produced 16 named QA bugs, all fixed in commit 6b29244 and frozen in a 171-line STABLE_LOGIC.md that forbids future refactor of the surviving edge cases.
+
+  Steady-state now runs 6–11 commits/month. The interesting work migrated from "build the app" to "build the machine that grows the app" — Claude authors marketing content, not code.
+supportingArtifacts:
+  - type: timeline
+    label: Build window
+    detail: 2026-04-08 → present · 5 months, 12 days
+  - type: timeline
+    label: April sprint
+    detail: 151 commits in first 10 days · empty repo to multi-tenant SaaS
+  - type: cost
+    label: Pricing
+    detail: $15/mo flat · 14-day trial · no credit card
+  - type: cost
+    label: Codebase size
+    detail: ~10,000 LOC · 73 TypeScript files
+  - type: commit
+    label: 6b29244
+    detail: fix all 16 QA bugs — slot cache, overlap, reschedule, break validation, phone/email, timezone UTC
+  - type: commit
+    label: d6e1b5a
+    detail: seed bookedSlotsMap from server on page load, eliminating all client cache issues
+  - type: link
+    label: STABLE_LOGIC.md pattern (portfolio DEVLOG)
+    href: https://github.com/ruslan4427/portfolio/blob/main/STABLE_LOGIC.md
+    detail: The 171-line file that names each frozen edge case and forbids refactor
 ---
 
 **Noble is a multi-tenant booking SaaS for barbershops and salons: $15/month, 5-minute setup, SMS reminders that actually work. Built with Claude over 227 commits, hardened by 16 named bugs, and running autonomous marketing since June.**

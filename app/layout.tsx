@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
+import { ConsentProvider } from "@/components/analytics/ConsentContext";
+import { ExternalLinkTracker } from "@/components/analytics/ExternalLinkTracker";
+import { GA4 } from "@/components/analytics/GA4";
+import { PageViews } from "@/components/analytics/PageViews";
 import { DotGrid } from "@/components/canvas/DotGrid";
 import { FloatingEmailCTA } from "@/components/layout/FloatingEmailCTA";
 import { Footer } from "@/components/layout/Footer";
@@ -38,6 +44,16 @@ export const metadata: Metadata = {
     description:
       "Five AI-collaboration case studies. Commit hashes attached.",
   },
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        { url: "/rss.xml", title: "hrekov.dev · Journal" },
+      ],
+    },
+  },
+  verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
+    : undefined,
 };
 
 const personJsonLd = {
@@ -59,16 +75,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body>
-        <SkipToMain />
-        <SmoothScroll>
-          <DotGrid />
-          <Nav />
-          <div className="relative z-10">
-            {children}
-            <Footer />
-          </div>
-          <FloatingEmailCTA />
-        </SmoothScroll>
+        <ConsentProvider>
+          <SkipToMain />
+          <SmoothScroll>
+            <DotGrid />
+            <Nav />
+            <div className="relative z-10">
+              {children}
+              <Footer />
+            </div>
+            <FloatingEmailCTA />
+          </SmoothScroll>
+          <ConsentBanner />
+          <ExternalLinkTracker />
+          <GA4 />
+          <Suspense fallback={null}>
+            <PageViews />
+          </Suspense>
+        </ConsentProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

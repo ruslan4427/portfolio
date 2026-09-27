@@ -53,3 +53,40 @@ Vercel project settings for prod):
 
 Spam defence: hidden honeypot field + in-memory rate limit (5 submissions
 per IP per hour, resets on cold start — acceptable for portfolio volume).
+
+## Analytics + consent
+
+GA4 is wired conditionally on `NEXT_PUBLIC_GA_ID`. With no ID set,
+no analytics script loads and no cookies are written.
+
+Geo gating: `middleware.ts` reads `x-vercel-ip-country` (set by Vercel
+Edge) and writes a `geo-eu=1|0` cookie for one day. `lib/consent-geo.ts`
+lists the 27 EU member states plus GB, NO, IS, LI, CH.
+
+- **EU visitors** see a bottom-right consent banner. GA4 stays off
+  until they click **Accept**. Choice is stored in a first-party
+  `consent=accepted|rejected` cookie (1 year).
+- **Non-EU visitors** see no banner. GA4 loads by default. Setting
+  `consent=rejected` (via the footer link) turns it back off.
+
+`send_page_view` is disabled on init; `components/analytics/PageViews.tsx`
+sends a manual `config` call on every route change with
+`anonymize_ip: true`.
+
+Events tracked:
+- `blog_post_read` — fires once when the reader hits the end sentinel
+  of `/blog/[slug]` (IntersectionObserver with `-20%` root margin)
+- `case_study_view_toggle` — fires when the Executive/Technical
+  toggle changes
+- `contact_form_submit` — fires on Server Action success
+- `external_link_click` — delegated document listener; skips
+  `hrekov.dev`, `www.hrekov.dev`, `localhost`
+
+Set `NEXT_PUBLIC_GSC_VERIFICATION` if you want the Google Search
+Console meta tag emitted (via `metadata.verification.google`).
+
+**Testing consent locally:** Vercel's country header isn't present in
+dev, so middleware defaults to `geo-eu=0` (non-EU). To exercise the
+banner path, edit `middleware.ts` to force `1`, or run
+`document.cookie = "geo-eu=1; Path=/"` in the browser console and
+reload.
