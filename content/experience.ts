@@ -30,4 +30,22 @@ export const experience: ExperienceEntry[] = [
     description:
       "Next.js + Supabase + Stripe stacks for boutique clients. Learned to measure everything and to trust commit hashes over screenshots.",
   },
+  {
+    years: "2021 — 2023",
+    role: "Product designer · PIMU Services, Cyprus",
+    description:
+      "Investment products, e-commerce, and mobile builds for a Cyprus product team. Ran design-to-dev handoffs and sat on FE/BE hiring panels — the muscle that later made spec-first shipping feel natural.",
+  },
+  {
+    years: "2018 — 2021",
+    role: "Product designer · Berlin Labs, Kyiv",
+    description:
+      "End-to-end research and design across web and mobile for investment products. Where the shipping instinct started forming.",
+  },
+  {
+    years: "2015 — 2016",
+    role: "UX/UI designer · Flynaut, Charlotte NC",
+    description:
+      "First US-market work. Learned early that a design only lives if the engineer holding it can defend it.",
+  },
 ];

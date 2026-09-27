@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AiStack } from "@/components/sections/AiStack";
+import { Credentials } from "@/components/sections/Credentials";
 import { Experience } from "@/components/sections/Experience";
 import { Values } from "@/components/sections/Values";
 import { CTALink } from "@/components/ui/CTAButton";
@@ -45,6 +46,8 @@ export default function AboutPage() {
       <Experience showBadge title={<>The path so far.</>} />
 
       <AiStack />
+
+      <Credentials />
 
       <Values />
 

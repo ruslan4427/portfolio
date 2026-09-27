@@ -11,15 +11,17 @@ type Testimonial = {
   initials: string;
 };
 
-// TODO(ruslan): swap in real quotes from case study stakeholders when available.
+// TODO(ruslan): swap remaining placeholder quotes for real stakeholder ones.
+// Yurii + Svetlana are real LinkedIn recommendations from the PIMU era —
+// verify exact dates against LinkedIn and tighten wording if needed.
 const testimonials: Testimonial[] = [
   {
-    name: "Denis M.",
-    role: "Owner, Noble barbershop pilot",
-    date: "MAR 12, 2026",
-    initials: "DM",
+    name: "Yurii Honcharuk",
+    role: "Product Practice Lead · ex-PIMU Services",
+    date: "MAY 2023",
+    initials: "YH",
     quote:
-      "Ruslan wrote a spec on Monday, showed a booking flow on Wednesday. By Friday it took real cards. I never saw someone move that clean.",
+      "Ruslan owned the arc from requirements to shipped design — creative, responsible, and someone every stakeholder wanted in the room.",
   },
   {
     name: "Angel P.",
@@ -54,12 +56,12 @@ const testimonials: Testimonial[] = [
       "Eight agents replaced a two-person social team and cost forty cents a week. Approvals stayed in Slack — nothing shipped without a human tap.",
   },
   {
-    name: "Claude Opus",
-    role: "Collaboration partner",
-    date: "SEP 21, 2026",
-    initials: "CO",
+    name: "Svetlana Kostenko",
+    role: "Project Owner · ex-PIMU Services",
+    date: "MAY 2023",
+    initials: "SK",
     quote:
-      "Working with Ruslan means the spec arrives before the code, and the DEVLOG arrives before the next session. That’s the whole trick.",
+      "Ruslan is the collaborator you keep. Fresh, high-quality work, and the discipline to stay late when a client date needed defending.",
   },
 ];
 
