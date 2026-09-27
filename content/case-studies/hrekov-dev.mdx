@@ -1,0 +1,449 @@
+---
+slug: hrekov-dev
+title: The portfolio that documents itself
+tagline: Twelve sprints, seventeen memory files, one recursive proof.
+role: Meta · solo build
+stack:
+  - Next.js 16
+  - React 19
+  - TypeScript
+  - Tailwind v4
+  - Claude Opus
+  - Framer Motion
+year: "2026"
+status: shipped
+featured: false
+publishedAt: "2026-09-27"
+readingTime: 7
+recruiterSummary: |
+  This portfolio ships as its own 6th case study. The other five (Noble, Angel, Lexora, Fieldmark, smm-factory) describe client work. This one describes the machine — the memory files, classifier, and promotion discipline — that produced all six, in the open, on the exact site you are reading.
+
+  Written for fractional clients evaluating whether the workflow scales to their engagement. If you're screening for craft, start with Noble. If you're screening for how work happens, start here.
+supportingArtifacts:
+  - type: commit
+    label: "Sprint 11 — L2/L3 apparatus this case study uses"
+    href: "https://github.com/ruslan4427/portfolio/commit/bfe7fd7"
+  - type: commit
+    label: "Sprint 7 — visual system this case study lives inside"
+    href: "https://github.com/ruslan4427/portfolio/commit/7cd977e"
+  - type: link
+    label: "Full repo — every memory file, DEVLOG entry, spec on disk"
+    href: "https://github.com/ruslan4427/portfolio"
+  - type: cost
+    label: "DEVLOG → STABLE_LOGIC promotion rate"
+    detail: "9 rules graduated from 25 journal entries · 36%"
+  - type: timeline
+    label: "Cadence to date"
+    detail: "12 sprints across 8 calendar days · ~1.5 sprints/day"
+  - type: timeline
+    label: "Ramp-up saved per new session"
+    detail: "~34 min · 17 memory files × ~2 min context re-hydration each"
+devlogRefs:
+  - date: "2026-09-24"
+    entry: "Font pivot to Playfair Display + ambient dot wave"
+    summary: "One decision, three memory files created (font, canvas, gate). Later sessions never re-litigated."
+  - date: "2026-09-24"
+    entry: "Sprint 9 · Site restructure — single-page → multi-page IA"
+    summary: "Spec triple caught the routing-boundary decision before the first component moved."
+  - date: "2026-09-26"
+    entry: "Sprint 11 — Blog foundation + case study L2/L3 + GA4"
+    summary: "Next.js 16 broke on middleware.ts; the memory of that break kept future sessions off the old name."
+  - date: "2026-09-25"
+    entry: "CSS layer bug — real root cause of \"invisible CTA text\""
+    summary: "One debug hour became one memory file. Every Tailwind-on-anchor question since has been a one-turn answer."
+---
+
+## 1. Cold open
+
+The other five case studies on this page describe work I did for clients.
+This one describes the site you're reading.
+
+That sounds self-obsessed. It would be, if the site were the point. It
+isn't — the site is a byproduct. The actual artifact is the workflow
+that produced it, and the workflow only holds up if I can show it
+working on something. This portfolio was the something.
+
+Seventeen memory files. Twenty-five journal entries. Nine of them
+promoted to durable rules. Twelve sprints across eight calendar days,
+solo. Every decision is on disk, timestamped, in a public repo you can
+clone. Half the interesting ones are wrong on the first pass — the
+discipline is that the second pass catches them before they compound.
+
+If you're evaluating whether AI-augmented delivery scales to a real
+engagement, don't read a whitepaper. Read the machine that made itself.
+
+## 2. The stateless-model problem
+
+A language model doesn't remember. Every session opens with the same
+blank slate: no prior context, no dated decisions, no record of which
+questions have already been asked and answered. Demos rarely expose
+this because a demo lives inside one conversation. Products don't have
+that luxury.
+
+Multi-session work forces a choice. You can re-hydrate context by
+hand every session — quote the last decision, restate the constraint,
+warn about the same three dead-ends — and burn the first thirty
+minutes on setup. Or you can build a persistence layer around the
+model: durable notes the next session reads before saying anything.
+
+Every serious agentic project ends up doing the second. The interesting
+question isn't *whether* to build persistence — it's *what shape* the
+notes take, and how you keep them from becoming a second junk drawer
+larger than the codebase. That's what the rest of this case study is
+about.
+
+## 3. The persistence layer
+
+The workflow lives in one directory:
+`~/.claude/projects/-Users-ruslan-portfolio/memory/`. Seventeen Markdown
+files at time of writing, each with YAML frontmatter, each authored by
+Claude at the exact moment a durable fact crystallized mid-conversation.
+
+```text
+MEMORY.md
+case_study_template.md
+feedback_auto_open_new_files.md
+feedback_css_cascade_first.md
+feedback_visual_direction.md
+iteration-11.md
+iteration-7.md
+iteration-9.md
+portfolio_active.md
+portfolio_ai_video_pivot.md
+portfolio_content_strategy.md
+portfolio_design_pivot.md
+portfolio_font_pivot.md
+portfolio_podcast_format.md
+portfolio_voice_cloning.md
+portfolio_workflow.md
+shiploop_discipline.md
+user_name_romanization.md
+```
+
+Four types, deliberately narrow:
+
+- **user** — who Ruslan is (surname romanization, technical background,
+  preferences). Written once, rarely edited. Frames how the model speaks.
+- **feedback** — corrections and validated approaches. Every rule carries
+  a **Why** line so future sessions can judge edge cases instead of
+  following blindly. Includes the CSS cascade rule that ended three
+  hours of Tailwind-under-Turbopack debugging.
+- **project** — ongoing initiatives, decisions, dates. The fastest-moving
+  type; entries decay in weeks and get rewritten in place.
+- **reference** — pointers to external systems. Never the data itself,
+  just where to look.
+
+Each file has a minimum shape:
+
+```yaml
+---
+name: <short title>
+description: <one-line hook — used at recall time to gauge relevance>
+type: user | feedback | project | reference
+---
+```
+
+The `description` matters more than the body. On a fresh conversation
+the model reads `MEMORY.md` — an index of one-line pointers — and only
+opens the files whose descriptions look load-bearing to the current
+task. Bad descriptions = wasted context; good ones = the machine
+remembering the right thing without being asked.
+
+The featured artifact is `feedback_css_cascade_first.md` — one rule, one
+incident, one clause on how to apply it. Reproduced verbatim below.
+
+```markdown
+---
+name: CSS cascade before JIT/HMR blame
+description: When "the same Tailwind class works on one element but not another", diagnose CSS layer/cascade first — never assume JIT ordering or HMR cache
+type: feedback
+---
+**Rule.** When a Tailwind utility class visibly works on one element but
+not another (especially: `<button>` works, `<a>` doesn't), the bug is
+almost never in Tailwind's JIT compiler or Turbopack's HMR cache. It is
+a CSS **cascade** problem. Look at:
+
+1. Are there unlayered rules in `globals.css` targeting the failing
+   element? (Element-level rules like `a { color: inherit }` outside
+   `@layer base` beat every layered utility regardless of specificity —
+   Tailwind v4 puts utilities inside `@layer utilities`.)
+2. Is inheritance in play? (Anchors inherit `color` from parent by
+   default; buttons don't. That asymmetry explains why the "same class"
+   yields different computed values.)
+3. Read the CSS bundle: `curl /_next/static/chunks/[root-of-the-server]__*.css`
+   and grep for the actual rule. If the rule *is* present in the bundle
+   and still doesn't win, it's cascade, not compilation.
+
+**Why:** In the 2026-09-25 portfolio session I spent three separate
+edits inline-styling CTA pills to work around what I diagnosed as a
+"Tailwind JIT quirk under Turbopack HMR". The real cause was
+`a { color: inherit }` sitting unlayered in `globals.css`, beating
+every `.text-[color:var(--cta-ink)]` utility on every anchor CTA. The
+tag difference (button vs anchor) was the diagnostic tell I ignored
+three times before checking layers.
+
+**How to apply:**
+- The moment computed color/background differs from what the utility
+  class prescribes AND the same class works elsewhere with a different
+  tag, jump straight to inspecting `@layer` structure in `globals.css`.
+- Never reach for `style={{ color: "var(--x)" }}` as a "quick fix" for
+  a Tailwind class not applying — it hides a cascade bug that will
+  affect other elements the same way.
+- On this project the rule is documented in `STABLE_LOGIC.md` under
+  "CSS authorship (Tailwind v4)"; if you break it, that file will call
+  it out.
+```
+
+That is one file out of seventeen. Every one of the others reads like
+this: rule at the top, incident that produced it in the middle, edge
+case guidance at the bottom. No lore, no essays, no aspirational
+principles — just what the machine needs to not repeat yesterday's
+mistake.
+
+## 4. The MEMORY.md index
+
+Seventeen files is already too many to open blindly at the start of a
+session. Reading them all would eat context before the actual work
+started. So the memory system carries its own directory: `MEMORY.md`,
+a flat list of one-line pointers.
+
+```markdown
+- [User's surname: Hrekov (not Grekov)](user_name_romanization.md) — Ukrainian romanization Г→H. Full name "Ruslan Hrekov". Gmail keeps the old spelling — do not "fix" the email.
+- [ShipLoop is a discipline, not an event](shiploop_discipline.md) — classify every request; nothing gets built without spec+plan+tasks.
+- [Portfolio shiploop active](portfolio_active.md) — Sprint 0 bootstrap shipped 2026-09-20; retrofit ShipLoop discipline retroactively.
+- [Portfolio design pivot (2026-09-23)](portfolio_design_pivot.md) — dark Lusion → minimalist editorial. Monochrome + green dot.
+- [Visual direction — reference-first](feedback_visual_direction.md) — never write a design brief from abstract description alone; get concrete references from Ruslan first.
+- [Portfolio font pivot (2026-09-24)](portfolio_font_pivot.md) — Playfair Display upright + strictly monochrome cursor-reactive DotGrid, all tunables in top-of-file CONFIG.
+- [Portfolio Sprint 9 shipped](iteration-9.md) — single-page → multi-page IA. Global chrome in root layout; Nav route-based w/ prefix match.
+- [CSS cascade before JIT/HMR blame](feedback_css_cascade_first.md) — same Tailwind class works on `<button>` but not `<a>`? It's `@layer` cascade, not compilation.
+- [Portfolio content strategy (2026-09-26)](portfolio_content_strategy.md) — Recruiter primary. Format D+C mix. Dev.to replaces Medium. GA4 chosen.
+- [Portfolio Sprint 11 shipped](iteration-11.md) — Blog foundation + case study L2/L3 + GA4 with EU-gated consent. proxy.ts (not middleware.ts).
+```
+
+Every line has the same shape: `- [<title>](<file>) — <one-line hook>`.
+Nothing longer, nothing hierarchical. The model reads the index in one
+pass, ranks which files look load-bearing to the current task, and
+opens only those. In practice, a typical session opens two or three
+files, not seventeen. The index is what makes the collection scale.
+
+## 5. The discipline that produces memory
+
+Memory files don't write themselves. Something has to route each
+incoming message to the right pipeline: a quick question gets an answer,
+a bug gets a diagnose-fix-verify-log, a large feature gets a full
+spec+plan+tasks triple before a line of code moves. That router is
+ShipLoop — a nine-class classifier applied silently to every prompt
+(Q, B, S, L, R, T, D, M, O), each with its own model tier and its own
+required artifact. The lifecycle is:
+
+```
+Discovery → Spec → Plan → Tasks → Build → QA → Ship → Retro → (loop)
+```
+
+Nothing skips a phase. Nothing gets built on a "let's just try it."
+When a phase ends, a memory file drops — that is where the persistence
+layer in §3 gets fed.
+
+The model-routing rules (which class runs on Haiku, Sonnet, or Opus,
+and why) live on the [About page's stack section](/about#stack). I won't
+duplicate them here; the point of the routing rules is that they're
+one lookup away, not restated everywhere.
+
+## 6. DEVLOG → STABLE\_LOGIC — the 36% number
+
+Twenty-five entries in `DEVLOG.md`. Nine of them promoted to
+`STABLE_LOGIC.md`. That's 36%. The other 64% stayed in the journal.
+
+Journaling and learning are not the same thing. A journal captures what
+happened; that's cheap and worth doing. But most of what happened is
+context: the shape of an incident, the sequence of dead ends, the exact
+error text. Useful for the next twenty minutes; noise for the next
+month. If every DEVLOG entry got treated as a durable lesson, the model
+would drown in advice — most of it about problems that don't recur.
+
+Promotion has a bar. A rule graduates only after it holds up across at
+least two sessions or one full sprint. Two-session proof means the same
+diagnosis worked twice on different symptoms. One-sprint proof means a
+constraint was written into a decision and no later refactor tried to
+overturn it. Below that bar, the entry stays a journal note — dated,
+searchable, cheap to skim, but not loaded on every session.
+
+An example. The 2026-09-25 CSS cascade incident (three edits inline-styling
+CTA pills, all wrong) started as a single DEVLOG entry titled "invisible
+CTA text." It graduated after a second session hit the same failure
+mode on a different element and the rule caught it in the first turn.
+
+The two forms of the same lesson, side by side:
+
+**`DEVLOG.md` · 2026-09-25 (verbatim excerpt):**
+
+```text
+The tag mattered because `globals.css` had `a { color: inherit; }`
+sitting unlayered. Tailwind v4 emits utility rules inside
+`@layer utilities`. In CSS cascade order, any unlayered rule beats
+any layered rule regardless of specificity — so `a { color: inherit }`
+(spec 0,0,1, unlayered) always won against `.text-[color:var(--cta-ink)]`
+(spec 0,1,0, in `@layer utilities`). Anchors inherited `--ink-body`
+from `body`; buttons don't inherit color, so they were unaffected.
+```
+
+**`STABLE_LOGIC.md` · promoted (verbatim):**
+
+```text
+Every element-level rule in `app/globals.css` lives inside
+`@layer base { ... }`. Never author `html { ... }`, `body { ... }`,
+`a { ... }`, `::selection { ... }` etc. unlayered. Reason: Tailwind v4
+declares the layer order `theme, base, components, utilities`; any
+unlayered rule beats every layered rule regardless of specificity.
+Regression path is anchor-based CTA pills rendering dark-on-dark;
+symptom always looks like a JIT/HMR bug and it never is.
+```
+
+The DEVLOG entry is a story. The STABLE\_LOGIC entry is a rule.
+Journaling is the raw material. Promotion is the discipline.
+
+## 7. What the machine produced
+
+<div className="not-prose my-8 grid grid-cols-3 divide-x divide-[color:var(--hairline)] border-y border-[color:var(--hairline)] py-6 text-center font-mono">
+  <div>
+    <div className="text-3xl text-[color:var(--ink-primary)]">12</div>
+    <div className="mt-1 text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">sprints</div>
+  </div>
+  <div>
+    <div className="text-3xl text-[color:var(--ink-primary)]">8</div>
+    <div className="mt-1 text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">calendar days</div>
+  </div>
+  <div>
+    <div className="text-3xl text-[color:var(--ink-primary)]">~1.5</div>
+    <div className="mt-1 text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">sprints / day</div>
+  </div>
+</div>
+
+Sixty-plus classified tasks. Five case studies drafted, one shipped
+end-to-end ([Noble is the flagship](/work/noble-saas)), four in review.
+A dot-grid canvas, a font pivot, a full IA restructure from single-page
+to multi-page, a blog foundation, EU-gated consent, a per-slug OG image
+pipeline, an executive/technical view toggle — each with its own spec
+triple or DEVLOG entry naming what broke and what held.
+
+The reflex says discipline slows delivery. The measurement disagrees.
+Every spec triple I wrote saved more time on the next session than it
+cost to author, because the next session started with the constraint
+already stated instead of re-derived from a diff. Every DEVLOG entry
+that graduated to `STABLE_LOGIC.md` prevented a class of question from
+recurring — the promotion is what compounds, not the journaling.
+
+The cadence held because the failure mode of AI-assisted work isn't
+speed; it's drift. Same session, three different answers to the same
+question. Different session, the fix from yesterday reintroduced as a
+"clever" refactor. The memory files are what stopped that. The
+classifier decides which channel a request goes down; the memory
+decides what the model already knows before it opens its mouth. Two
+small primitives, one compounding result.
+
+## 8. Context re-hydration saved per session
+
+A fresh session with no memory has to be told, or has to re-derive from
+a diff, at minimum:
+
+- *"Is the design system dark or light? What are the exact hex values?"*
+  — answered by `portfolio_design_pivot.md` in one line.
+- *"When a Tailwind utility 'doesn't work' on an anchor, is it a JIT
+  bug?"* — no, it's cascade; answered by `feedback_css_cascade_first.md`
+  before I sink another hour.
+- *"Should the display font be italic Playfair?"* — no, that was pivoted
+  out on 2026-09-24; answered by `portfolio_font_pivot.md`.
+- *"What's the user's actual surname — Hrekov or Grekov?"* — Hrekov;
+  the email keeps the old spelling on purpose; `user_name_romanization.md`.
+- *"Are we still shipping the ElevenLabs voice clone plan?"* — no,
+  pivoted to AI video on 2026-09-27; `portfolio_ai_video_pivot.md`.
+
+Rough estimate: two minutes per file × seventeen files ≈ thirty-four
+minutes of ramp-up the model doesn't have to spend rebuilding context
+before it can act. That number is soft, but the direction isn't.
+
+## 9. How to steal it
+
+The specific memory files here are project-shaped and won't fit yours.
+The *pattern* is generalizable. What's portable:
+
+- The four-type taxonomy — **user / feedback / project / reference** —
+  and the discipline that every entry must belong to exactly one. Types
+  give the system a shape; ad-hoc notes eventually devolve into a wiki
+  nobody reads.
+- The frontmatter contract: `name`, `description`, `type`. Nothing
+  more required. The `description` is what the model uses at recall
+  time, so write it for the *future you who has forgotten this exists*.
+- The **Why** line inside every feedback rule. Not just what to do —
+  the reason it exists, usually a past incident. Rules without reasons
+  don't survive edge cases; they get followed blindly or overturned
+  on a whim.
+- `MEMORY.md` as a flat index of pointers, not a document. Keep it
+  under two hundred lines. If it grows past that, the pointers were
+  too verbose or the files too fragmented.
+
+The actual auto-memory spec these files implement ships inside Claude
+Code itself. The relevant excerpt — types and when-to-save triggers —
+is reproduced below, attribution intact.
+
+<TechnicalDetail summary="Auto-memory spec — verbatim excerpt (types + when-to-save)">
+
+*Excerpt from Claude Code's system-embedded auto-memory spec — not
+authored by Ruslan, reproduced here for context. Slightly abridged.*
+
+```text
+Types of memory. There are several discrete types of memory that
+you can store in your memory system:
+
+- user — Information about the user's role, goals, responsibilities,
+  and knowledge. Great user memories help you tailor your future
+  behavior to the user's preferences and perspective. Save when you
+  learn any details about the user's role, preferences,
+  responsibilities, or knowledge.
+
+- feedback — Guidance the user has given you about how to approach
+  work — both what to avoid and what to keep doing. Record from failure
+  AND success: if you only save corrections, you will avoid past
+  mistakes but drift away from approaches the user has already
+  validated, and may grow overly cautious. Lead with the rule itself,
+  then a Why: line (the reason the user gave — often a past incident
+  or strong preference) and a How to apply: line (when/where this
+  guidance kicks in). Knowing why lets you judge edge cases instead
+  of blindly following the rule.
+
+- project — Information about ongoing work, goals, initiatives, bugs,
+  or incidents within the project that is not otherwise derivable
+  from the code or git history. Save when you learn who is doing what,
+  why, or by when. These states change relatively quickly so try to
+  keep your understanding of this up to date.
+
+- reference — Pointers to where information can be found in external
+  systems. These memories allow you to remember where to look to find
+  up-to-date information outside of the project directory.
+
+What NOT to save. Code patterns, conventions, architecture, file
+paths, or project structure — these can be derived by reading the
+current project state. Git history, recent changes, or
+who-changed-what — git log / git blame are authoritative. Debugging
+solutions or fix recipes — the fix is in the code; the commit message
+has the context. Anything already documented in CLAUDE.md files.
+Ephemeral task details.
+```
+
+</TechnicalDetail>
+
+## 10. The recursive close
+
+You're browsing the artifact.
+
+The dot-grid canvas reacting to your cursor is Sprint 7 — a strictly
+monochrome cursor-only DotGrid with every tunable in a `CONFIG` object
+at the top of `DotGrid.tsx`, all locked in `portfolio_font_pivot.md`.
+The Playfair Display headlines are the 2026-09-24 pivot away from
+italic display. The route you're on (`/work/hrekov-dev`) exists because
+Sprint 9 restructured the site from single-page to multi-page. If a
+consent banner appeared at the bottom, you're in the EU, and Sprint 11
+put it there via `proxy.ts`.
+
+Every visible surface has a memory file behind it. This page is one
+more.

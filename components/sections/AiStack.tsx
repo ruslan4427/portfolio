@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SectionBadge } from "@/components/ui/SectionBadge";
 import { Reveal } from "@/components/ui/Reveal";
 import { MaskReveal } from "@/components/ui/MaskReveal";
@@ -98,6 +99,19 @@ export function AiStack({ showBadge = true }: AiStackProps = {}) {
             </StaggerItem>
           ))}
         </Stagger>
+
+        <Reveal delay={0.2}>
+          <p className="mt-8 text-center text-sm text-[color:var(--ink-muted)]">
+            See{" "}
+            <Link
+              href="/work/hrekov-dev"
+              className="underline underline-offset-2 hover:text-[color:var(--ink-primary)]"
+            >
+              the portfolio meta case study
+            </Link>
+            {" "}for how routing decisions get made in practice.
+          </p>
+        </Reveal>
       </div>
     </section>
   );

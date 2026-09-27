@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run verify:numbers",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify:numbers": "node scripts/verify-case-study-numbers.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

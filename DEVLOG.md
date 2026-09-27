@@ -5,6 +5,62 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-09-27 · Sprint 12 — Portfolio meta case study (`hrekov-dev`)
+
+**Problem.** The other five case studies describe client work. The
+recursive claim of this portfolio — that the workflow scales because
+the memory system is real — had no artifact of its own. A recruiter or
+fractional client could see the outputs but not the machine. Also
+needed a way to keep numeric claims (promotion rate, memory count,
+sprint cadence) from drifting out of sync with disk truth.
+
+**Decision.** Ship the portfolio itself as the 6th case study, slug
+`hrekov-dev`, `featured: false` so the home hero stays "five case
+studies." Ten-section body (~2000 words) covering: stateless-model
+problem, persistence layer anatomy, MEMORY.md index, ShipLoop
+discipline, DEVLOG→STABLE_LOGIC promotion, what the machine produced,
+context re-hydration saved, how to steal it. Six embedded artifacts
+including `feedback_css_cascade_first.md` verbatim, a DEVLOG→STABLE_LOGIC
+pair, and the auto-memory spec excerpt inside a `<TechnicalDetail>`.
+Cross-links `/about#stack` (backward) + forward-link block in
+`AiStack.tsx`. Full spec+plan+tasks triple in
+`specs/12-portfolio-meta-case-study/`. Numbers-guardrail script at
+`scripts/verify-case-study-numbers.mjs` wired into `prebuild` — fails
+build if MDX artifact `detail` strings drift from disk (DEVLOG
+heading count, STABLE_LOGIC heading count, distinct Sprint N mentions,
+day-span, memory dir file count).
+
+**Result.** Route 200. All 10 h2 sections render (SSR). Six
+artifacts + 4 devlogRefs in Technical view; recruiterSummary in both
+views. Home `/` shows 5 cards; `/work` index shows 6. Sitemap contains
+`/work/hrekov-dev`. Forward-link from `/about#stack` resolves. Noble
+backlink in §7. Guardrail catches drift (proved with sabotage test:
+37.5% → 50% exits 1 with "promotion percent: MDX=50%, disk=37.5%").
+Verify-numbers passes: {devlog: 24, stable: 9, sprints: 11, daysSpan: 7,
+memory: 17}. Reconciled MDX from stale claim of 13 memory files → 17.
+tsc + build clean.
+
+**Lesson.** Two things.
+1. **MDX 3 hates blockquotes that contain code spans with curly braces.**
+   `` > `@layer base { ... }` `` triggers "Unexpected lazy line in
+   expression in container" and silently blanks the entire body — SSR
+   returns 200 but zero content renders. Symptom looks like a routing
+   or data fetching failure; root cause is the MDX parser treating the
+   `{` as an unclosed JSX expression across blockquote lines. Fix:
+   convert the blockquote to a fenced `text` code block. Rule for future
+   case studies: **never quote code-heavy content with `>`, always
+   fence with triple backticks + `text`.** Belongs in STABLE_LOGIC on
+   promotion.
+2. **Numbers-in-prose need a guardrail or they rot.** The MDX draft
+   opened with "13 memory files" while disk had 17. Without the
+   `verify:numbers` script wired into `prebuild`, that stale claim
+   would have shipped invisibly. The script pays for itself the first
+   time a memory file is added and the ramp-up claim needs updating.
+   Pattern is generalizable to any case study that quantifies its own
+   process.
+
+---
+
 ## 2026-09-26 · Sprint 11 — Blog foundation + case study L2/L3 + GA4
 
 **Problem.** Three things the portfolio was missing before it could
