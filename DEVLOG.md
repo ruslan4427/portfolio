@@ -1597,3 +1597,15 @@ Also converted `content/blog/schedule.ts` → `content/blog/schedule.mjs` so the
 Follow-ups queued, not blocking: dev.to username is auto-generated (`ruslan_hrekov_d296523b326`) — fix in dev.to settings before next post for cleaner canonical. Second blog post will exercise the full publish-apply-ledger-commit path through actual cron (tonight was synthetic — ledger pre-seeded).
 
 ---
+
+## 2026-10-01 — cron · cross-post batch
+
+**Problem:** 2 scheduled cross-post(s) reached publish time.
+
+**Decision:** publish-due.mjs fired via GH Actions hourly cron.
+
+**Result:** Published: shipping-the-cross-poster/linkedin → https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7511283215077289984/; shipping-the-cross-poster/devto → https://dev.to/ruslan_hrekov_d296523b326/shipping-the-cross-poster-34hn. Failures: 0.
+
+**Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
+
+---

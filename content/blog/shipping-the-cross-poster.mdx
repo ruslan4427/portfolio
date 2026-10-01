@@ -1,9 +1,12 @@
 ---
 slug: shipping-the-cross-poster
 title: Shipping the cross-poster
-tagline: Three hundred lines of orchestrator, three non-obvious traps, one meta-publication — what a schedule-driven cross-posting pipeline actually looks like when the site is publishing itself.
+tagline: >-
+  Three hundred lines of orchestrator, three non-obvious traps, one
+  meta-publication — what a schedule-driven cross-posting pipeline actually
+  looks like when the site is publishing itself.
 format: build-log
-publishedAt: "2026-09-30"
+publishedAt: '2026-09-30'
 readingTime: 5
 tags:
   - meta
@@ -13,22 +16,27 @@ featured: true
 distribution:
   - channel: rss
     status: live
-    url: "https://hrekov.dev/rss.xml"
+    url: 'https://hrekov.dev/rss.xml'
   - channel: linkedin
-    status: planned
+    status: posted
+    publishedUrl: >-
+      https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7511283215077289984/
+    postedAt: '2026-10-01T04:37:52.251Z'
   - channel: devto
-    status: planned
+    status: posted
+    publishedUrl: 'https://dev.to/ruslan_hrekov_d296523b326/shipping-the-cross-poster-34hn'
+    postedAt: '2026-10-01T04:37:52.730Z'
 artifacts:
   - type: commit
     label: Sprint 14 · Distribution automation
-    href: "https://github.com/ruslan4427/portfolio/commit/898a8ca"
+    href: 'https://github.com/ruslan4427/portfolio/commit/898a8ca'
     detail: 29 files · 2361 lines of pipeline + specs + content
   - type: commit
     label: Sprint 14 live-ship retro
-    href: "https://github.com/ruslan4427/portfolio/commit/a4839b8"
+    href: 'https://github.com/ruslan4427/portfolio/commit/a4839b8'
   - type: link
-    label: "The first post that shipped through this (meta)"
-    href: "/blog/launching-the-journal"
+    label: The first post that shipped through this (meta)
+    href: /blog/launching-the-journal
 ---
 
 The previous post promised cross-posts to LinkedIn and dev.to "once Sprint 14 wires the automation." Three days later, Sprint 14 shipped and you're reading proof — this post landed on both platforms through a cron job the site runs on itself.
