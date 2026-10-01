@@ -1574,3 +1574,26 @@ Also converted `content/blog/schedule.ts` → `content/blog/schedule.mjs` so the
 **Lesson:** When credentials are blocked, don't idle — every publisher, renderer, and workflow YAML is writable today. Tomorrow's session becomes a 20-minute credential-paste + `workflow_dispatch dryRun=true` verification, not a code sprint. Also: `[^/>]+?` in a JSX regex bites you when attr values contain `/` (dollar amounts, paths); prefer `[^>]+?` + explicit `\s*\/>` terminator.
 
 ---
+
+## 2026-09-30 — Sprint 14 shipped live: dev.to + LinkedIn first cross-post
+
+**Problem:** Code was ready yesterday but unverified against live APIs. Needed to actually push the pipeline through dev.to and LinkedIn, confirm both renderers survive their respective markdown/plain-text constraints, and prove the GH Actions runner path end-to-end before trusting it to publish on its own.
+
+**Decision:** Pushed through tonight in four stages rather than defer:
+
+1. **LinkedIn Company Page + Dev app.** User's existing personal profile is not sufficient to own a LinkedIn app — the post-2019 verification chain requires a Company Page as the ownership anchor. Created minimal Page (ID 143957068); app bound to it. Posts still land on the personal profile via `urn:li:person:XKuTKDehCv`.
+2. **OAuth handshake.** `scripts/linkedin-oauth.mjs` ran local 8787 callback, exchanged code → 60-day access token. Confirmed empirically: **self-serve `w_member_social` does NOT grant a refresh token**, only the access token. 60-day cliff is manual re-handshake, not scripted rotation. Updated `scripts/linkedin-refresh.mjs` to no-op + warn when the refresh token env var is empty, so the weekly workflow stays green.
+3. **Live publish via `publish-one.mjs --live`.** dev.to returned `https://dev.to/ruslan_hrekov_d296523b326/launching-the-journal-3fh5` (4780166); LinkedIn returned `urn:li:share:7511255500445872129`. Markdown stripper + 2900-char LinkedIn cap behaved cleanly; visual review on both platforms confirmed no artifacts.
+4. **Orchestrator validation via GH Actions `workflow_dispatch dryRun=true`.** Backfilled `.distribution-ledger.jsonl` with the two real URLs (otherwise cron would re-publish). Fired the "Publish blog" workflow — ran in 21 seconds on `ubuntu-latest` + Node 20, output `[publish-due] nothing due at 2026-10-01T03:22:40Z`. Secrets propagate, `npm ci --ignore-scripts` installs cleanly, ledger idempotency works end-to-end.
+
+**Result:** Both commits pushed (`030cc95` Sprint 13, `898a8ca` Sprint 14). Hourly cron armed on `15 * * * *`. Four Sprint-14 invariants locked into `STABLE_LOGIC.md`: LinkedIn endpoint is `/v2/ugcPosts` not `/rest/posts`; publish order is ledger → frontmatter → git; cron commits carry `[skip ci]`; distribution scripts are `.mjs` under plain node; ledger is NOT gitignored (ephemeral runners would double-publish). Discovered + fixed: `.distribution-ledger.jsonl` had been in `.gitignore`, which would have silently broken the idempotency contract on first cron tick.
+
+**Lesson:** Three traps that cost real time if you miss them:
+
+- **LinkedIn `w_member_social` self-serve is scope-only, not durability.** You get the access token but no refresh — plan for a 60-day re-handshake calendar event, not scripted rotation. If you need true rotation, you need Community Management API partner review (multi-week gate).
+- **A ledger that lives only on the runner is not a ledger.** GH Actions runners are ephemeral; the `.jsonl` has to be committed back, which is why `publish-due.mjs` stages it alongside the frontmatter. Easy to accidentally `.gitignore` because the name looks like local state.
+- **For LinkedIn, the Company Page is a one-time cost, not a permanent commitment.** Posts never go to the Page; it's just the ownership anchor LinkedIn requires. Fifteen minutes of bureaucracy that unblocks the whole pipeline.
+
+Follow-ups queued, not blocking: dev.to username is auto-generated (`ruslan_hrekov_d296523b326`) — fix in dev.to settings before next post for cleaner canonical. Second blog post will exercise the full publish-apply-ledger-commit path through actual cron (tonight was synthetic — ledger pre-seeded).
+
+---
