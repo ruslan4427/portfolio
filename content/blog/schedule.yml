@@ -8,7 +8,7 @@
 # hourly cron doesn't publish accidentally.
 
 # launching-the-journal shipped manually on 2026-09-30 (ledger has both channels).
-# Next post example:
-# some-slug:
-#   linkedin: 2026-10-15T09:00:00Z
-#   devto: 2026-10-15T10:00:00Z
+
+shipping-the-cross-poster:
+  linkedin: 2026-10-01T03:50:00Z
+  devto: 2026-10-01T03:55:00Z

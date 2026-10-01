@@ -1,0 +1,80 @@
+---
+slug: shipping-the-cross-poster
+title: Shipping the cross-poster
+tagline: Three hundred lines of orchestrator, three non-obvious traps, one meta-publication — what a schedule-driven cross-posting pipeline actually looks like when the site is publishing itself.
+format: build-log
+publishedAt: "2026-09-30"
+readingTime: 5
+tags:
+  - meta
+  - automation
+  - distribution
+featured: true
+distribution:
+  - channel: rss
+    status: live
+    url: "https://hrekov.dev/rss.xml"
+  - channel: linkedin
+    status: planned
+  - channel: devto
+    status: planned
+artifacts:
+  - type: commit
+    label: Sprint 14 · Distribution automation
+    href: "https://github.com/ruslan4427/portfolio/commit/898a8ca"
+    detail: 29 files · 2361 lines of pipeline + specs + content
+  - type: commit
+    label: Sprint 14 live-ship retro
+    href: "https://github.com/ruslan4427/portfolio/commit/a4839b8"
+  - type: link
+    label: "The first post that shipped through this (meta)"
+    href: "/blog/launching-the-journal"
+---
+
+The previous post promised cross-posts to LinkedIn and dev.to "once Sprint 14 wires the automation." Three days later, Sprint 14 shipped and you're reading proof — this post landed on both platforms through a cron job the site runs on itself.
+
+Here's what shipping that pipeline looked like.
+
+## The itch
+
+Cross-posting manually dies at the third post. Open LinkedIn, strip the markdown, re-check character count, paste. Open dev.to, remember the canonical URL field, paste the body, slugify the tags, confirm. Each post is fifteen minutes of friction between "I wrote something" and "the people who follow me on those platforms can read it." After two tries you stop writing instead of fixing it.
+
+The fix had to clear a lower bar than you'd think: it had to work, land in the correct places, and not accidentally publish the same post twice. The rest is polish.
+
+## The constraint
+
+One decision gated everything: no dedicated service, no Zapier, no VPS. The site already deploys on Vercel and the code already lives on GitHub, so the pipeline had to live inside the repo. GitHub Actions free tier cron, scripts in the same language as the site, state in a committed file. If the cron ever misbehaves, I want `git log` to tell me when and why.
+
+That ruled out LinkedIn's partner-reviewed Community Management API (multi-week approval gate for a solo-developer app) and ruled in the self-serve `w_member_social` scope targeting the legacy `/v2/ugcPosts` endpoint. Different surface, same posting outcome.
+
+## The pipeline
+
+Three hundred lines of orchestrator (`scripts/publish-due.mjs`) read `content/blog/schedule.yml`, cross-reference `.distribution-ledger.jsonl`, and when a scheduled post is due and not already published, hand it to the matching publisher — `lib/distribution/devto.mjs` or `lib/distribution/linkedin.mjs`. On success, three things happen in a fixed order:
+
+1. Append to the ledger (`{slug, channel, publishedUrl, remoteId, ts}`)
+2. Mutate the post's frontmatter (`status: posted`, `publishedUrl`, `postedAt`)
+3. Commit and push with `[skip ci]` so Vercel still rebuilds but the cron origin is filterable in `git log`
+
+The ordering is non-negotiable. If step 2 crashes, step 1 already recorded the publish — the next cron tick sees the ledger entry and skips the slug instead of double-posting. Reversing to frontmatter-first means a crash leaves the post un-marked-as-published; the next tick re-publishes.
+
+The ledger is checked into git. Had to catch that one in review — my first draft had `.distribution-ledger.jsonl` in `.gitignore` because the filename looks like local state. GitHub Actions runners are ephemeral; an ignored ledger would see empty state on every tick and re-publish every past-scheduled post. The file isn't local state; it's the durable idempotency guard.
+
+## The three traps I almost shipped
+
+**`/rest/posts` vs `/v2/ugcPosts`.** The LinkedIn docs lead you to the newer `/rest/posts` under Community Management API. Looks modern, has nice typed schemas. Returns 403 with a self-serve token because that surface is partner-review-gated. The legacy UGC endpoint with `X-Restli-Protocol-Version: 2.0.0` (and no `LinkedIn-Version` header) is what self-serve apps actually get. A full afternoon vanished before I noticed the two docs sets live in parallel universes.
+
+**Refresh tokens don't exist on self-serve.** The access token is sixty days. The weekly refresh worker I wrote assumed a refresh token would arrive — none did. Not a bug; an empirical limit of the `w_member_social` scope. Fix was a graceful no-op with a cliff-countdown warning, and a calendar reminder two weeks before expiry to re-run the OAuth handshake manually.
+
+**Company Pages aren't optional, but they're one-time.** My app wouldn't bind to a personal profile; LinkedIn's post-2019 verification chain wants a Page as the ownership anchor. Created a minimal Page in fifteen minutes, bound the app, then never used the Page again. All posts go to the personal profile via `urn:li:person:XKuTKDehCv`.
+
+## What runs now
+
+Hourly on `15 * * * *`. Twenty-one seconds end-to-end on a cold GitHub Actions runner. On ticks with nothing due, the output is one line — `[publish-due] nothing due at <iso-timestamp>` — and the job exits clean. On ticks with a due post, you see the publish lines, the devlog entry, and a cron commit landing in `main`.
+
+The first live run shipped the previous post, [Launching the journal](/blog/launching-the-journal), to both platforms. That post went live manually because I needed to validate the renderers against real APIs before trusting the cron. This post is the first one going through the full automated path — authored, scheduled, pushed, published by the machine, with a commit back on `main` to prove it.
+
+## What this post itself proves
+
+You're reading a Build Log about a cross-posting pipeline. If you found it on dev.to or LinkedIn, that pipeline is what put it there — the schedule-driven path with no manual step between my `git push` and your scroll.
+
+The whole thing is in the open: three hundred lines of orchestrator at [scripts/publish-due.mjs](https://github.com/ruslan4427/portfolio/blob/main/scripts/publish-due.mjs), four invariants locked into [STABLE_LOGIC.md](https://github.com/ruslan4427/portfolio/blob/main/STABLE_LOGIC.md), the full ship retro at [DEVLOG.md](https://github.com/ruslan4427/portfolio/blob/main/DEVLOG.md). Clone the repo, read the cron, run the dry-run — the pipeline isn't a demo of a clever idea, it's the thing that made this very post appear in two more places than I had to type.
