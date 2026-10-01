@@ -175,6 +175,15 @@ two sessions or one full sprint.
   `verify-case-study-numbers.mjs` convention; no tsx/bun dependency. The
   `--ignore-scripts` flag skips the Next `prebuild verify:numbers` hook
   (that's a build-time check, not an install-time one).
+- **LinkedIn re-handshake reminder is automated via the weekly
+  `linkedin-refresh` workflow, not a human calendar.** When
+  `LINKEDIN_REFRESH_TOKEN_ISSUED_AT` + today puts the 60-day cliff at
+  ≤14 days out, `scripts/linkedin-refresh.mjs` opens a GitHub issue
+  labelled `linkedin-token-cliff` (idempotent — skips if an open one
+  exists). After a fresh handshake, update the `ISSUED_AT` secret so
+  the countdown resets; closing the issue is cosmetic. Removing the
+  `issues: write` permission or dropping the `ISSUED_AT` secret
+  silently breaks this — don't.
 
 ## Sprint history — locked directions
 
