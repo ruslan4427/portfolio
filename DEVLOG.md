@@ -1318,3 +1318,259 @@ without runtime errors. No content yet — verifies structure only.
 them through Turbopack's `experimental.turbo.rules` instead.
 
 ---
+
+## 2026-09-29 · MDX object-array props silently stripped (`blockJS`)
+
+**Problem.** New `<MetricGrid>` primitive crashed with
+`TypeError: Cannot read properties of undefined (reading 'map')` on
+`/work/hrekov-dev`. Standalone `@mdx-js/mdx` compile of the same source
+produced correct output — the `items={[{...}, ...]}` array was there.
+Something between MDX compile and render was dropping the prop.
+
+**Decision.** Read `node_modules/next-mdx-remote/dist/serialize.js`.
+`getCompileOptions` defaults `blockJS: true` and injects a
+`removeJavaScriptExpressions` remark plugin that strips MDX flow
+expressions (`{...}`) from the AST. So `columns={3}` (numeric literal
+inline) survived, but `items={[{value: "12", label: "sprints"}, …]}`
+(object array) got removed — `items` arrived as `undefined`.
+
+Fix: set `blockJS: false` on both `<MDXRemote>` call sites — case
+studies (`components/mdx/CaseStudyBody.tsx`) and blog posts
+(`components/mdx/BlogPostBody.tsx`). Content is authored in-repo, not
+user-submitted, so the JS-injection surface being closed doesn't
+apply. Kept `blockDangerousJS` at its default (`true`) — that only
+blocks `require`/`process`/`fetch`-style globals, which we never use in
+MDX anyway.
+
+**Result.** MetricGrid renders. Confirmed via curl of `/work/hrekov-dev`:
+`~1.5`, `sprints / day`, `clamp(28px,3.5vw,44px)`,
+`divide-y divide-[color:var(--hairline)]` all present. No console
+error in dev log after refetch.
+
+**Lesson.** `next-mdx-remote` silently rewrites the MDX AST by default.
+Any primitive that takes structured props (`items`, `columns`, `data`)
+via array/object literals in MDX will fail silently unless `blockJS`
+is disabled at the render site. Numeric/string attributes work because
+they're MDX attribute values, not flow expressions. Rule promoted to
+`STABLE_LOGIC.md`.
+
+---
+
+## 2026-09-29 · P1.2 · `<PromptLog>` wired into Prompt Architecture sections
+
+**Problem.** The case-study audit flagged the "Prompt Architecture"
+sections as dense-prose walls that recruiters bounce off (Noble §4
+was the specific example). Existing `<PromptLog>` primitive was
+declared in `BlogComponents.tsx` but never invoked in any case study
+body.
+
+**Decision.** Scoped down from "wire PromptLog across all 6 case
+studies" to 4, on semantics: `<PromptLog>` reads as a verbatim
+Claude-facing instruction. That fits sections that quote a durable
+directive from `CLAUDE.md` / `AGENTS.md` / `STABLE_LOGIC.md`. Sections
+that don't quote a directive (or where the quote is already a
+three-word bold callout) get nothing — pulling one-liners into
+collapsibles adds noise, doesn't reduce density.
+
+Wired:
+- `noble-saas.mdx` — `docs/STABLE_LOGIC.md — the anti-drift directive`
+- `angel.mdx` — `AGENTS.md — the 5-role contract`
+- `lexora.mdx` — `CLAUDE.md — the routing rule`
+- `fieldmark.mdx` — `CLAUDE.md — the four-stage gate`
+
+Skipped:
+- `smm-factory.mdx` — section already tight; "Rules = Code." is
+  three words, doesn't merit a collapsible.
+- `hrekov-dev.mdx` — no "Prompt Architecture" section (meta case
+  study); no verbatim directive quoted elsewhere.
+
+**Result.** Four case studies now open their Prompt Architecture
+section with prose → collapsed directive → prose. Verified via curl
+that each renders (no `TypeError`) and that the correct filename-tagged
+title lands in each SSR payload. `blockJS: false` fix from earlier
+today is what makes any of this work — pre-fix, MDX would have silently
+dropped the `title` prop.
+
+**Lesson.** Primitives have a semantic surface, not just a visual
+one. A component labeled "prompt" and marked with `❝` should only wrap
+Claude-facing instructions. Wrapping every dense paragraph in one
+would have shipped visual noise + false semantic weight.
+
+---
+
+## 2026-09-29 · P1.1 → pivoted to `<BeforeAfter>` primitive (not `<Diff>`)
+
+**Problem.** Original task was "wire `<Diff>` into Iteration Moments across
+6 case studies". Read all 6 sections first — none of them contain
+before/after **code**. They describe approach/behavior/commit changes in
+prose. `<Diff>` renders two `<pre>` code blocks side-by-side; using it
+for prose would be a false semantic match (same class of error as the
+first-pass P1.2 plan).
+
+**Decision.** Built a new primitive `<BeforeAfter>` with `<Before>` /
+`<After>` panel children (composition-based so MDX authors can use
+inline `_italic_` and `` `code` `` naturally). Each panel accepts
+`date`, `commit`, `commitHref` props and renders a pill-style commit
+chip in the header. Registered all three in `blogComponents`.
+
+Wired:
+- `fieldmark.mdx` — Apple Sign-In rewrite (2 dates + 2 commits)
+- `lexora.mdx` — Anthropic → Gemini migration (same-day rollover)
+- `noble-saas.mdx` — 2 iteration moments (April slot-cache freeze,
+  Vercel cache elimination) — 4 panels total, each with commit hashes
+- `smm-factory.mdx` — 21-minute Playwright unwind (Ship, test, kill)
+
+Skipped:
+- `angel.mdx` — single commit, no before/after pair to render.
+- `hrekov-dev.mdx` — meta case study, no Iteration Moment section.
+
+**Result.** 4/6 case studies now open their Iteration Moment with a
+two-panel `<BeforeAfter>` — commit chip, date pill, prose body — with
+the Lesson italic beneath. Verified via curl: 8 panels rendered
+(2×fieldmark + 2×lexora + 4×noble + 2×smm-factory across SSR flight +
+HTML). No `TypeError`. Depended on the `blockJS: false` fix from
+earlier today.
+
+**Lesson.** Second time this week that following the audit doc's
+"wire primitive X into section Y" plan revealed a semantic mismatch
+between the primitive's contract and what the section actually
+contains. Rule I'll apply going forward: before wiring, read all
+target sections first and check the semantic fit against the
+primitive's contract. If the fit is wrong, build the right primitive
+first.
+
+---
+
+## 2026-09-29 · P1.3 → pivoted to `<MetricGrid>` + `<Cost>` for Results
+
+**Problem.** Original task was "inline `<Artifact>` + `<Cost>` chips in
+Results sections across 6 case studies". Read all 6 — Results sections
+are almost entirely numeric or metric bullets (commits, LOC, followers,
+posts published, pricing). `<Artifact>` renders a labeled chip
+("commit ⌥ 6b29244", "screenshot ▢ ...") — meant for pointing at
+concrete artifacts, not "227". `<Cost>` fits pricing but only pricing.
+Inlining `<Artifact>` for every number would ship the same false-weight
+noise that P1.1 and P1.2 caught.
+
+**Decision.** For numeric-metric Results, convert to `<MetricGrid>` —
+the primitive already exists in `BlogComponents.tsx` (built for the
+blog, unused so far in case studies). Extract `<Cost>` selectively for
+actual pricing/spend items only. Leave short Results sections (≤5
+bullets) as prose bullets — grid would fragment them.
+
+Wired:
+- `noble-saas.mdx` — `<MetricGrid columns={4}>` for {227 commits,
+  ~10k LOC, 16 named bugs, 3 pivots} + two `<Cost>` pills for pricing +
+  trial. Two prose bullets survive (weekly cadence, integrations).
+- `smm-factory.mdx` — `<MetricGrid columns={4}>` for {40 posts, 0→13
+  followers, 0–200 views, 0 IG violations} + two `<Cost>` pills for
+  AI cost + human time.
+
+Skipped:
+- `fieldmark.mdx` — 4 bullets, all tight prose (dates, commit counts,
+  build states). Grid would strip the narrative.
+- `lexora.mdx` — 5 bullets, similar shape.
+- `angel.mdx` — 4 bullets.
+- `hrekov-dev.mdx` — Results already a table.
+
+**Result.** 2/6 case studies now open their Results with a 4-column
+metric grid + inline `<Cost>` pills for spend/pricing. Verified via
+curl on both slugs — MetricGrid tabular-nums classes present, no
+`TypeError`, values render (227, 40, 0 → 13, client / week visible in
+HTML). Phase 1 complete: P1.1 (`<BeforeAfter>`), P1.2 (`<PromptLog>`),
+P1.3 (`<MetricGrid>` + `<Cost>`), P1.4 (recruiter summary in
+frontmatter — shipped Sprint 11).
+
+**Lesson.** Third pivot this week — the audit doc named the primitive
+before checking the content shape three times in a row. The general
+pattern: audit docs describe an *aesthetic goal* ("Results should feel
+scannable"), not a mapping. The mapping only surfaces after reading
+the actual content. New rule for the next audit: pair each "wire X
+into Y" line with a 1-sentence content-shape claim (`Y contains N
+before/after prose blocks`, `Y contains K numeric bullets`) so the
+semantic mismatch fails fast at planning, not at implementation.
+
+---
+
+## 2026-09-29 · Sprint 14 · Phase A + F ship (no-credentials slice)
+
+**Problem.** Sprint 14 (distribution automation, task #73) is class L
+— LinkedIn + dev.to APIs, OAuth handshake, weekly refresh worker,
+GitHub Actions cron, blog-drafter skill. Full-stack execution is
+blocked by LinkedIn app + Company Page creation, which Ruslan is
+doing manually tomorrow. But ~60% of the sprint has zero credential
+dependency (schedule scaffolding, type extensions, privacy page,
+skill definition). Ship what can ship today.
+
+**Decision.** Executed Phase A (editorial calendar) + Phase F
+(blog-drafter skill) + one Sprint-15-prep dependency: privacy page.
+LinkedIn app creation form validates the Privacy Policy URL against
+200; publishing that landing page tonight lets tomorrow's LI form
+pass on first attempt.
+
+Also: spec §5.2 was wrong. Original had `POST /rest/posts` with
+`LinkedIn-Version: 202409` — that's the newer Community Management
+REST API, which is review-gated behind LinkedIn's Marketing partner
+program (multi-week gate). The self-serve `w_member_social` scope
+only authorizes the older `POST /v2/ugcPosts` UGC surface. Verified
+via `learn.microsoft.com/.../share-on-linkedin` (updated 2026-06).
+Spec §3.3 and §5.2 rewritten to lock in `/v2/ugcPosts`; explicit
+rejection of `/rest/posts` documented so future-me doesn't re-open
+this loop.
+
+**Result.**
+- `content/blog/schedule.yml` — scaffold with far-future placeholder
+  entry for `launching-the-journal` so cron won't publish accidentally.
+- `content/blog/schedule.ts` — reader with slug + channel + datetime
+  validation. Smoke test parses scaffold correctly.
+- `content/blog.ts` — `DistributionChannel` extended with optional
+  `publishedUrl` + `error`; `DistributionStatus` gains `"failed"`.
+  Additive, no callers break.
+- `.env.distribution.example` — six LinkedIn/dev.to secret keys
+  documented with source URLs. Added to `.gitignore` allowlist;
+  `.distribution-ledger.jsonl` also ignored.
+- `app/(marketing)/privacy/page.tsx` — full privacy notice (data,
+  cookies, retention, third parties, contact). Matches About/Services
+  shell.
+- `app/sitemap.ts` — `/privacy` entry added (priority 0.3).
+- `components/layout/Footer.tsx` — Privacy link next to
+  ConsentResetLink.
+- `.claude/skills/blog-drafter/` — SKILL.md + 4 format templates
+  (build-log, pattern, case-study, skeptic) with frontmatter
+  placeholders + section skeletons.
+
+Verify: `curl /privacy` = 200. `npx tsc --noEmit` clean. Schedule
+smoke-test returns typed entry.
+
+**Lesson.** Docs age fast on OAuth surfaces. LinkedIn added the newer
+`/rest/posts` REST API + `LinkedIn-Version` header in 2023–2024 and
+the top search results for "LinkedIn API post" push you there — but
+`learn.microsoft.com/.../getting-access`'s authoritative "Open
+Permissions" table for `w_member_social` still shows `/v2/ugcPosts`.
+Rule: for LinkedIn API integrations, always load the *specific*
+self-serve product's docs page, not the general "how do I post"
+search result. Cost of this error if unchecked = full Phase B
+implementation against a review-gated endpoint, discovered only at
+first live call.
+
+---
+
+## 2026-09-30 — Sprint 14 Phases B/C/D/E scaffolded (no credentials required yet)
+
+**Problem:** Phase A + F shipped yesterday; user is deferring LinkedIn Company Page + Developer app creation to tomorrow. Cheapest use of today is to write the code that will execute against those credentials — nothing here needs a live LinkedIn to author, only to run.
+
+**Decision:** Wrote all remaining Sprint 14 code in `.mjs` (matches existing `verify-case-study-numbers.mjs` convention, no tsx dep):
+- Renderer + tests (`lib/distribution/render.mjs`, `scripts/render-smoke.mjs`) — 11/11 assertions pass, including a real-post smoke against `launching-the-journal.mdx`.
+- Publishers (`lib/distribution/devto.mjs`, `lib/distribution/linkedin.mjs`) — both dry-run successfully via `scripts/publish-one.mjs`; LinkedIn payload confirmed to be UGC-shape (`/v2/ugcPosts`) with `x-restli-protocol-version: 2.0.0`, no `LinkedIn-Version` header.
+- OAuth handshake (`scripts/linkedin-oauth.mjs`) — localhost:8787 callback server, `w_member_social openid profile email` scopes, writes `.env.distribution` (chmod 600) + prints `gh secret set` block for GH Secrets.
+- Cron orchestrator (`scripts/publish-due.mjs` + `scripts/lib/{git,devlog,frontmatter,ledger}.mjs`) — dry-run says "nothing due" against the 2027-scheduled test post. Ledger-then-frontmatter-then-git ordering enforced.
+- Refresh worker (`scripts/linkedin-refresh.mjs`) — exchanges refresh token, rotates via `gh secret set` when `GH_TOKEN` present, warns when refresh cliff is <30 days.
+- Two GH Actions workflows (`publish-blog.yml` hourly, `linkedin-refresh.yml` Monday-06:00-UTC) — `actions/setup-node@v4` with `npm ci --ignore-scripts` (skips prebuild verify:numbers, which is a Next build hook).
+
+Also converted `content/blog/schedule.ts` → `content/blog/schedule.mjs` so the cron can import without tsx/build-step. Nothing in Next consumed the TS version. Fixed `bun`/`oven-sh/setup-bun@v2` cruft in plan.md + tasks.md (project uses npm, not bun).
+
+**Result:** `npx tsc --noEmit` clean. Renderer 11/11. Orchestrator smoke clean. Real-post publish-one dry-run produces LinkedIn payload of 2003 chars (under 2900 cap, canonical suffix intact) and dev.to payload with correct canonical_url + tags.
+
+**Lesson:** When credentials are blocked, don't idle — every publisher, renderer, and workflow YAML is writable today. Tomorrow's session becomes a 20-minute credential-paste + `workflow_dispatch dryRun=true` verification, not a code sprint. Also: `[^/>]+?` in a JSX regex bites you when attr values contain `/` (dollar amounts, paths); prefer `[^>]+?` + explicit `\s*\/>` terminator.
+
+---

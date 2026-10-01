@@ -95,6 +95,17 @@ two sessions or one full sprint.
   toggle. When adding L2/L3 fields, use real data only; if a
   recruiter summary would need invented facts, leave the field
   blank and let the body carry the weight.
+- **`next-mdx-remote` needs `blockJS: false` for structured MDX
+  props.** The default (`blockJS: true`) injects a remark plugin
+  that silently strips JS flow expressions from the AST — so
+  `columns={3}` survives (attribute value) but
+  `items={[{value: "12", label: "sprints"}, …]}` gets removed and
+  the primitive receives `items: undefined`. Set `blockJS: false`
+  on every `<MDXRemote>` call site (both `CaseStudyBody.tsx` and
+  `BlogPostBody.tsx`). Keep `blockDangerousJS` at default — our
+  in-repo MDX never uses `require`/`process`/`fetch` globals. Any
+  new MDX primitive that takes `items`, `data`, `entries`, or any
+  object/array literal from MDX depends on this flag being off.
 
 ## Analytics + consent
 
@@ -131,6 +142,39 @@ two sessions or one full sprint.
   server-rendered; a re-render on toggle would tear it down and
   refetch. The DOM stays; the presentation flips. No state
   desync possible.
+
+## Distribution automation (Sprint 14, 2026-09-30)
+
+- **LinkedIn personal posting endpoint is `POST /v2/ugcPosts`.** The
+  self-serve `w_member_social` scope authorizes this surface and no other.
+  Required headers: `Authorization: Bearer <token>`, `X-Restli-Protocol-Version: 2.0.0`,
+  `Content-Type: application/json`. Do NOT set `LinkedIn-Version` — that
+  header belongs to `/rest/posts` under the Community Management API,
+  which requires LinkedIn partner review (multi-week gate). Symptom of the
+  wrong endpoint: 403 despite a seemingly valid token.
+- **Publish ordering is ledger → frontmatter → git.** `scripts/publish-due.mjs`
+  always writes to `.distribution-ledger.jsonl` *first*, mutates the MDX
+  frontmatter *second*, and runs `git add/commit/push` *last*. Reason:
+  the ledger is the only durable idempotency guard across runner
+  restarts; a crash between the publish and the frontmatter write still
+  leaves the ledger entry, so the next cron tick won't double-publish.
+  Reversing this order has produced duplicate LinkedIn posts in similar
+  pipelines elsewhere — treat the ordering as load-bearing.
+- **`.distribution-ledger.jsonl` is checked into git, not gitignored.**
+  GH Actions runners are ephemeral — if the ledger isn't in the repo, the
+  next run sees an empty guard and re-publishes everything scheduled in
+  the past. The cron commit always stages the ledger alongside the
+  frontmatter mutation. If you see the file re-appearing in a "should I
+  ignore this?" review, the answer is no.
+- **Cross-post cron commits carry `[skip ci]`.** Vercel still rebuilds via
+  the git integration webhook (frontmatter mutation = content change),
+  but the commit message makes the cron origin filterable in logs. Do
+  not strip the marker.
+- **All distribution scripts are `.mjs`, run via plain `node`, installed
+  with `npm ci --ignore-scripts`.** Matches the existing
+  `verify-case-study-numbers.mjs` convention; no tsx/bun dependency. The
+  `--ignore-scripts` flag skips the Next `prebuild verify:numbers` hook
+  (that's a build-time check, not an install-time one).
 
 ## Sprint history — locked directions
 

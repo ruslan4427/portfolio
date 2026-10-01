@@ -14,9 +14,13 @@ distribution:
     status: live
     url: "https://hrekov.dev/rss.xml"
   - channel: linkedin
-    status: planned
+    status: posted
+    publishedUrl: "https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7511255500445872129/"
+    postedAt: "2026-09-30T20:35:00.000Z"
   - channel: devto
-    status: planned
+    status: posted
+    publishedUrl: "https://dev.to/ruslan_hrekov_d296523b326/launching-the-journal-3fh5"
+    postedAt: "2026-09-30T20:30:00.000Z"
 artifacts:
   - type: commit
     label: Sprint 11 · Blog foundation
@@ -44,11 +48,11 @@ Each post lands with reading time, tags, and (where relevant) a **Receipts** asi
 - MDX with frontmatter validated at build time (invalid frontmatter throws).
 - `/rss.xml` is generated from the same source with CDATA descriptions.
 - Google Search Console meta tag ships via env var, so the feed shows up.
-- Analytics: GA4 with IP anonymisation, off by default for EU visitors until you click accept. `middleware.ts` reads Vercel's edge country header and sets a `geo-eu` cookie so the client knows which path to render.
+- Analytics: GA4 with IP anonymisation, off by default for EU visitors until you click accept. `proxy.ts` (Next.js 16's edge middleware convention) reads Vercel's `x-vercel-ip-country` header and sets a `geo-eu` cookie so the client knows which path to render.
 - No third-party tracking beyond that. No newsletter form yet.
 
 ## What's next
 
 First real posts land over the next two weeks — one Field Note on prompt patterns that stopped working when I moved from Sonnet to Opus, one Build Log on Sprint 11 itself, and a Pattern write-up of `STABLE_LOGIC.md` (the file that keeps AI collaboration from unwinding your own fixes).
 
-Subscribe via [RSS](/rss.xml), or wait for LinkedIn cross-posts once the distribution automation lands in Sprint 12.
+Subscribe via [RSS](/rss.xml), or wait for the LinkedIn + dev.to cross-posts — Sprint 14 wires the schedule-driven automation that lands this very post on both platforms.

@@ -1,0 +1,14 @@
+# Editorial calendar — per-slug scheduled cross-post times.
+# Format: <slug>: { <channel>: <ISO-8601 UTC datetime> }
+# Overrides frontmatter distribution.<channel>.scheduledFor when both set.
+# Valid channels: linkedin, devto.
+# Slug MUST match an existing content/blog/<slug>.mdx file.
+#
+# Set the datetime far in the future while wiring up secrets so the
+# hourly cron doesn't publish accidentally.
+
+# launching-the-journal shipped manually on 2026-09-30 (ledger has both channels).
+# Next post example:
+# some-slug:
+#   linkedin: 2026-10-15T09:00:00Z
+#   devto: 2026-10-15T10:00:00Z
