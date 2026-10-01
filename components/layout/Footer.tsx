@@ -28,7 +28,15 @@ export function Footer() {
         <div className="mt-12 grid grid-cols-1 items-center gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2 font-sans text-sm text-[color:var(--ink-muted)] md:text-left">
             <span>© Ruslan Hrekov {year}. All rights reserved.</span>
-            <ConsentResetLink />
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <a
+                href="/privacy"
+                className="underline decoration-[color:var(--hairline)] underline-offset-4 transition-colors hover:text-[color:var(--ink-primary)]"
+              >
+                Privacy
+              </a>
+              <ConsentResetLink />
+            </div>
           </div>
           <div aria-hidden className="hidden md:block" />
           <div className="flex flex-wrap items-center gap-2 md:justify-end">

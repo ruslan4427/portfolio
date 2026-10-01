@@ -39,7 +39,11 @@ Every existing trucking SaaS handles one slice: TMS, or maintenance, or hiring. 
 
 ## Prompt Architecture — the 5-stage pipeline
 
-Every task passes through **five roles**, in order: Orchestrator → PM → Designer → Developer → Reviewer. Each role has its own `AGENTS.md`-declared contract. **The PM asks up to 5 clarifying questions and then writes a Task Brief. The Designer never codes. The Developer never re-designs. The Reviewer validates against three docs: Brief, Design Spec, V9 tokens.**
+Every task passes through **five roles**, in order: Orchestrator → PM → Designer → Developer → Reviewer. Each role has its own `AGENTS.md`-declared contract:
+
+<PromptLog title="AGENTS.md — the 5-role contract">
+The PM asks up to 5 clarifying questions and then writes a Task Brief. The Designer never codes. The Developer never re-designs. The Reviewer validates against three docs: Brief, Design Spec, V9 tokens.
+</PromptLog>
 
 The rule that keeps sessions sharp: **"Spec + one file, not the codebase."** Claude never reads the whole tree — every task hands it the Brief and the specific files by name. This is what stops mid-session context rot.
 

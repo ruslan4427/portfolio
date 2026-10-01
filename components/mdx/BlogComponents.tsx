@@ -119,6 +119,119 @@ export function Diff({
   );
 }
 
+type MetricGridItem = {
+  value: string;
+  label: string;
+  hint?: string;
+};
+
+const metricGridCols: Record<2 | 3 | 4, string> = {
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-3",
+  4: "grid-cols-2 sm:grid-cols-4",
+};
+
+export function MetricGrid({
+  items,
+  columns = 3,
+}: {
+  items: MetricGridItem[];
+  columns?: 2 | 3 | 4;
+}) {
+  return (
+    <div
+      className={`not-prose my-10 grid ${metricGridCols[columns]} divide-y divide-[color:var(--hairline)] border-y border-[color:var(--hairline)] py-6 text-center sm:divide-x sm:divide-y-0`}
+    >
+      {items.map((item, i) => (
+        <div key={i} className="px-4 py-4 sm:py-0">
+          <div className="font-serif text-[clamp(28px,3.5vw,44px)] leading-none text-[color:var(--ink-primary)] tabular-nums">
+            {item.value}
+          </div>
+          <div className="mt-2 font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)]">
+            {item.label}
+          </div>
+          {item.hint && (
+            <div className="mt-1 font-sans text-[12px] leading-snug text-[color:var(--ink-muted)]">
+              {item.hint}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function BeforeAfter({ children }: { children: ReactNode }) {
+  return (
+    <div className="not-prose my-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+      {children}
+    </div>
+  );
+}
+
+type BeforeAfterPanelProps = {
+  label: "Before" | "After";
+  date?: string;
+  commit?: string;
+  commitHref?: string;
+  children: ReactNode;
+};
+
+function BeforeAfterPanel({
+  label,
+  date,
+  commit,
+  commitHref,
+  children,
+}: BeforeAfterPanelProps) {
+  const chipInner = (
+    <>
+      <span aria-hidden className="font-serif text-[color:var(--ink-muted)]">
+        ⌥
+      </span>
+      <span>{commit}</span>
+    </>
+  );
+  const chip = commit ? (
+    commitHref ? (
+      <a
+        href={commitHref}
+        target={commitHref.startsWith("http") ? "_blank" : undefined}
+        rel={commitHref.startsWith("http") ? "noopener noreferrer" : undefined}
+        className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2 py-0.5 font-sans text-[11px] text-[color:var(--ink-primary)] no-underline transition-colors hover:border-[color:var(--outline)]"
+      >
+        {chipInner}
+      </a>
+    ) : (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2 py-0.5 font-sans text-[11px] text-[color:var(--ink-primary)]">
+        {chipInner}
+      </span>
+    )
+  ) : null;
+  return (
+    <div className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[color:var(--hairline)] px-4 py-2">
+        <span className="font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+          {label}
+          {date ? <span className="ml-1.5 normal-case tracking-normal text-[color:var(--ink-faint)]"> · {date}</span> : null}
+        </span>
+        {chip}
+      </div>
+      <div className="px-4 py-3 text-[14px] leading-[1.6] text-[color:var(--ink-body)] [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function Before(props: Omit<BeforeAfterPanelProps, "label">) {
+  return <BeforeAfterPanel {...props} label="Before" />;
+}
+
+export function After(props: Omit<BeforeAfterPanelProps, "label">) {
+  return <BeforeAfterPanel {...props} label="After" />;
+}
+
 export function TechnicalDetail({
   summary,
   children,
@@ -152,5 +265,9 @@ export const blogComponents = {
   Cost,
   PromptLog,
   Diff,
+  MetricGrid,
+  BeforeAfter,
+  Before,
+  After,
   TechnicalDetail,
 };

@@ -58,10 +58,20 @@ That flipped every Claude session from *"here's a codebase, please read it all"*
 
 ## Iteration Moment — a decision I unwound in 21 minutes
 
-**June 12, 00:11** — integrated Playwright + FFmpeg for reel rendering. First working commit.
-**June 12, 00:32** — fix commit: screenshot-per-frame instead of WebM recording.
+<BeforeAfter>
+  <Before date="June 12, 00:11">
 
-The original design used Playwright's native `page.video()`. Defensible on paper. In practice: animation timings weren't frame-aligned, jittery output, dropped frames. Ship, test, kill in 21 minutes. Switched to screenshot-per-frame at 30fps → FFmpeg compositing → deterministic output every time. Slower to render, but rendering runs once on GitHub Actions free tier.
+Integrated Playwright + FFmpeg for reel rendering. First working commit. Used Playwright's native `page.video()`. Defensible on paper. In practice: animation timings weren't frame-aligned, jittery output, dropped frames.
+
+  </Before>
+  <After date="June 12, 00:32">
+
+Fix commit — switched to screenshot-per-frame at 30fps → FFmpeg compositing. Deterministic output every time. Slower to render, but rendering runs once on GitHub Actions free tier.
+
+  </After>
+</BeforeAfter>
+
+Ship, test, kill in 21 minutes.
 
 **What this taught me**: with Claude, the useful skill isn't defending design-pass decisions — it's the speed to unwind them once reality argues back.
 
@@ -73,12 +83,20 @@ The original design used Playwright's native `page.video()`. Defensible on paper
 
 ## Results — 2 months of autonomous operation
 
-- **40 posts published**, zero manual editing
-- **0 → 13 followers** in a niche B2B segment (independent barbershop owners actively on Instagram)
-- **0 – 200 views per post**
-- **Zero Instagram violations, bans, or shadowbans** — Orchestrator's safety pauses worked
-- **AI cost**: ~$0.30–0.50/client/week
-- **Human time after setup**: ~1 hour/week
+<MetricGrid
+  columns={4}
+  items={[
+    { value: "40", label: "posts published", hint: "zero manual editing" },
+    { value: "0 → 13", label: "followers", hint: "niche B2B segment" },
+    { value: "0–200", label: "views per post", hint: "per-post range" },
+    { value: "0", label: "IG violations", hint: "safety pauses worked" },
+  ]}
+/>
+
+<div className="not-prose my-6 flex flex-wrap gap-3">
+  <Cost label="AI cost" value="$0.30–0.50 / client / week" />
+  <Cost label="Human time" value="~1 hr / week" />
+</div>
 
 **The honest read**: 13 followers is small. This is a genuinely narrow audience (specific service tier, specific behavior). The system proved it can run at cost. The current work — where I'm now — is whether we can lift the creative ceiling enough for the same targeting to convert.
 

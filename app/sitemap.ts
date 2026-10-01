@@ -54,6 +54,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: 0.7,
     },
+    {
+      url: `${BASE}/privacy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
     ...studies.map((s) => ({
       url: `${BASE}/work/${s.frontmatter.slug}`,
       lastModified: new Date(s.frontmatter.publishedAt),

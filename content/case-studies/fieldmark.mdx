@@ -40,14 +40,28 @@ Existing task apps (Asana, ClickUp, Fieldwire) treat plans as attachments. In pr
 
 ## Prompt Architecture — Analyze → Propose → Decide → Implement
 
-CLAUDE.md defines a **four-stage gate**: I state the problem, Claude analyzes and proposes 2–3 options with trade-offs, I decide, then Claude implements. No code before decision. Any change touching more than 2 files or a UX flow gets a written plan first.
+CLAUDE.md defines a **four-stage gate**:
+
+<PromptLog title="CLAUDE.md — the four-stage gate">
+I state the problem, Claude analyzes and proposes 2–3 options with trade-offs, I decide, then Claude implements. No code before decision. Any change touching more than 2 files or a UX flow gets a written plan first.
+</PromptLog>
 
 The knowledge layer is **DEVLOG.md**, structured as Problem/Decision/Result/Lesson blocks. It's not a diary — it's the memory Claude loads next session so we don't re-litigate solved problems. `.claude/settings.local.json` pre-permits 30+ flutter/git commands so nothing stalls on approval prompts.
 
 ## Iteration Moment — Apple Sign-In rewrite
 
-- **Before:** 2026-09-12 `f05b752` — initial build used Supabase's web-based `signInWithOAuth` for Apple. Apple review rejected Build 20 with Guideline 2.1(a): sign-in flow broken.
-- **After:** 2026-09-18 `8b18221` `feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)` — pivoted to native `ASAuthorization` with nonce + sha256 validation. 5 files changed. Submitted the next morning, 2026-09-19 `071b10c`.
+<BeforeAfter>
+  <Before date="2026-09-12" commit="f05b752">
+
+Initial build used Supabase's web-based `signInWithOAuth` for Apple. Apple review rejected Build 20 with Guideline 2.1(a): sign-in flow broken.
+
+  </Before>
+  <After date="2026-09-18" commit="8b18221">
+
+_feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ — pivoted to native `ASAuthorization` with nonce + sha256 validation. 5 files changed. Submitted the next morning, 2026-09-19 `071b10c`.
+
+  </After>
+</BeforeAfter>
 
 **Lesson:** *When Apple bounces you on auth UX, Claude can implement the native replacement in one session — but only if DEVLOG already contains the rejection text verbatim. Feelings don't route back into code; error strings do.*
 

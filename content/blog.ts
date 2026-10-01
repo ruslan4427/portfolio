@@ -20,11 +20,13 @@ export type Artifact = {
   detail?: string;
 };
 
-export type DistributionStatus = "pending" | "posted" | "manual";
+export type DistributionStatus = "pending" | "posted" | "manual" | "failed";
 
 export type DistributionChannel = {
   scheduledFor?: string;
   status: DistributionStatus;
+  publishedUrl?: string;
+  error?: string;
 };
 
 export type BlogDistribution = {

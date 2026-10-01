@@ -72,6 +72,20 @@ discipline is that the second pass catches them before they compound.
 If you're evaluating whether AI-augmented delivery scales to a real
 engagement, don't read a whitepaper. Read the machine that made itself.
 
+<figure className="not-prose my-10">
+  <video
+    className="w-full rounded-[16px] shadow-[var(--shadow-card)]"
+    src="/videos/podcast-hrekov-dev.mp4"
+    poster="/videos/podcast-hrekov-dev-poster.jpg"
+    controls
+    playsInline
+    preload="metadata"
+  />
+  <figcaption className="mt-3 font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+    21s · The machine explaining itself. Two avatars, one HeyGen Podcast render, 30 credits. My face, the voice, the whole edit — generated. That's the point.
+  </figcaption>
+</figure>
+
 ## 2. The stateless-model problem
 
 A language model doesn't remember. Every session opens with the same
@@ -304,20 +318,14 @@ Journaling is the raw material. Promotion is the discipline.
 
 ## 7. What the machine produced
 
-<div className="not-prose my-8 grid grid-cols-3 divide-x divide-[color:var(--hairline)] border-y border-[color:var(--hairline)] py-6 text-center font-mono">
-  <div>
-    <div className="text-3xl text-[color:var(--ink-primary)]">12</div>
-    <div className="mt-1 text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">sprints</div>
-  </div>
-  <div>
-    <div className="text-3xl text-[color:var(--ink-primary)]">8</div>
-    <div className="mt-1 text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">calendar days</div>
-  </div>
-  <div>
-    <div className="text-3xl text-[color:var(--ink-primary)]">~1.5</div>
-    <div className="mt-1 text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">sprints / day</div>
-  </div>
-</div>
+<MetricGrid
+  columns={3}
+  items={[
+    { value: "12", label: "sprints" },
+    { value: "8", label: "calendar days" },
+    { value: "~1.5", label: "sprints / day" },
+  ]}
+/>
 
 Sixty-plus classified tasks. Five case studies drafted, one shipped
 end-to-end ([Noble is the flagship](/work/noble-saas)), four in review.

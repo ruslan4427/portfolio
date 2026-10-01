@@ -27,6 +27,7 @@ export function BlogPostBody({
           mdxOptions: {
             remarkPlugins: [remarkGfm],
           },
+          blockJS: false,
         }}
       />
     </div>

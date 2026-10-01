@@ -12,6 +12,7 @@ export function CaseStudyBody({ source }: { source: string }) {
         mdxOptions: {
           remarkPlugins: [remarkGfm],
         },
+        blockJS: false,
       }}
     />
   );

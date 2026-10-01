@@ -85,7 +85,11 @@ Noble sits below all three. Same core features (online booking, SMS reminders, s
 
 The single pattern that made this scale past week two: **once code is verified, it becomes frozen and named.**
 
-The booking-page slot calculation lives in `src/lib/slots.ts` and `SalonClient.tsx`. It went through 16 rounds of QA in April. Each bug got a name — `BUG-01` through `BUG-15` — and a commit hash. All 16 are documented in `docs/STABLE_LOGIC.md`, which opens with the rule: **"Do not refactor the functions listed below. Do not 'improve' them. Do not restructure them. They handle a specific set of edge cases. If they need to change, add a test first, then change with the test as spec."**
+The booking-page slot calculation lives in `src/lib/slots.ts` and `SalonClient.tsx`. It went through 16 rounds of QA in April. Each bug got a name — `BUG-01` through `BUG-15` — and a commit hash. All 16 are documented in `docs/STABLE_LOGIC.md`, which opens with the rule that anchors every Claude session on this repo:
+
+<PromptLog title="docs/STABLE_LOGIC.md — the anti-drift directive">
+Do not refactor the functions listed below. Do not "improve" them. Do not restructure them. They handle a specific set of edge cases. If they need to change, add a test first, then change with the test as spec.
+</PromptLog>
 
 This is the anti-drift mechanism. Claude, given a codebase without this rule, will helpfully "clean up" a function that survives eight edge cases by removing the special-case handling for two of them. `STABLE_LOGIC.md` is the sign that says *this looks messy for a reason; leave it alone.*
 
@@ -93,19 +97,37 @@ The rest of session context is split across single-purpose files: `CLAUDE.md` (p
 
 ## Iteration Moment #1 — the April slot-cache freeze
 
-**Before:** 2026-04-08 → 2026-04-18. Ten days. 151 commits. A booking page that shipped, worked in dev, worked in staging, and started producing double-bookings within an hour of the first real user.
+<BeforeAfter>
+  <Before date="2026-04-08 → 04-18">
+
+Ten days. 151 commits. A booking page that shipped, worked in dev, worked in staging, and started producing double-bookings within an hour of the first real user.
 
 Every failure mode showed up: race conditions on insert (two people booking the same slot because check-then-insert wasn't atomic). Cache stale between browser refresh and server state. Break windows validated wrong. Timezone drift between the browser calendar and the block-timestamps table. Phone regex too permissive. Email accepting garbage.
 
-**After:** 2026-04-18 16:31 UTC, commit `6b29244` — *"fix: all 16 QA bugs — slot cache, overlap, reschedule, break validation, phone/email validation, timezone UTC"*. 200+ line diff. Each fix numbered. Each numbered fix landed in `STABLE_LOGIC.md`. No refactor allowed after.
+  </Before>
+  <After date="2026-04-18 16:31 UTC" commit="6b29244">
+
+_"fix: all 16 QA bugs — slot cache, overlap, reschedule, break validation, phone/email validation, timezone UTC"_. 200+ line diff. Each fix numbered. Each numbered fix landed in `STABLE_LOGIC.md`. No refactor allowed after.
+
+  </After>
+</BeforeAfter>
 
 **Lesson:** *AI-collaboration velocity is real, and produces exactly the number of bugs you don't test for. 151 commits in 10 days shipped 16 broken edge cases. QA discipline is the ceiling, not code output.*
 
 ## Iteration Moment #2 — Vercel's cache is not your friend
 
-**Before:** 2026-06-03. `SalonClient.tsx` fetched bookings client-side on mount. Vercel's Next.js Data Cache — a layer I didn't know was on by default — held Supabase responses for 1–5 minutes. Slots appeared available that had been booked minutes ago. Race conditions returned at scale.
+<BeforeAfter>
+  <Before date="2026-06-03">
 
-**After:** 2026-06-03 15:09 UTC, commit `d6e1b5a` — *"seed bookedSlotsMap from server on page load, eliminating all client cache issues"*. Plus three sibling commits the same day: bypass Next.js Data Cache on the admin client, force-dynamic on the availability route, sync both `bookedSlotsMap` and `localBookedSlots` after every booking. Server fetches 16 days of bookings via `supabaseAdmin` with `cache: 'no-store'`. Passes as `initialBookings` to the client. Client seeds state immediately. Background refresh continues for freshness. Zero cache layers, top to bottom.
+`SalonClient.tsx` fetched bookings client-side on mount. Vercel's Next.js Data Cache — a layer I didn't know was on by default — held Supabase responses for 1–5 minutes. Slots appeared available that had been booked minutes ago. Race conditions returned at scale.
+
+  </Before>
+  <After date="2026-06-03 15:09 UTC" commit="d6e1b5a">
+
+_"seed bookedSlotsMap from server on page load, eliminating all client cache issues"_. Plus three sibling commits the same day: bypass Next.js Data Cache on the admin client, force-dynamic on the availability route, sync both `bookedSlotsMap` and `localBookedSlots` after every booking. Server fetches 16 days of bookings via `supabaseAdmin` with `cache: 'no-store'`. Passes as `initialBookings` to the client. Client seeds state immediately. Background refresh continues for freshness. Zero cache layers, top to bottom.
+
+  </After>
+</BeforeAfter>
 
 **Lesson:** *Managed platforms cache things you didn't ask them to cache. The right response is not to work around the cache — it's to eliminate the cache layer entirely at the point where correctness matters.*
 
@@ -123,12 +145,22 @@ Every failure mode showed up: race conditions on insert (two people booking the 
 
 ## Results
 
-- **227 commits** over 5 months and 12 days (151 in the first 10 days, 6–11/month after June)
-- **~10,000 LOC** of application code across 73 TypeScript files
-- **16 named bugs** documented in `STABLE_LOGIC.md`, none regressed since April
-- **3 architectural pivots** with commit hashes anyone can inspect
+<MetricGrid
+  columns={4}
+  items={[
+    { value: "227", label: "commits", hint: "5 months, 12 days" },
+    { value: "~10k", label: "LOC", hint: "73 TS files" },
+    { value: "16", label: "named bugs", hint: "none regressed" },
+    { value: "3", label: "pivots", hint: "commit hashes inspectable" },
+  ]}
+/>
+
+<div className="not-prose my-6 flex flex-wrap gap-3">
+  <Cost label="Pricing" value="$15 / mo" />
+  <Cost label="Trial" value="14 days · no card" />
+</div>
+
 - **7 reels + 7 feed posts per week**, autonomously generated by the marketing system
-- **$15/mo pricing**, 14-day trial, no credit card
 - **Stack integrations shipped**: Stripe subscriptions, Twilio A2P 10DLC SMS, Resend email, Sentry error tracking
 
 **Honestly on customers:** no public customer numbers yet. Testimonials on the landing page are aspirational. The product is production-ready, the marketing pipeline is running, the funnel from Instagram to sign-up is measurable — but *"how many salons pay us $15/month"* is not a number I'm ready to put on a page. That's the current work.
