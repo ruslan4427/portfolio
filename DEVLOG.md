@@ -1609,3 +1609,43 @@ Follow-ups queued, not blocking: dev.to username is auto-generated (`ruslan_hrek
 **Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
 
 ---
+
+## 2026-10-01 — `hrekov-dev` full podcast (8:20) replaces pilot in §1
+
+**Problem:** The pilot video in `hrekov-dev` §1 was a 21-second two-camera dialogue — a proof-of-concept that the HeyGen Podcast template could render a two-avatar scene from `[Host]`/`[Guest]` script. The case study itself is a 10-section, ~2500-word write-up of the memory-file workflow; a 21-second video on the cold open under-serves it. Needed to produce the "full podcast" version of the case study and swap it in.
+
+**Decision:** Scripted the full case study as three dialogue segments (The Itch / The System / The Proof, ~440-460 words each, ~1350 total) with a shared Scene Instructions block to pin the studio aesthetic. User rendered the complete script in a single HeyGen Podcast render rather than three — got back one 8:20 clip at 720p for 140 credits (50 preview + 90 final). Avatar swapped from `Ruslan Hrekov studio v1` to a Gemini-generated image whose hairstyle matched the user's real appearance better; same cloned voice attached.
+
+**Result:** New assets at `public/videos/podcast-hrekov-dev-full.mp4` (60 MB, 1280×720, 500 s) + poster at `-full-poster.jpg` (120 KB, extracted from 00:00:04). `content/case-studies/hrekov-dev.mdx` §1 figure now points to the new mp4/jpg pair with updated figcaption ("8:20 · The case study, spoken. Three movements..."). Old `podcast-hrekov-dev.mp4` kept in place because `components/sections/Hero.tsx` still uses it as the 21-sec click-to-modal teaser on the home page. Dev server verified: both files serve 200 OK with `Accept-Ranges: bytes` (seeking works), new figcaption text renders in SSR output. Scripts captured at `~/.claude/projects/-Users-ruslan-portfolio/podcast_scripts/06_hrekov_dev.md` for future reruns.
+
+**Lesson:** The HeyGen Podcast template's final-render charge at 720p is **~11 credits/min**, not 30/min as initially estimated — my earlier pricing math (used to justify "segment into three 3-min renders to fit budget") was wrong by a factor of ~3. One 8:20 render consumed 140 credits total (90 for the 500-second final + 50 preview). This changes the economics completely: a 30-min full podcast would run ~380 credits, affordable within one Creator-plan refill. **Defer the segment-vs-full decision one month** until next credit refill lets us pilot a true 30-min render on `noble-saas` and confirm the per-minute rate holds linearly at longer durations. Also: when the user swaps the trained avatar for a Gemini-image avatar for cosmetic reasons, voice attachment resets — must re-select the cloned voice manually or the Guest ships in a stock HeyGen voice.
+
+---
+
+## 2026-10-02 — `hrekov-dev` podcast split into 3 inline-embedded parts
+
+**Problem:** The 8:20 single-render podcast shipped yesterday had one structural flaw for a reader walking down the case study: it opened with a formal greeting and closed with a formal goodbye, both in §1. A reader scrolling past §6 and §9 got no companion audio for the war-story and meta sections — the podcast and the written text diverged after the cold open. For a case study whose entire thesis is "the artifact and the discipline are the same thing," embedding three podcast beats at matching text beats is the shape the content actually wants.
+
+**Decision:** Split the single 8:20 render into three 8-minute episodes, each embedded at a semantically matching location in the MDX:
+1. **Part 1 — The system** (§1, cold open): hello + four memory types + classifier + closing hook. Produced by trimming the original 8:20 full render at 00:08:15 with `ffmpeg -c copy` (lossless, re-timestamped) to drop the goodbye line.
+2. **Part 2 — The war stories** (after §6, DEVLOG → STABLE_LOGIC): fresh render. CSS cascade incident (three hours blamed on Turbopack for one unlayered `a { color: inherit }`) + dark-Lusion → minimalist pivot (one-day build killed by one Dribbble shot). Opens "Welcome back everyone...", closes with "See you there." hook.
+3. **Part 3 — How this was made** (after §9, How to steal it): fresh render. The meta story — the 30-credits/min estimate that was off by 3× + the segmented-architecture hour that solved a non-problem + the three-field memory-file recipe + the one-file starting-move for readers. Opens "Back for the final part", closes with proper goodbye.
+
+Scene Instructions, avatars (Marieke + Gemini-generated Ruslan avatar), cloned voice, 720p/16:9 settings — all identical across the three renders to preserve visual continuity. User rendered Parts 2 and 3 separately; each came back at ~8:01-8:07 for ~140 credits per render.
+
+**Result:** Three asset pairs in `public/videos/`:
+
+- `podcast-hrekov-dev-part1.mp4` (8:15, 60 MB) + `-part1-poster.jpg`
+- `podcast-hrekov-dev-part2.mp4` (8:01, 59 MB) + `-part2-poster.jpg`
+- `podcast-hrekov-dev-part3.mp4` (8:07, 57 MB) + `-part3-poster.jpg`
+
+`content/case-studies/hrekov-dev.mdx` edits: §1 figcaption rewritten to "Part 1 of 3 · 8:15 · The system...". New `<figure>` blocks inserted at end of §6 (Part 2 · 8:01 · The war stories...) and end of §9 (Part 3 · 8:07 · How this podcast was made...). Scripts live at `~/.claude/projects/-Users-ruslan-portfolio/podcast_scripts/06b_hrekov_dev_part2.md` and `06c_hrekov_dev_part3.md` for future reruns. Original full 8:20 render retained locally as reference but not embedded.
+
+Total credit spend: ~470 across the three renders (140 for the original full 8:20 render that became Part 1 via trim + ~140 for Part 2 (8:01) + ~190 for Part 3 (8:07)) — balance after Part 3 shows 50 credits remaining out of the monthly 520. Part 3's higher spend tracks its slightly longer runtime (8:07 vs 8:01) plus whatever preview iterations ran during that session.
+
+**Lesson:** For dense case studies, inline-embedded multi-part audio beats a single long opener. The reader gets a "listen to this beat" prompt at exactly the moment the written text makes the beat concrete — so the audio reinforces the text instead of competing with it. Operational rules that fell out:
+
+- **Trim before re-rendering if the content is already there.** Part 1 was produced by trimming the existing 8:20 render at the goodbye line, not by re-rendering the opening half. Zero credits spent for a cleaner split.
+- **For a multi-part series on one platform, the opening-closing-continuation shape has to be scripted explicitly.** Part 1 is "hello + content, no bye." Part 2 is "continuation, no hello, no bye." Part 3 is "continuation + proper goodbye." Mistake would be each render independently greeting and closing — reader confusion.
+- **Scene Instructions is the consistency driver, not the avatar.** Same block pasted across three sessions produced visibly matching studios. Avatar + voice + settings held second-order.
+- **Credit-per-minute of HeyGen Podcast template holds linearly** across 8-minute renders (verified twice now at ~140 credits per 8 min = ~17.5/min including the fixed 50-credit preview, or ~11/min for just the final render). Earlier estimate of 30/min stays dead.
