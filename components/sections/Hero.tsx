@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { DateTime } from "@/components/ui/DateTime";
@@ -18,6 +18,21 @@ const socials = [
 export function Hero() {
   const reduced = usePrefersReducedMotion();
   const [videoOpen, setVideoOpen] = useState(false);
+  const hoverVideoRef = useRef<HTMLVideoElement>(null);
+
+  const playHover = () => {
+    if (reduced) return;
+    const v = hoverVideoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    void v.play();
+  };
+  const stopHover = () => {
+    const v = hoverVideoRef.current;
+    if (!v) return;
+    v.pause();
+    v.currentTime = 0;
+  };
   const D = reduced
     ? {
         chrome: 0,
@@ -70,35 +85,24 @@ export function Hero() {
           <button
             type="button"
             onClick={() => setVideoOpen(true)}
-            aria-label="Play intro podcast: Building Software with AI"
+            onMouseEnter={playHover}
+            onMouseLeave={stopHover}
+            onFocus={playHover}
+            onBlur={stopHover}
+            aria-label="Play intro video"
             className="group relative h-28 w-28 overflow-hidden rounded-full shadow-[var(--shadow-card)] outline-offset-4 transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)] md:h-32 md:w-32"
           >
             <video
+              ref={hoverVideoRef}
               className="h-full w-full object-cover"
-              autoPlay={!reduced}
               muted
               loop
               playsInline
-              preload="metadata"
-              poster="/videos/hero-avatar-poster.jpg"
+              preload="auto"
+              poster="/videos/hero-poster.jpg"
             >
-              <source src="/videos/hero-avatar-loop.mp4" type="video/mp4" />
+              <source src="/videos/hero-hover.mp4" type="video/mp4" />
             </video>
-            <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.32)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
-              <span
-                aria-hidden
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[color:var(--ink-primary)] shadow-[var(--shadow-card)]"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 12 14"
-                  fill="currentColor"
-                >
-                  <path d="M1 1v12l10-6z" />
-                </svg>
-              </span>
-            </span>
           </button>
         </motion.div>
 
@@ -180,9 +184,9 @@ export function Hero() {
       <VideoModal
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
-        src="/videos/podcast-hrekov-dev.mp4"
-        poster="/videos/podcast-hrekov-dev-poster.jpg"
-        title="Building Software with AI — podcast intro"
+        src="/videos/hero-intro.mp4"
+        poster="/videos/hero-intro-poster.jpg"
+        title="Intro — Ruslan Hrekov"
       />
     </section>
   );
