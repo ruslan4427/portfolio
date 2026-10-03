@@ -19,7 +19,7 @@ export function SelectedWork() {
             <SectionBadge label="Selected work" />
           </Reveal>
           <h2 className="font-serif text-[clamp(36px,4.5vw,64px)] leading-[1.02] text-[color:var(--ink-primary)]">
-            <MaskReveal delay={0.15}>Three case studies,</MaskReveal>
+            <MaskReveal delay={0.15}>Four case studies,</MaskReveal>
             <br />
             <MaskReveal delay={0.32}>commit hashes attached.</MaskReveal>
           </h2>
