@@ -86,14 +86,14 @@ export function Nav() {
     <>
       <nav
         aria-label="Primary"
-        className={`fixed inset-x-0 top-0 z-40 transition-[background-color,border-color] duration-300 ${
+        className={`pointer-events-none fixed inset-x-0 top-0 z-40 transition-[background-color,border-color] duration-300 ${
           scrolled
             ? "border-b border-[color:var(--hairline)] bg-[color:var(--bg-page)]/85 backdrop-blur-sm"
             : "border-b border-transparent"
         }`}
       >
         <div className="mx-auto flex max-w-[var(--content-max)] items-center justify-end px-[var(--gutter)] py-5">
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="pointer-events-auto hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => {
               const active = isActive(pathname ?? "/", link.href);
               return (
@@ -120,7 +120,7 @@ export function Nav() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((o) => !o)}
-            className="relative z-50 flex h-9 w-9 flex-col items-center justify-center gap-1.5 md:hidden"
+            className="pointer-events-auto relative z-50 flex h-9 w-9 flex-col items-center justify-center gap-1.5 md:hidden"
           >
             <span
               className={`block h-px w-6 bg-[color:var(--ink-primary)] transition-transform duration-300 ${open ? "translate-y-[3.5px] rotate-45" : ""}`}
