@@ -17,7 +17,16 @@ readingTime: 4
 
 **Fieldmark is a Flutter app that turns a PDF floor plan into a live installation checklist — foremen drop numbered pins, installers pick up tasks offline in the field.**
 
-`Flutter · Supabase · Riverpod · Firebase FCM · 2026-09-12 → 2026-09-19`
+<StackRow
+  items={[
+    { name: "Flutter", slug: "flutter" },
+    { name: "Riverpod" },
+    { name: "Supabase", slug: "supabase" },
+    { name: "Firebase FCM", slug: "firebase" },
+    { name: "Apple Sign-In", slug: "apple" },
+  ]}
+  dateRange="2026-09-12 → 2026-09-19"
+/>
 
 <ValueStatement eyebrow="Pitch">
 A rejection email became the clearest spec of the sprint. Build 20 bounced, Build 21 submitted the next morning, approved.
@@ -87,6 +96,57 @@ _feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ —
   </After>
 </BeforeAfter>
 
+<FlowSchema
+  title="Build 20 → Build 21 · the 18-hour rejection-resubmit loop"
+  rows={[
+    {
+      label: "Build 20 — web OAuth path, bounced on Guideline 2.1(a)",
+      tone: "before",
+      meta: "2026-09-12 · f05b752",
+      diagram: {
+        width: 900,
+        height: 220,
+        nodes: [
+          { id: "b-dev", shape: "role", icon: "user", label: "Dev", x: 50, y: 110 },
+          { id: "b-code", shape: "event", icon: "code", label: "signInWithOAuth", sub: "Supabase web flow", x: 230, y: 110 },
+          { id: "b-sub", shape: "event", icon: "cloud", label: "Submit build 20", sub: "TestFlight → review", x: 440, y: 110 },
+          { id: "b-rev", shape: "action", icon: "shield", label: "Apple review", sub: "sign-in verified?", x: 640, y: 110 },
+          { id: "b-rej", shape: "event", icon: "mail", label: "Rejection email", sub: "Guideline 2.1(a)", x: 820, y: 110, color: "danger", outcome: "denied" },
+        ],
+        edges: [
+          { from: "b-dev", to: "b-code" },
+          { from: "b-code", to: "b-sub" },
+          { from: "b-sub", to: "b-rev" },
+          { from: "b-rev", to: "b-rej", color: "danger", label: "broken" },
+        ],
+      },
+    },
+    {
+      label: "Build 21 — native ASAuthorization, approved next morning",
+      tone: "after",
+      meta: "2026-09-18 → 09-19 · 8b18221 → 071b10c",
+      diagram: {
+        width: 900,
+        height: 240,
+        nodes: [
+          { id: "a-spec", shape: "event", icon: "doc", label: "Rejection as spec", sub: "DEVLOG entry · verbatim", x: 60, y: 120 },
+          { id: "a-code", shape: "event", icon: "code", label: "ASAuthorization", sub: "5 files · nonce + sha256", x: 260, y: 120 },
+          { id: "a-pkce", shape: "process", icon: "lock", label: "PKCE + credential", sub: "native handshake", x: 460, y: 120 },
+          { id: "a-sub", shape: "event", icon: "cloud", label: "Resubmit build 21", sub: "2026-09-19 AM", x: 660, y: 120 },
+          { id: "a-ok", shape: "event", icon: "check", label: "Approved", sub: "live on App Store", x: 840, y: 120, color: "success", outcome: "approved" },
+        ],
+        edges: [
+          { from: "a-spec", to: "a-code" },
+          { from: "a-code", to: "a-pkce" },
+          { from: "a-pkce", to: "a-sub" },
+          { from: "a-sub", to: "a-ok", color: "success" },
+        ],
+      },
+    },
+  ]}
+  caption="The rejection email became the sprint spec. Build 21 shipped 18 hours after the first native commit."
+/>
+
 **Lesson:** *When Apple bounces you on auth UX, Claude can implement the native replacement in one session — but only if DEVLOG already contains the rejection text verbatim. Feelings don't route back into code; error strings do.*
 
 <Figure
@@ -132,3 +192,58 @@ Rejection emails are the best specs. Guideline 2.1(a) with the reviewer's screen
 
 1. **A DEVLOG that captures *why* survives context resets.** Claude Code hits context limits mid-project; DEVLOG is what lets the next session pick up without me re-explaining.
 2. **Automating the boring future task pays off before the future arrives.** The 6-month Apple secret rotation script was written the same day as the auth pivot — because the pivot's context was the only time I'd remember to.
+
+<TechNotes
+  title="For engineers — go deeper"
+  items={[
+    {
+      kind: "docs",
+      label: "ASAuthorization",
+      title: "Native Sign in with Apple on iOS",
+      description:
+        "The API Build 21 pivoted to — ASAuthorizationAppleIDProvider with nonce + sha256 token exchange. Apple's canonical reference.",
+      href: "https://developer.apple.com/documentation/authenticationservices/asauthorizationappleidprovider",
+    },
+    {
+      kind: "spec",
+      label: "HIG · Sign in with Apple",
+      title: "The UX contract Build 20 violated",
+      description:
+        "Button sizing, label verbs, placement rules. The spec Apple reviewers check against before they even run the app.",
+      href: "https://developer.apple.com/design/human-interface-guidelines/sign-in-with-apple",
+    },
+    {
+      kind: "flag",
+      label: "App Review Guideline 2.1",
+      title: "App Completeness — the rejection category",
+      description:
+        "The rule that bounced Build 20. Guideline 2.1(a) covers broken sign-in flows at review time.",
+      href: "https://developer.apple.com/app-store/review/guidelines/#performance",
+    },
+    {
+      kind: "docs",
+      label: "Riverpod",
+      title: "Async notifier + codegen state model",
+      description:
+        "Why Fieldmark picked Riverpod over Bloc — code-generated providers, async notifier pattern, less boilerplate on solo velocity.",
+      href: "https://riverpod.dev/docs/essentials/first_request",
+    },
+    {
+      kind: "docs",
+      label: "Supabase RLS",
+      title: "Row-Level Security for multi-crew isolation",
+      description:
+        "Postgres policies that keep crew A's plans invisible to crew B, enforced at the database rather than the Flutter layer.",
+      href: "https://supabase.com/docs/guides/database/postgres/row-level-security",
+    },
+    {
+      kind: "tool",
+      label: "connectivity_plus",
+      title: "Online/offline queue signal for Flutter",
+      description:
+        "The signal source for Fieldmark's offline-first queue — mechanical rooms lose signal, but the app keeps accepting pins.",
+      href: "https://pub.dev/packages/connectivity_plus",
+    },
+  ]}
+  caption="External docs are jump-points — the sections above show how they combined under App Store review pressure."
+/>
