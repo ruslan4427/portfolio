@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { easeSmooth, usePrefersReducedMotion } from "@/lib/motion";
@@ -38,10 +39,15 @@ export function FloatingEmailCTA() {
       >
         <span
           aria-hidden
-          style={{ background: "var(--ink-primary)" }}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold"
+          className="relative h-9 w-9 overflow-hidden rounded-full bg-[color:var(--ink-primary)]"
         >
-          RG
+          <Image
+            src="/videos/hero-poster.jpg"
+            alt=""
+            fill
+            sizes="36px"
+            className="object-cover"
+          />
         </span>
         <span aria-hidden className="inline-flex items-center gap-2">
           <svg
