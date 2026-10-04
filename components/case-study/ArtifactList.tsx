@@ -47,7 +47,7 @@ export function ArtifactList({ artifacts }: { artifacts: Artifact[] }) {
               <ArtifactBody artifact={a} />
             </div>
             {a.detail && (
-              <p className="artifact-detail mt-1 pl-[calc(5rem+0.5rem)] text-[color:var(--ink-muted)]">
+              <p className="mt-1 pl-[calc(5rem+0.5rem)] text-[color:var(--ink-muted)]">
                 {a.detail}
               </p>
             )}

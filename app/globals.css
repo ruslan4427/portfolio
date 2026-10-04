@@ -177,22 +177,6 @@ html.lenis body {
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }
 
-/* ---------- Case study view mode ---------- */
-
-/* Toggle between executive and technical views without re-rendering the
-   React tree — pure CSS attribute-based show/hide. */
-
-[data-view="executive"] [data-mode="technical"],
-[data-view="executive"] .devlog-full,
-[data-view="executive"] .artifact-detail {
-  display: none;
-}
-
-[data-view="technical"] .devlog-summary,
-[data-view="technical"] .recruiter-only {
-  display: none;
-}
-
 /* ---------- Focus (a11y) ---------- */
 
 :focus-visible {

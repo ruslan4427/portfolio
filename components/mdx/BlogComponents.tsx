@@ -240,16 +240,16 @@ export function TechnicalDetail({
   children: ReactNode;
 }) {
   return (
-    <details
-      data-mode="technical"
-      className="my-6 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]"
-    >
-      <summary className="cursor-pointer list-none px-5 py-3 font-sans text-sm text-[color:var(--ink-primary)]">
-        <span aria-hidden className="mr-2 text-[color:var(--ink-muted)]">
-          ⧉
+    <details className="group my-6 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 font-sans text-sm text-[color:var(--ink-primary)]">
+        <span
+          aria-hidden
+          className="inline-block text-[color:var(--ink-muted)] transition-transform duration-200 group-open:rotate-90"
+        >
+          ›
         </span>
-        {summary}
-        <span className="ml-2 text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <span className="flex-1">{summary}</span>
+        <span className="text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
           technical
         </span>
       </summary>

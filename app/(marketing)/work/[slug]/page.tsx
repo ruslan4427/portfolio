@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArtifactList } from "@/components/case-study/ArtifactList";
 import { DevlogRefs } from "@/components/case-study/DevlogRefs";
-import { ViewToggle } from "@/components/case-study/ViewToggle";
 import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
 import { MaskReveal } from "@/components/ui/MaskReveal";
@@ -67,10 +66,6 @@ export default async function CaseStudyPage({
   const stats = (frontmatter.supportingArtifacts ?? []).filter(
     (a) => a.type === "cost" || a.type === "timeline",
   );
-  const hasEnhanced =
-    !!frontmatter.recruiterSummary ||
-    (frontmatter.supportingArtifacts?.length ?? 0) > 0 ||
-    (frontmatter.devlogRefs?.length ?? 0) > 0;
 
   return (
     <main id="main" className="relative min-h-screen">
@@ -78,8 +73,7 @@ export default async function CaseStudyPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      {hasEnhanced && <ViewToggle />}
-      <article data-view="executive" data-slug={frontmatter.slug}>
+      <article data-slug={frontmatter.slug}>
       <BackToWork />
       <header className="px-[var(--gutter)] pt-40 pb-16">
         <div className="mx-auto max-w-[65ch]">
