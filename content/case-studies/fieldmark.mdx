@@ -104,14 +104,14 @@ _feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ —
       tone: "before",
       meta: "2026-09-12 · f05b752",
       diagram: {
-        width: 900,
+        width: 960,
         height: 220,
         nodes: [
           { id: "b-dev", shape: "role", icon: "user", label: "Dev", x: 50, y: 110 },
           { id: "b-code", shape: "event", icon: "code", label: "signInWithOAuth", sub: "Supabase web flow", x: 230, y: 110 },
           { id: "b-sub", shape: "event", icon: "cloud", label: "Submit build 20", sub: "TestFlight → review", x: 440, y: 110 },
           { id: "b-rev", shape: "action", icon: "shield", label: "Apple review", sub: "sign-in verified?", x: 640, y: 110 },
-          { id: "b-rej", shape: "event", icon: "mail", label: "Rejection email", sub: "Guideline 2.1(a)", x: 820, y: 110, color: "danger", outcome: "denied" },
+          { id: "b-rej", shape: "event", icon: "mail", label: "Rejection email", sub: "Guideline 2.1(a)", x: 850, y: 110, color: "danger", outcome: "denied" },
         ],
         edges: [
           { from: "b-dev", to: "b-code" },
@@ -126,14 +126,14 @@ _feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ —
       tone: "after",
       meta: "2026-09-18 → 09-19 · 8b18221 → 071b10c",
       diagram: {
-        width: 900,
+        width: 960,
         height: 240,
         nodes: [
           { id: "a-spec", shape: "event", icon: "doc", label: "Rejection as spec", sub: "DEVLOG entry · verbatim", x: 60, y: 120 },
           { id: "a-code", shape: "event", icon: "code", label: "ASAuthorization", sub: "5 files · nonce + sha256", x: 260, y: 120 },
           { id: "a-pkce", shape: "process", icon: "lock", label: "PKCE + credential", sub: "native handshake", x: 460, y: 120 },
           { id: "a-sub", shape: "event", icon: "cloud", label: "Resubmit build 21", sub: "2026-09-19 AM", x: 660, y: 120 },
-          { id: "a-ok", shape: "event", icon: "check", label: "Approved", sub: "live on App Store", x: 840, y: 120, color: "success", outcome: "approved" },
+          { id: "a-ok", shape: "event", icon: "check", label: "Approved", sub: "live on App Store", x: 850, y: 120, color: "success", outcome: "approved" },
         ],
         edges: [
           { from: "a-spec", to: "a-code" },
