@@ -23,7 +23,7 @@ type ButtonProps = CommonProps & {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-sans text-sm shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0";
+  "inline-flex items-center justify-center gap-2 rounded-full font-sans text-sm shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0";
 
 const variants: Record<Variant, string> = {
   primary: "bg-[color:var(--cta)] text-[color:var(--cta-ink)]",

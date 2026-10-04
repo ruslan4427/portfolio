@@ -25,14 +25,14 @@ export function ConsentBanner() {
         <button
           type="button"
           onClick={reject}
-          className="rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-2 font-sans text-xs text-[color:var(--ink-primary)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+          className="rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-2 font-sans text-xs text-[color:var(--ink-primary)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
         >
           Decline
         </button>
         <button
           type="button"
           onClick={accept}
-          className="rounded-full bg-[color:var(--cta)] px-4 py-2 font-sans text-xs text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+          className="rounded-full bg-[color:var(--cta)] px-4 py-2 font-sans text-xs text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
         >
           Accept
         </button>

@@ -15,7 +15,7 @@ export function PostRow({ post }: { post: BlogPost }) {
     <li className="border-b border-[color:var(--hairline)] last:border-b-0">
       <Link
         href={`/blog/${frontmatter.slug}`}
-        className="group flex flex-col gap-2 py-5 focus-visible:outline-none md:flex-row md:items-baseline md:gap-6"
+        className="group flex flex-col gap-2 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-page)] focus-visible:rounded-md md:flex-row md:items-baseline md:gap-6"
       >
         <div className="flex shrink-0 items-baseline gap-4 md:w-64">
           <time

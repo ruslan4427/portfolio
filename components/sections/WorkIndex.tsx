@@ -173,7 +173,7 @@ function Chip({
       whileFocus={{ y: -3, transition: { duration: 0.35, ease: easeSmooth } }}
       transition={{ duration: 0.18, ease: easeSmooth }}
       className={
-        "rounded-full border px-3.5 py-1.5 font-sans text-xs focus-visible:outline-none " +
+        "rounded-full border px-3.5 py-1.5 font-sans text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 " +
         (active
           ? "border-transparent bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)]"
           : "border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)]")
@@ -194,7 +194,7 @@ function EmptyState({ onClear }: { onClear: () => void }) {
       <button
         type="button"
         onClick={onClear}
-        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
       >
         Clear filters
       </button>

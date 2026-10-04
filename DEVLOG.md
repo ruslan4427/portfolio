@@ -5,6 +5,70 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-10-03 · ui-ux-pro audit — focus rings, faint text, arbitrary radius
+
+**Problem.** Ran `ui-ux-pro` audit (external skill at
+`~/.claude/skills/ui-ux-pro`) over the whole portfolio. Three findings:
+(1) 13 interactive elements had `focus-visible:outline-none` with no
+replacement ring — only a 0.5px translate as "focus feedback", which is
+not perceivable as focus state for keyboard users. Direct violation of
+the skill's `accessibility-checklist.md` ("never `outline: none` without
+a replacement focus style"). Elements affected: `CTAButton` base,
+`SocialPill`, `FloatingEmailCTA`, `ConsentBanner` (both buttons),
+`BackToWork`, `BackToJournal`, `ExperienceMini` "Full timeline" link,
+`ProjectAccordionRow` toggle + CTA, `WorkIndex` filter chips + "Clear
+filters", `PostRow`, `PostCard`, `BlogComponents` link primitive.
+(2) `BlogComponents.tsx:216` renders date metadata in
+`text-[color:var(--ink-faint)]` — but `CLAUDE.md:113` declares faint
+`#A8A8A2` as "decorative only" and `check_contrast.py` reports 2.17:1
+on paper (fails AA at any size). Dates are information, not decoration.
+(3) `VideoModal.tsx:51` uses literal `rounded-[16px]` — violates
+`CLAUDE.md:242` ("no arbitrary `rounded-[Npx]`", radii come from tokens).
+Status green `#22C55E` also fails AA against paper (2.07:1) but is used
+only as a functional dot adjacent to a text label, which satisfies the
+"never rely on color alone" rule — no fix needed.
+
+**Decision.** (1) Copied the canonical pattern already present on
+`Credentials.tsx:32`: `focus-visible:ring-2
+focus-visible:ring-[color:var(--ink-primary)]/40`. Kept existing
+`-translate-y-0.5` and `focus-visible:outline-none` so visual rhythm
+stays — ring is additive, not a replacement for the subtle lift. For
+`ProjectAccordionRow` row-toggle and `PostRow` (both wide
+non-rectangular hit zones) added `ring-offset-2 ring-offset-[color:
+var(--bg-page)] rounded-md` so the ring doesn't hug the content edge.
+`PostCard` got `rounded-[var(--radius-card)]` on the outer `<Link>` so
+the ring matches the article's rounded shape. For the inline link in
+`BlogComponents.tsx:48` added `rounded-sm` so the ring has defined
+corners in inline flow. Elements that already had a color-flip focus
+(`ConsentResetLink`, `WorkIndex.tsx:101` meta link) were left alone —
+their text-color change from muted → primary is a valid existing
+replacement. (2) Swapped `--ink-faint` → `--ink-muted` on the date span
+(4.86:1, passes AA normal). Treated the CLAUDE.md "faint = decorative"
+rule as the source of truth; one line of drift fixed, no rule change.
+(3) `rounded-[16px]` → `rounded-[var(--radius-card)]` — the value
+already matched `--radius-card`, this is the lexical fix.
+
+**Result.** 13 files touched, 17 insertions / 17 deletions. `tsc --noEmit`
+clean. `eslint` on all 13 files clean — one pre-existing error on
+`ProjectAccordionRow.tsx:27` (set-state-in-effect on a `matchMedia`
+listener) unchanged; not introduced here. Dev server smoke:
+`GET /` 200 (121KB, 124ms), `/work` 200, `/blog` 200, `/contact` 200.
+Visual verification against focus ring pending — recommend tabbing
+through nav + a project card + a blog card to confirm the ring reads
+clearly on both paper and elevated backgrounds.
+
+**Lesson.** `focus-visible:outline-none` without a replacement is the
+single most common a11y regression on this project — it crept into
+13 places over Sprints 7–11 despite `Credentials.tsx` demonstrating
+the right pattern from the start. The canonical ring belongs in the
+`CTAButton` base and in the two "card link" shells (`PostCard`,
+`ProjectCard`-equivalent) so future components inherit it instead of
+each author re-deriving. Consider promoting the "ring-2 ring-ink-primary/40"
+string into a Tailwind component class or a `cn('focus-ring', ...)`
+helper in `STABLE_LOGIC.md` before Sprint 12.
+
+---
+
 ## 2026-10-03 · Lexora pre-ship pass — closes all six case studies
 
 **Problem.** Lexora `.mdx` and `projects.ts` metric were frozen at the

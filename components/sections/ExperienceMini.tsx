@@ -55,7 +55,7 @@ export function ExperienceMini() {
         <div className="mt-10 flex justify-center">
           <Link
             href="/about#experience"
-            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
           >
             Full timeline
             <span aria-hidden>→</span>

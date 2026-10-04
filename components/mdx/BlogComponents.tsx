@@ -45,7 +45,7 @@ export function Artifact({
       href={href}
       target={href.startsWith("http") ? "_blank" : undefined}
       rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-      className="no-underline transition-transform hover:-translate-y-px focus-visible:-translate-y-px focus-visible:outline-none"
+      className="no-underline transition-transform hover:-translate-y-px focus-visible:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 focus-visible:rounded-sm"
     >
       {inner}
     </a>
@@ -213,7 +213,7 @@ function BeforeAfterPanel({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[color:var(--hairline)] px-4 py-2">
         <span className="font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
           {label}
-          {date ? <span className="ml-1.5 normal-case tracking-normal text-[color:var(--ink-faint)]"> · {date}</span> : null}
+          {date ? <span className="ml-1.5 normal-case tracking-normal text-[color:var(--ink-muted)]"> · {date}</span> : null}
         </span>
         {chip}
       </div>

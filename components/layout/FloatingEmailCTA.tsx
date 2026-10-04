@@ -34,7 +34,7 @@ export function FloatingEmailCTA() {
         whileHover={hover}
         whileFocus={hover}
         transition={{ duration: 0.22, ease: easeSmooth }}
-        className="inline-flex items-center gap-3 rounded-full bg-[color:var(--cta)] py-1.5 pl-1.5 pr-5 font-sans text-sm text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] focus-visible:outline-none"
+        className="inline-flex items-center gap-3 rounded-full bg-[color:var(--cta)] py-1.5 pl-1.5 pr-5 font-sans text-sm text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
       >
         <span
           aria-hidden

@@ -89,7 +89,7 @@ export function ProjectAccordionRow({ project, order }: Props) {
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls={panelId}
-          className="group flex w-full items-center gap-5 py-7 text-left focus-visible:outline-none md:gap-10 md:py-10"
+          className="group flex w-full items-center gap-5 py-7 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-page)] focus-visible:rounded-md md:gap-10 md:py-10"
         >
           <motion.span
             ref={numberRef}
@@ -182,7 +182,7 @@ export function ProjectAccordionRow({ project, order }: Props) {
                 <div className="mt-8">
                   <Link
                     href={`/work/${project.slug}`}
-                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
                   >
                     Read case study
                     <span aria-hidden>→</span>

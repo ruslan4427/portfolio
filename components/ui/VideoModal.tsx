@@ -48,7 +48,7 @@ export function VideoModal({ open, onClose, src, poster, title }: Props) {
             animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.32, ease: easeSmooth }}
-            className="relative w-full max-w-[min(960px,92vw)] overflow-hidden rounded-[16px] bg-black shadow-[var(--shadow-card)]"
+            className="relative w-full max-w-[min(960px,92vw)] overflow-hidden rounded-[var(--radius-card)] bg-black shadow-[var(--shadow-card)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button

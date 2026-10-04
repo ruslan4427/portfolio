@@ -21,7 +21,7 @@ export function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link
       href={`/blog/${frontmatter.slug}`}
-      className="group block focus-visible:outline-none"
+      className="group block rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
     >
       <article className="flex h-full flex-col rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8 shadow-[var(--shadow-card)] transition-transform duration-300 group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
         <div className="flex items-center justify-between">

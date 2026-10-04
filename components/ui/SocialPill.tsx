@@ -25,7 +25,7 @@ export function SocialPill({ href, label, short }: Props) {
       whileHover={hover}
       whileFocus={hover}
       transition={{ duration: 0.2, ease: easeSmooth }}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] font-sans text-xs font-medium text-[color:var(--ink-primary)] focus-visible:outline-none"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] font-sans text-xs font-medium text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
     >
       {short}
     </motion.a>
