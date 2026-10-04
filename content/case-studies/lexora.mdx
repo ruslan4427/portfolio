@@ -18,6 +18,10 @@ readingTime: 4
 
 `Flutter · Supabase · GCP TTS · Gemini · 2026-08-30 → 2026-09-29`
 
+<ValueStatement eyebrow="The posture">
+Audio first. Twelve languages. Lock screen playable, offline capable, no eyes on glass. Everything else is in service of that.
+</ValueStatement>
+
 ## Context
 
 Language learners already have vocabulary — in Quizlet, Anki, Google Sheets. What they don't have is a way to *use* it hands-free. Duolingo demands eyes on a screen. Anki demands taps. Lexora just plays.
@@ -64,10 +68,15 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
 
 ## Trade-Offs
 
-1. **Silent MP3 assets over `SilenceAudioSource`.** Just_audio's silence source crashed with error 9999999 on real devices. Solution: pre-generated MP3s for 1–5s pauses, checked into `assets/`. Cost: +2 MB bundle. Value: playback that actually works.
-2. **Gemini over Claude / GPT-4 for generation.** Free, one API key, JSON-guaranteed. Less nuanced on terminology — acceptable trade at MVP.
-3. **Postgres trigger for `word_count`.** Trigger on `words` INSERT/DELETE updates `playlists.word_count` atomically. No app-level reconciliation. Cost: tiny latency. Value: zero stale counts, ever.
-4. **Offline-first cache with dual-write.** Generate audio → save local file → queue Supabase upload. Playback latency `<100ms`. Cost: if the app crashes pre-upload, Supabase is stale — re-sync on next open.
+<NumberedCards
+  columns={2}
+  items={[
+    { title: "Silent MP3 assets over SilenceAudioSource", body: "Just_audio's silence source crashed with error 9999999 on real devices. Solution: pre-generated MP3s for 1–5s pauses in assets/. Cost: +2 MB bundle. Value: playback that actually works." },
+    { title: "Gemini over Claude / GPT-4 for generation", body: "Free, one API key, JSON-guaranteed. Less nuanced on terminology — acceptable trade at MVP." },
+    { title: "Postgres trigger for word_count", body: "Trigger on words INSERT/DELETE updates playlists.word_count atomically. No app-level reconciliation. Cost: tiny latency. Value: zero stale counts, ever." },
+    { title: "Offline-first cache with dual-write", body: "Generate audio → save local file → queue Supabase upload. Playback latency under 100ms. Cost: if the app crashes pre-upload, Supabase is stale — re-sync on next open." },
+  ]}
+/>
 
 ## Results (honest)
 
@@ -79,6 +88,10 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
 
 ## Reflection
 
+<Pullquote attribution="Lesson from Build 12 → Build 15">
+A rotating API key is a runtime dependency, not a config. Two Build resubmissions came from key rotations that shell env didn't pick up.
+</Pullquote>
+
 1. **Spec-first isn't ceremony — it's cache.** The `specs/` folder is a durable record. Next session, Claude re-reads the spec instead of me re-explaining. Front-load once, save every session after.
 2. **Real devices ≠ simulators.** Both crashes that made it into DEVLOG (`SilenceAudioSource`, stale env keys) only reproduced on hardware. Simulator green means nothing.
-3. **A rotating API key is a runtime dependency, not a config.** Two Build resubmissions came from key rotations that shell env didn't pick up. Now `--dart-define-from-file=.env` is the only build path.
+3. **Build-pass discipline closes the loop.** `--dart-define-from-file=.env` is now the only build path. One rejection becomes one rule, enforced in code — not in a README.

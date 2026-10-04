@@ -24,6 +24,10 @@ readingTime: 4
 
 `Python · Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5 · Playwright + FFmpeg · Supabase · Slack Bolt · Render.com · GitHub Actions · dev 2026-06-08 → 2026-07-04 · pilot operation 2026-07 → 2026-08`
 
+<ValueStatement eyebrow="The constraint">
+AI does everything except the taste calls. Three-tap Slack approval, ~1 hour of my time per week, forty posts shipped at ~$0.40/week in model costs.
+</ValueStatement>
+
 ## Context
 
 Noble is a booking SaaS for barbershops and independent salons — the kind of business that lives on Instagram but rarely has time for it. Solo owners already juggle staff, chairs, and no-shows. Marketing consistently falls off the table.
@@ -102,6 +106,15 @@ Ship, test, kill in 21 minutes.
 
 ## Reflection
 
-1. **Model stratification is a UX decision, not just a cost one.** Opus writing a comment reads as *"AI-trying-too-hard."* Haiku writing a comment reads as human. Match model personality to task.
-2. **Human-in-the-loop only works if the loop is fast.** Three-tap Slack approval = 2-minute weekly review. A dashboard would have died by month two.
-3. **"AI can now do everything" is technically true, operationally false.** The wins come from architecture: state machines, safety valves, approval gates, version histories. AI is a component; the system is what ships.
+<Pullquote attribution="The thesis after 40 posts">
+"AI can now do everything" is technically true, operationally false. AI is a component; the system is what ships.
+</Pullquote>
+
+<NumberedCards
+  columns={1}
+  items={[
+    { title: "Model stratification is a UX decision, not just a cost one", body: "Opus writing a comment reads as AI-trying-too-hard. Haiku writing a comment reads as human. Match model personality to task — 20× cheaper is the second-order win." },
+    { title: "Human-in-the-loop only works if the loop is fast", body: "Three-tap Slack approval = 2-minute weekly review. A dashboard would have died by month two." },
+    { title: "Architecture is where the AI story actually gets told", body: "State machines, safety valves, approval gates, version histories. Autonomous content is the output; the discipline that produces it is the deliverable." },
+  ]}
+/>
