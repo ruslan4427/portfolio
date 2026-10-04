@@ -121,6 +121,7 @@ export function ImpactStats({
 }
 
 type FigureFrame = "minimal" | "flat";
+type FigureKind = "default" | "phone";
 
 export function Figure({
   src,
@@ -129,6 +130,7 @@ export function Figure({
   width = 1600,
   height = 1000,
   frame = "minimal",
+  kind = "default",
 }: {
   src: string;
   alt: string;
@@ -136,6 +138,7 @@ export function Figure({
   width?: number;
   height?: number;
   frame?: FigureFrame;
+  kind?: FigureKind;
 }) {
   const frameClass =
     frame === "flat"
@@ -145,17 +148,23 @@ export function Figure({
     frame === "flat"
       ? "block h-auto w-full"
       : "block h-auto w-full rounded-[var(--radius-tile)]";
+  const wrapperClass =
+    kind === "phone" ? "mx-auto w-full max-w-[320px]" : "";
+  const sizes =
+    kind === "phone" ? "320px" : "(min-width: 768px) 65ch, 100vw";
   return (
     <figure className="not-prose my-10">
-      <div className={frameClass}>
-        <Image
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          sizes="(min-width: 768px) 65ch, 100vw"
-          className={imgClass}
-        />
+      <div className={wrapperClass}>
+        <div className={frameClass}>
+          <Image
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            sizes={sizes}
+            className={imgClass}
+          />
+        </div>
       </div>
       {caption && (
         <figcaption className="mt-3 text-center font-sans text-xs text-[color:var(--ink-muted)]">
