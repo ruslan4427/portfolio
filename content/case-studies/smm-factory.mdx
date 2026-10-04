@@ -22,7 +22,19 @@ readingTime: 4
 
 > A multi-agent SMM system that ran a barbershop-SaaS Instagram for 2 months on its own — 40 posts, 13 niche followers, zero moderator violations, ~$0.40/week in AI costs. Built as Noble's in-house marketing team, minus the team.
 
-`Python · Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5 · Playwright + FFmpeg · Supabase · Slack Bolt · Render.com · GitHub Actions · dev 2026-06-08 → 2026-07-04 · pilot operation 2026-07 → 2026-08`
+<StackRow
+  items={[
+    { name: "Python", slug: "python" },
+    { name: "Claude", slug: "anthropic", version: "Opus · Sonnet · Haiku" },
+    { name: "Playwright" },
+    { name: "FFmpeg", slug: "ffmpeg" },
+    { name: "Supabase", slug: "supabase" },
+    { name: "Slack Bolt", slug: "slack" },
+    { name: "Render", slug: "render" },
+    { name: "GitHub Actions", slug: "githubactions" },
+  ]}
+  dateRange="dev 2026-06-08 → 2026-07-04 · pilot 2026-07 → 2026-08"
+/>
 
 <ValueStatement eyebrow="The constraint">
 AI does everything except the taste calls. Three-tap Slack approval, ~1 hour of my time per week, forty posts shipped at ~$0.40/week in model costs.
@@ -53,6 +65,61 @@ I wanted something that runs itself but where I stay the taste-maker. Not *"AI w
 | Learning | Analytics Agent (weekly) + Self-Improvement (monthly) → **I approve, doesn't auto-apply** |
 
 Model stratification wasn't premature optimization. First month running Opus for everything ≈ $8/day. After stratification: ~$0.30–0.50/client/week. Same output quality where it matters, 20× cheaper.
+
+<FlowSchema
+  title="Two loops · one Slack approval each"
+  rows={[
+    {
+      label: "Weekly content pipeline — Opus plans, Haiku writes, I tap",
+      tone: "neutral",
+      meta: "Mon 09:00 Kyiv · 1×/week",
+      diagram: {
+        width: 1020,
+        height: 240,
+        nodes: [
+          { id: "strategy", shape: "process", icon: "doc", label: "Strategy", sub: "Sonnet · per-client voice", x: 70, y: 120 },
+          { id: "plan", shape: "process", icon: "box", label: "Weekly plan", sub: "Opus · 7 posts", x: 250, y: 120 },
+          { id: "generate", shape: "process", icon: "bolt", label: "Generate", sub: "Haiku + Playwright + FFmpeg", x: 450, y: 120 },
+          { id: "approve", shape: "action", icon: "user", label: "Slack approval", sub: "3 taps · ~2 min", x: 670, y: 120 },
+          { id: "post", shape: "event", icon: "cloud", label: "Post to IG", sub: "Orchestrator state machine", x: 890, y: 70, color: "success", outcome: "approved" },
+          { id: "revise", shape: "event", icon: "sync", label: "Revise", sub: "regen with notes", x: 890, y: 170, color: "faint" },
+        ],
+        edges: [
+          { from: "strategy", to: "plan" },
+          { from: "plan", to: "generate" },
+          { from: "generate", to: "approve" },
+          { from: "approve", to: "post", color: "success", label: "approve" },
+          { from: "approve", to: "revise", style: "dashed", label: "edit" },
+        ],
+      },
+    },
+    {
+      label: "Learning loop — analytics proposes, I decide, nothing auto-applies",
+      tone: "neutral",
+      meta: "weekly + monthly cadence",
+      diagram: {
+        width: 1020,
+        height: 240,
+        nodes: [
+          { id: "analytics", shape: "process", icon: "database", label: "Analytics", sub: "weekly · per-post signals", x: 80, y: 120 },
+          { id: "self", shape: "process", icon: "code", label: "Self-Improvement", sub: "monthly · new strategy draft", x: 290, y: 120 },
+          { id: "proposal", shape: "event", icon: "doc", label: "Strategy v+1", sub: "archived vs current", x: 510, y: 120 },
+          { id: "humangate", shape: "action", icon: "user", label: "I approve", sub: "Slack summary", x: 710, y: 120 },
+          { id: "apply", shape: "event", icon: "check", label: "Promote", sub: "new strategy becomes active", x: 920, y: 70, color: "success", outcome: "approved" },
+          { id: "discard", shape: "event", icon: "warning", label: "Discard", sub: "stays in archive", x: 920, y: 170, color: "faint" },
+        ],
+        edges: [
+          { from: "analytics", to: "self" },
+          { from: "self", to: "proposal" },
+          { from: "proposal", to: "humangate" },
+          { from: "humangate", to: "apply", color: "success", label: "approve" },
+          { from: "humangate", to: "discard", style: "dashed", label: "ignore" },
+        ],
+      },
+    },
+  ]}
+  caption="Both loops end at a human — the content loop at post-approval, the learning loop at strategy-promotion. Nothing bypasses the Slack tap."
+/>
 
 ## Prompt Architecture
 
@@ -117,4 +184,59 @@ Ship, test, kill in 21 minutes.
     { title: "Human-in-the-loop only works if the loop is fast", body: "Three-tap Slack approval = 2-minute weekly review. A dashboard would have died by month two." },
     { title: "Architecture is where the AI story actually gets told", body: "State machines, safety valves, approval gates, version histories. Autonomous content is the output; the discipline that produces it is the deliverable." },
   ]}
+/>
+
+<TechNotes
+  title="For engineers — the eight pieces that hold the pipeline up"
+  items={[
+    {
+      kind: "tool",
+      label: "Slack Bolt (Python)",
+      title: "Why Slack is the entire UI",
+      description:
+        "Bolt turns approval cards into three-button messages — no custom dashboard, no auth plumbing, zero infra to maintain. The weekly review is a chat thread.",
+      href: "https://slack.dev/bolt-python/concepts",
+    },
+    {
+      kind: "docs",
+      label: "Playwright for Python",
+      title: "Screenshot-per-frame rendering",
+      description:
+        "After the June 12 unwind, every reel is a sequence of deterministic PNGs. Playwright drives the capture; the browser is the rendering engine.",
+      href: "https://playwright.dev/python/docs/screenshots",
+    },
+    {
+      kind: "docs",
+      label: "FFmpeg concat demuxer",
+      title: "Stitching frames into reels",
+      description:
+        "FFmpeg composites the PNG sequence into the final MP4 at 30fps. The concat demuxer is what makes the render reproducible across runs.",
+      href: "https://ffmpeg.org/ffmpeg-formats.html#concat",
+    },
+    {
+      kind: "docs",
+      label: "GitHub Actions · scheduled",
+      title: "Cron on the free tier is a render farm",
+      description:
+        "Weekly content runs on a schedule-triggered workflow. 2 000 free minutes/month covers a single-client pilot comfortably — the ~50-client ceiling lives here.",
+      href: "https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule",
+    },
+    {
+      kind: "docs",
+      label: "Render.com cron",
+      title: "The daily engagement worker",
+      description:
+        "Lightweight engagement + analytics jobs run on Render's cron tier — short-lived, no state, cheap. Pairs with GitHub Actions for heavier renders.",
+      href: "https://render.com/docs/cronjobs",
+    },
+    {
+      kind: "docs",
+      label: "Anthropic API",
+      title: "Opus · Sonnet · Haiku stratification",
+      description:
+        "The 20× cost delta comes from matching model to task. Opus for weekly planning, Sonnet for strategy distillation, Haiku for the high-volume caption/comment stream.",
+      href: "https://docs.anthropic.com/en/docs/intro",
+    },
+  ]}
+  caption="The pipeline isn't exotic — it's the discipline of eight ordinary tools wired together and gated by one Slack tap."
 />
