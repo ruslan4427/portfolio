@@ -16,7 +16,7 @@ export function SelectedWork() {
       <div className="mx-auto max-w-[var(--content-max)]">
         <header className="mb-14 flex flex-col items-center gap-6 text-center">
           <Reveal>
-            <SectionBadge label="Selected work" />
+            <SectionBadge label="Selected cases" />
           </Reveal>
           <h2 className="font-serif text-[clamp(36px,4.5vw,64px)] leading-[1.02] text-[color:var(--ink-primary)]">
             <MaskReveal delay={0.15}>Four case studies,</MaskReveal>

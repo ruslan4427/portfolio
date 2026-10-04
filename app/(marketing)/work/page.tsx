@@ -5,7 +5,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { SectionBadge } from "@/components/ui/SectionBadge";
 
 export const metadata: Metadata = {
-  title: "Work",
+  title: "Cases",
   description:
     "Five case studies of AI-collaboration in production — Noble, Angel, Fieldmark, Lexora, smm-factory. Filter by role, stack, or year.",
 };
@@ -17,7 +17,7 @@ export default function WorkPage() {
       <section className="px-[var(--gutter)] pt-40 pb-12">
         <div className="mx-auto flex max-w-[var(--content-max)] flex-col items-center text-center">
           <Reveal>
-            <SectionBadge label="Work" />
+            <SectionBadge label="Cases" />
           </Reveal>
           <h1 className="mt-8 max-w-[16ch] font-serif text-[clamp(48px,7vw,88px)] leading-[0.98] text-[color:var(--ink-primary)]">
             <MaskReveal mode="mount" delay={0.15}>
