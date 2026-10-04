@@ -16,7 +16,15 @@ readingTime: 4
 
 **Lexora is a vocabulary app that never asks you to look at your phone — playlists of word pairs play through Neural2 voices while you drive, run, or cook.**
 
-`Flutter · Supabase · GCP TTS · Gemini · 2026-08-30 → 2026-09-29`
+<StackRow
+  items={[
+    { name: "Flutter", slug: "flutter" },
+    { name: "Supabase", slug: "supabase" },
+    { name: "Google TTS Neural2", slug: "googlecloud" },
+    { name: "Gemini 3.6 Flash", slug: "googlegemini" },
+  ]}
+  dateRange="2026-08-30 → 2026-09-29"
+/>
 
 <ValueStatement eyebrow="The posture">
 Audio first. Twelve languages. Lock screen playable, offline capable, no eyes on glass. Everything else is in service of that.
@@ -80,7 +88,57 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
 
 ## Results (honest)
 
-- **Build 15** in Apple review as of 2026-09-29. Arc: Build 12 submitted → Build 13 same-day hotfix (rotated Gemini key) → Build 14 moved Gemini behind a Supabase Edge Function with a Vertex AI service account for stable auth → **rejected under Guidelines 5.1.1(i) + 5.1.2(i)** (undisclosed third-party AI) → Build 15 adds an in-app consent gate before any topic string leaves the device
+<FlowSchema
+  title="Build 12 → Build 15 · the Apple review arc"
+  rows={[
+    {
+      label: "Build 12 → Build 14 — rejected on undisclosed third-party AI",
+      tone: "before",
+      meta: "2026-09-14 → 09-24",
+      diagram: {
+        width: 1020,
+        height: 240,
+        nodes: [
+          { id: "b12", shape: "event", icon: "cloud", label: "Build 12", sub: "shipped w/ empty key · 401", x: 70, y: 120 },
+          { id: "b13", shape: "event", icon: "code", label: "Build 13", sub: "same-day · Gemini key rotated", x: 250, y: 120 },
+          { id: "b14", shape: "event", icon: "server", label: "Build 14", sub: "Edge Function + Vertex AI SA", x: 440, y: 120 },
+          { id: "review", shape: "action", icon: "shield", label: "Apple review", sub: "undisclosed AI disclosure?", x: 650, y: 120 },
+          { id: "reject", shape: "event", icon: "mail", label: "Rejected", sub: "Guidelines 5.1.1(i) + 5.1.2(i)", x: 870, y: 120, color: "danger", outcome: "denied" },
+        ],
+        edges: [
+          { from: "b12", to: "b13" },
+          { from: "b13", to: "b14" },
+          { from: "b14", to: "review" },
+          { from: "review", to: "reject", color: "danger", label: "undisclosed" },
+        ],
+      },
+    },
+    {
+      label: "Build 15 — explicit consent before any topic leaves the device",
+      tone: "after",
+      meta: "2026-09-29 · still in review",
+      diagram: {
+        width: 1020,
+        height: 220,
+        nodes: [
+          { id: "spec", shape: "event", icon: "doc", label: "Rejection as spec", sub: "DEVLOG · verbatim", x: 80, y: 110 },
+          { id: "gate", shape: "process", icon: "lock", label: "Consent gate", sub: "in-app opt-in · topic string", x: 300, y: 110 },
+          { id: "disclose", shape: "event", icon: "shield", label: "AI disclosure UI", sub: "names Gemini + GCP TTS", x: 540, y: 110 },
+          { id: "resub", shape: "event", icon: "cloud", label: "Resubmit Build 15", sub: "2026-09-29", x: 760, y: 110 },
+          { id: "pending", shape: "event", icon: "clock", label: "In review", sub: "no outcome yet", x: 960, y: 110, color: "faint" },
+        ],
+        edges: [
+          { from: "spec", to: "gate" },
+          { from: "gate", to: "disclose" },
+          { from: "disclose", to: "resub" },
+          { from: "resub", to: "pending", style: "dashed" },
+        ],
+      },
+    },
+  ]}
+  caption="Three builds to find the actual rule — the shape of the fix was consent UX, not auth plumbing."
+/>
+
 - **76 unit tests** (mocktail + Freezed) across 12 files, 7 integration flow files
 - **12 supported languages** (dropped Persian when Google TTS had no fa-IR voice)
 - **26–28 MB** iOS bundle, 59 MB Android
@@ -95,3 +153,50 @@ A rotating API key is a runtime dependency, not a config. Two Build resubmission
 1. **Spec-first isn't ceremony — it's cache.** The `specs/` folder is a durable record. Next session, Claude re-reads the spec instead of me re-explaining. Front-load once, save every session after.
 2. **Real devices ≠ simulators.** Both crashes that made it into DEVLOG (`SilenceAudioSource`, stale env keys) only reproduced on hardware. Simulator green means nothing.
 3. **Build-pass discipline closes the loop.** `--dart-define-from-file=.env` is now the only build path. One rejection becomes one rule, enforced in code — not in a README.
+
+<TechNotes
+  title="For engineers — go deeper"
+  items={[
+    {
+      kind: "tool",
+      label: "just_audio",
+      title: "Lock-screen playback + the SilenceAudioSource bug",
+      description:
+        "The Flutter audio package that drives Lexora's background playback. The 9999999 crash on real devices is in its issue tracker — the fix was pre-rendered MP3 silence.",
+      href: "https://pub.dev/packages/just_audio",
+    },
+    {
+      kind: "docs",
+      label: "Google Cloud TTS",
+      title: "Neural2 voice catalog — the 12-language cut",
+      description:
+        "The canonical voice list. Persian dropped because fa-IR has no Neural2 entry; the twelve supported languages are the twelve with usable voices.",
+      href: "https://cloud.google.com/text-to-speech/docs/voices",
+    },
+    {
+      kind: "docs",
+      label: "Gemini structured output",
+      title: "responseMimeType: application/json",
+      description:
+        "The JSON-guaranteed schema path that made the Claude → Gemini pivot clean. Parse-time errors went to zero.",
+      href: "https://ai.google.dev/gemini-api/docs/structured-output",
+    },
+    {
+      kind: "flag",
+      label: "App Review 5.1.1 / 5.1.2",
+      title: "The undisclosed-AI rejection category",
+      description:
+        "The exact guideline that bounced Build 14 — data collection + consent for third-party ML providers. Build 15 ships the consent gate this rule asks for.",
+      href: "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage",
+    },
+    {
+      kind: "docs",
+      label: "Supabase Edge Functions",
+      title: "Vertex AI service account auth",
+      description:
+        "Where Build 14 moved the Gemini call so rotating keys stopped breaking production. One Edge Function + one GCP SA replaced three app-side .env secrets.",
+      href: "https://supabase.com/docs/guides/functions",
+    },
+  ]}
+  caption="The sections above show how these combined under Apple review pressure — the docs are jump-points for each decision."
+/>
