@@ -22,7 +22,7 @@ readingTime: 4
 
 > A multi-agent SMM system that ran a barbershop-SaaS Instagram for 2 months on its own — 40 posts, 13 niche followers, zero moderator violations, ~$0.40/week in AI costs. Built as Noble's in-house marketing team, minus the team.
 
-`Python · Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5 · Playwright + FFmpeg · Supabase · Slack Bolt · Render.com · GitHub Actions · June–July 2026`
+`Python · Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5 · Playwright + FFmpeg · Supabase · Slack Bolt · Render.com · GitHub Actions · dev 2026-06-08 → 2026-07-04 · pilot operation 2026-07 → 2026-08`
 
 ## Context
 
@@ -52,7 +52,7 @@ Model stratification wasn't premature optimization. First month running Opus for
 
 ## Prompt Architecture
 
-The system's superpower is the `knowledge/` directory — 12 markdown files, one per agent (`00_overview` through `11_orchestrator`). One rule I set for myself: **Rules = Code.** If a rule lives only in markdown, it doesn't exist. Every markdown rule must be in code.
+The system's superpower is the `knowledge/` directory — 12 markdown files (`00_overview` through `11_orchestrator`) covering the 8 agents, 3 shared systems (content pipeline, approval manager, database schema), and the orchestrator. One rule I set for myself: **Rules = Code.** If a rule lives only in markdown, it doesn't exist. Every markdown rule must be in code.
 
 That flipped every Claude session from *"here's a codebase, please read it all"* into *"here's the spec and the one file we're touching."* Sessions got sharp.
 
@@ -81,7 +81,7 @@ Ship, test, kill in 21 minutes.
 - **Slack as the only UI.** Every approval, status, insight — Slack. Custom dashboard would've cost weeks; Slack costs zero. Rate limits push me toward batching, which turned out to be a UX win.
 - **Self-Improvement never auto-applies.** Monthly it writes a new strategy version, archives the old, posts summary in Slack. I approve or ignore. Costs me weekly attention. Prevents silent drift into whatever Claude currently thinks is right.
 
-## Results — 2 months of autonomous operation
+## Results — 2-month pilot (2026-07 → 2026-08)
 
 <MetricGrid
   columns={4}
@@ -98,7 +98,7 @@ Ship, test, kill in 21 minutes.
   <Cost label="Human time" value="~1 hr / week" />
 </div>
 
-**The honest read**: 13 followers is small. This is a genuinely narrow audience (specific service tier, specific behavior). The system proved it can run at cost. The current work — where I'm now — is whether we can lift the creative ceiling enough for the same targeting to convert.
+**The honest read**: 13 followers is small. This is a genuinely narrow audience (specific service tier, specific behavior). The pilot proved the system can run at cost. The open question it didn't resolve — and the reason this stayed a pilot rather than scaling into Noble's live marketing stack — was whether the creative ceiling of autonomous content was high enough for the same targeting to actually convert.
 
 ## Reflection
 

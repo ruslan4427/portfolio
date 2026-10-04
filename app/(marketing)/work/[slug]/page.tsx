@@ -127,8 +127,13 @@ export default async function CaseStudyPage({
             <h2 className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
               At a glance
             </h2>
-            <div className="mt-4 space-y-4 text-[15px] leading-[1.7] text-[color:var(--ink-body)] whitespace-pre-line">
-              {frontmatter.recruiterSummary}
+            <div className="mt-4 space-y-4 text-[15px] leading-[1.7] text-[color:var(--ink-body)]">
+              {frontmatter.recruiterSummary
+                .trim()
+                .split(/\n{2,}/)
+                .map((para, i) => (
+                  <p key={`recruiter-${i}`}>{para.trim()}</p>
+                ))}
             </div>
             {stats.length > 0 && (
               <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-[color:var(--hairline)] pt-6">

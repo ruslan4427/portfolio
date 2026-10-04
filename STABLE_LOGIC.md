@@ -106,6 +106,52 @@ two sessions or one full sprint.
   in-repo MDX never uses `require`/`process`/`fetch` globals. Any
   new MDX primitive that takes `items`, `data`, `entries`, or any
   object/array literal from MDX depends on this flag being off.
+- **Numbers-in-prose guards cover body + JSX, not only frontmatter.**
+  `scripts/verify-case-study-numbers.mjs` (wired as `prebuild`)
+  started by inspecting only `frontmatter detail:` strings. On
+  2026-10-03 the hrekov-dev case shipped with frontmatter
+  reconciled to disk but five body-prose claims (seventeen /
+  twenty-six / 26 min) and the §7 `<MetricGrid items={…}>` JSX still
+  carrying the old counts — the drift was invisible to CI until the
+  first `/shiploop-expert phase=pre-ship` run caught it. Rule: any
+  numeric claim that renders to the reader (body prose, JSX
+  `items`, inline `<Counter>`) must either be covered by the
+  reconciliation script or be marked with a visible stale-date
+  snapshot ("as of YYYY-MM-DD"). Extend the script when adding
+  a new primitive that renders numbers. Reason: partial
+  reconciliation reads worse than no reconciliation — a careful
+  reader sees the numbers crossing each other and loses trust in
+  all of them. Belongs to AI-collaboration case studies most
+  strongly, but applies anywhere a stat appears outside frontmatter.
+- **Positional claims must name the sibling, never "on this page" /
+  "Nth case study."** Wording that embeds position (`"the other five
+  case studies on this page"`, `"this is the 6th case study"`,
+  `"listed below"`) silently inverts whenever a `featured` flag flips
+  or ordering changes. 2026-10-03 incident: hrekov-dev was promoted
+  to `featured: true` and listed first on home per 2026-10-02
+  decision, but `hrekov-dev.mdx:58` still read "the other five case
+  studies on this page" — false from every vantage point (not on
+  `/work/hrekov-dev`, not on home, not on `/work`). Rule: when
+  referring to sibling case studies, say "on this site" and name
+  them ("Noble, Angel, Lexora, Fieldmark, smm-factory") rather than
+  rely on relative position. Capsule
+  `.claude/expertise/editorial-portfolio-site.md` already carries
+  this as an AI-collab-variant red flag; promoting here because the
+  rule applies to all case studies, not only AI-collab ones.
+- **The numeric-drift guardrail is local-only; Vercel is not an
+  authoritative check.** `verify-case-study-numbers.mjs` reads the
+  memory folder at `~/.claude/projects/-Users-ruslan-portfolio/memory/`
+  which lives outside the repo and is absent on Vercel. On Vercel the
+  script logs a loud PARTIAL GUARDRAIL banner and skips the memory +
+  body-prose + MetricGrid + §4-ls checks. This is deliberate — the
+  canonical state of the memory folder lives on the author's machine,
+  and reconciling against a stale checked-in snapshot would be worse
+  than skipping. Rule: treat `prebuild` on a local workstation as the
+  authoritative gate before `git push`. Do not try to "fix" the Vercel
+  skip by committing a snapshot of the memory folder — it would drift
+  on every real memory write. If a future workflow needs CI-side
+  verification, export a frozen `memory-manifest.json` from the local
+  prebuild and reconcile against that, not against a live folder.
 
 ## Analytics + consent
 

@@ -5,6 +5,290 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-10-03 · Lexora pre-ship pass — closes all six case studies
+
+**Problem.** Lexora `.mdx` and `projects.ts` metric were frozen at the
+submission snapshot and had drifted on four axes against `~/lexora`:
+(1) **Build number**: MDX line 74 claimed "Build 13 in Apple review as of
+2026-09-19"; disk `pubspec.yaml` reads `version: 1.0.0+15` and `DEVLOG.md`
+documents the full post-publish arc — Build 13 same-day Gemini-key hotfix →
+Build 14 moved Gemini behind a Supabase Edge Function with a Vertex AI
+service account for stable auth → **Build 14 rejected under App Store
+Guidelines 5.1.1(i) + 5.1.2(i)** for sending topic strings to a third-party
+AI with no in-app disclosure → Build 15 (`91ccaf6`, 2026-09-29) adds an
+in-app consent gate before any topic leaves the device. (2) **Skill count**:
+MDX line 42 says "19 custom skills in `.claude/skills/`"; disk has 17.
+(3) **Unit test count**: MDX + `projects.ts` metric both claim "61 unit
+tests"; disk has 76 `test(` calls across 12 test files. (4) **Date range**:
+tech-stack line reads `2026-08-30 → 2026-09-19`; last commit is 2026-09-29.
+Confirmed accurate on probe: 12 supported languages (the language picker in
+`create_playlist_sheet.dart`, `edit_playlist_sheet.dart`, and
+`import_screen.dart` all enumerate the same 12 `(xx-XX, Label)` tuples), 5
+silent MP3s (`assets/audio/silence_{1-5}s.mp3`), 7 integration flow files.
+
+**Decision.** Fieldmark-pattern reconciliation. (1) MDX line 74 rewritten
+end-to-end: "**Build 15** in Apple review as of 2026-09-29. Arc: Build 12
+submitted → Build 13 same-day hotfix (rotated Gemini key) → Build 14 moved
+Gemini behind a Supabase Edge Function with a Vertex AI service account for
+stable auth → rejected under Guidelines 5.1.1(i) + 5.1.2(i) (undisclosed
+third-party AI) → Build 15 adds an in-app consent gate before any topic
+string leaves the device". The reviewer-rejection story stays in Results
+instead of swapping into §Iteration Moment — the Claude→Gemini pivot is a
+cleaner lesson about stack consolidation, and diluting §IM with a second
+pivot weakens both. (2) MDX test line: "**61 unit tests** (mocktail +
+Freezed), 7 integration flows" → "**76 unit tests** (mocktail + Freezed)
+across 12 files, 7 integration flow files". (3) MDX line 42: "19 custom
+skills" → "17 custom skills". (4) MDX tech-stack range end `2026-09-19` →
+`2026-09-29`. (5) `projects.ts` lexora metric: "12 languages · 61 unit
+tests · 5 silent MP3s" → "12 languages · 76 unit tests · 5 silent MP3s".
+(6) `verify-case-study-numbers.mjs` extended with `LEXORA_REPO`, `LEXORA_MDX`,
+`lexoraDisk()` returning
+`{totalCommits, buildNumber, lastCommitDate, skillCount, languages, silentMp3s, unitTests}`
+and Check #14 covering: build number vs pubspec, "as of" date vs last-commit
+date, skill count via `.claude/skills/` dir listing, unit tests via
+`find … | grep -c "^[[:space:]]*test(" | awk sum`, languages via picker
+tuple parsing, and `projects.ts` metric reconciliation. Script auto-skips
+with warning banner on absent repo — Vercel still ships.
+
+**Result.** `node scripts/verify-case-study-numbers.mjs` prints clean 20-
+check pass:
+```
+{
+  devlog: 38, stable: 10, sprints: 14, daysSpan: 14, memory: 28,
+  noble: { totalCommits: 234, first10Commits: 74, stableLines: 170 },
+  smm: { firstCommit: '2026-06-08', knowledgeFiles: 12 },
+  angel: { totalCommits: 1, firstHash: 'b652cd3', agentFiles: 6, docFiles: 6 },
+  fieldmark: { totalCommits: 7, firstHash: 'f05b752', authSprintCommits: 5, ... },
+  lexora: { totalCommits: 3, buildNumber: 15, lastCommitDate: '2026-09-29',
+            skillCount: 17, languages: 12, silentMp3s: 5, unitTests: 76 }
+}
+```
+All six case studies — hrekov-dev, noble, smm, angel, fieldmark, lexora —
+have passed the pre-ship pass. Portfolio-facing truth now matches on-disk
+state across build numbers, commit counts, test counts, file inventories,
+and dates. The pre-ship queue is empty.
+
+**Lesson.** Lexora had the most number-of-type drift of any case study (4
+distinct axes) because it was published mid-flight: Build 12 was literally
+in review when the MDX was authored, which created a snapshot-moment that
+decayed as soon as review iterations began. The Apple-AI-compliance arc
+(Build 14 → 15) wasn't anticipate-able at write-time — it's a reviewer
+response, not a developer plan. Takeaway for future case studies on apps
+still in review: either hold publication until the first "shipped" verdict,
+or write the Results section in a form that assumes further build iterations
+and plan to re-reconcile on each. The guardrail now catches build drift
+automatically for any case study whose MDX uses the "Build N in Apple review
+as of YYYY-MM-DD" idiom, so the detection cost is zero after the first
+author pass.
+
+---
+
+## 2026-10-03 · Fieldmark pre-ship pass — closes the featured + in-review sweep
+
+**Problem.** Fieldmark `.mdx` and `projects.ts` were frozen at
+`2026-09-19 — waiting for Apple review`, which is now two weeks stale.
+Disk truth: `pubspec.yaml` shows `version: 1.0.0+21`, and `~/fieldmark/DEVLOG.md`
+holds three post-launch Problem/Decision/Result/Lesson entries (OTP delivery
+failure, Delete Account broken, invitation idempotency across deletion) with
+real foremen named — `clinetast1@gmail.com` on project `Sst`,
+`volavokiiskelo@gmail.com` on `Building`, `b.denisd2@gmail.com` on
+`SST Willow Creek Phase 2`. Build 21 is approved and live. The portfolio
+still claimed `status: "in-review"` and `"0 shipped users at the time of
+writing"`. Secondary gap: no guardrail covered Fieldmark's numeric claims —
+the commit count (`7`), auth-sprint tally (`5` on 2026-09-18), or the three
+hashes referenced in body copy (`f05b752`, `8b18221`, `071b10c`).
+
+**Decision.** Light-touch reconciliation, not a rewrite: the case-study's
+narrative arc is the Apple-rejection → native-ASAuthorization pivot, and that
+arc still holds. (1) `projects.ts` fieldmark entry: `status: "in-review"` →
+`"shipped"`; metric `"7 days empty repo to App Review"` →
+`"7 days empty repo to App Store · live with 3 foreman crews"`.
+(2) `fieldmark.mdx` frontmatter `status: in-review` → `shipped`.
+(3) §Results lines 79–80 rewrite: "Build 20 rejected → Build 21 submitted
+2026-09-19 → approved and live on the App Store"; the "0 shipped users"
+bullet replaced with "Live with 3 foreman crews across 3 projects; three
+post-launch bugs surfaced on real signups within days (OTP delivery, Delete
+Account, invitation idempotency across deletion) — all diagnosed root-cause
+and fixed, documented in DEVLOG.md". No invented metrics beyond what the
+Fieldmark DEVLOG proves. (4) `verify-case-study-numbers.mjs` extended with
+`FIELDMARK_REPO`, `fieldmarkDisk()` returning
+`{totalCommits, firstHash, authSprintCommits, hasAuthHash, hasSubmitHash}`,
+and Check #13 covering: 7-commit prose claim, 5-commit auth-sprint claim
+anchored to 2026-09-18 date filter, all MDX-referenced hashes present via
+`git cat-file -t`, frontmatter status must be `shipped`, three script
+constants (`FIELDMARK_FIRST_HASH`, `FIELDMARK_AUTH_HASH`,
+`FIELDMARK_SUBMIT_HASH`) match disk. Script auto-skips on absent repo with
+the standard PARTIAL GUARDRAIL banner — Vercel keeps shipping.
+
+**Result.** `node scripts/verify-case-study-numbers.mjs` prints clean 15-
+check pass:
+```
+{
+  devlog: 37, stable: 10, sprints: 14, daysSpan: 14, memory: 28,
+  noble: { totalCommits: 234, first10Commits: 74, stableLines: 170 },
+  smm: { firstCommit: '2026-06-08', knowledgeFiles: 12 },
+  angel: { totalCommits: 1, firstHash: 'b652cd3', agentFiles: 6, docFiles: 6 },
+  fieldmark: { totalCommits: 7, firstHash: 'f05b752', authSprintCommits: 5,
+               hasAuthHash: true, hasSubmitHash: true }
+}
+```
+Portfolio-facing truth now matches `pubspec.yaml` + Fieldmark DEVLOG; a reader
+following the Fieldmark card no longer lands on a two-week-old "waiting for
+review" page. All four featured case studies plus fieldmark have passed the
+pre-ship pass. Only `lexora` remains in the queue.
+
+**Lesson.** The right unit of pre-ship work is one case study end-to-end:
+disk-truth probe → surgical edits → verify-script extension that locks the
+numbers in place. Fieldmark fit in ~15 minutes because the pattern is now
+fully internalized — four prior passes compressed each incremental step. The
+cost of the first noble pass (90+ min, Option C narrative design) amortizes:
+cases 2–5 each took 15–30 min because the guardrail skeleton, PARTIAL
+GUARDRAIL banner, and MDX-vs-disk mental model were already resolved. Also:
+"waiting for review" claims decay fastest — any future case study submitted
+to a reviewer needs an explicit calendar reminder to update the portfolio
+within 48h of the verdict, otherwise the page silently gaslights visitors.
+
+---
+
+## 2026-10-03 · Noble pre-ship pass (second expert invocation) + reconciliation guardrail generalized
+
+**Problem.** Pre-ship pass on `noble-saas.mdx` surfaced four blockers inside a
+single read: (1) `"151 commits in first 10 days"` was false — actual is 74;
+the 151/152 figure was the April **monthly** total, conflated into a 10-day
+window. The claim repeated in 5 locations (projects.ts metric,
+recruiterSummary, §Context, §1 Before block, §Reflection item 1). (2) Total
+commit count `227` was stale (disk: 234). Appeared in tagline + body +
+recruiterSummary + MetricGrid. (3) Supporting artifact `"5 months, 12 days"`
+was a frozen snapshot from ~2026-09-20 — today's disk truth is 5 months
+25 days (178 days). (4) The `STABLE_LOGIC.md pattern` artifact linked to
+the **portfolio's** `STABLE_LOGIC.md` (now 239 lines, describing the
+portfolio's rules) but the detail text described **Noble's** 170-line file.
+Reader following the link lands on the wrong artifact. Also softer:
+MetricGrid claimed 3 pivots when only 2 are named with hashes (6b29244,
+d6e1b5a); reflection §2 claimed velocity dropped `10×` when honest math is
+20–30× daily (74 commits/10 days = 7.4/day vs 6–11/month = 0.3/day). Side
+discovery during disk probing: Noble's git remote URL has an embedded GitHub
+PAT visible on every `git remote -v` — flagged for user to rotate.
+
+**Decision.** Option C narrative: honour both numbers, re-anchor to the
+sprint vs April distinction. "74 commits in the first ten days to live
+multi-tenant bookings. 152 by April's end, hardened against the 16 named
+bugs." Preserves the velocity thesis (really was shipping fast) without
+inventing a false headline. For the artifact mismatch, kept the link to
+the portfolio's STABLE_LOGIC (public, inspectable, same pattern) and
+reworded the detail to describe what the reader actually finds there
+("rules that survive future refactors, promoted from a journal only after
+proving themselves") — no longer claims it names Noble's edge cases.
+Build-window artifact rewritten as a self-certified stale snapshot
+("5 months 25 days as of 2026-10-03") per the STABLE_LOGIC rule promoted
+the same morning. MetricGrid: 3 → 2 pivots with hashes inline; velocity
+math corrected to "roughly 20× in daily terms."
+
+**Result.** Reconciliation script extended with two new checks (projects.ts
+noble-saas tagline/metric; MDX tagline/MetricGrid/first-10-days/
+STABLE_LOGIC-line-count) sourcing disk truth from `/Users/ruslan/noble-saas`
+via `git rev-list` + a `docs/STABLE_LOGIC.md` line count. Same local-only
+guardrail model as the memory-dir check — on Vercel the loud PARTIAL
+GUARDRAIL banner fires for Noble independently of the hrekov-dev memory
+check. Verify now reports `noble: { totalCommits: 234, first10Commits: 74,
+stableLines: 170 }` alongside the hrekov-dev state and passes clean. Total
+checks on hrekov-dev + noble: 10. Second real pre-ship invocation of
+`/shiploop-expert` — the pattern generalizes without capsule changes.
+
+**Lesson.** The number-word drift guardrail promoted this morning paid for
+itself inside hours — same category of drift (narrative claim with a wrong
+cardinality) showed up on the next case study, same shape ("N commits in
+window"), just with a different frame. Capsule is still thin and still
+largely inert; what carried both reviews is the project-layer rules in
+STABLE_LOGIC + the willingness to probe disk truth before trusting prose.
+Second-order lesson: when a case study links to an external repo, run
+`git remote -v` once; embedded PATs leak silently and nobody notices until
+a `git clone` prints the URL in a log.
+
+---
+
+## 2026-10-03 · Domain-expert V1 + hrekov-dev positional override + numbers reconciliation (post-expert review)
+
+**Problem.** Two issues surfaced in one review pass. (1) The hrekov-dev case
+study still carried five stale number claims in the body (seventeen /
+twenty-six / 26 min / MetricGrid 12-8-~1.5) even though the frontmatter + §6
+had been reconciled earlier that day — the reconciliation script only
+inspects `frontmatter detail:` strings, so body prose and `<MetricGrid>`
+JSX drift was invisible to CI. (2) hrekov-dev was promoted to `featured: true`
+and placed first on home per Ruslan's 2026-10-02 request, directly overriding
+spec §12 ("home hero stays five case studies; hrekov-dev is a depth click,
+not a peer"). The §1 cold open still read "the other five case studies **on
+this page**" which was false from every vantage point: on `/work/hrekov-dev`
+there are no sibling cards, on home the SelectedWork heading now says "Four
+case studies" and includes hrekov-dev, on `/work` all six are listed. The
+first real `/shiploop-expert phase=pre-ship` invocation caught 10 findings;
+4 blockers, all narrative-integrity. Capsule's "numbers in prose must match
+disk reality" rule was directly load-bearing.
+
+**Decision.** Three-part fix.
+
+- **Positional reword.** `hrekov-dev.mdx:58` → "The five client case studies
+  on this site describe work I did for others. This one describes the site
+  you're reading." Drops "on this page." `hrekov-dev.mdx:19`
+  (recruiterSummary) → "This portfolio ships as its own case study, listed
+  first on the home page. The five client cases (Noble, Angel, Lexora,
+  Fieldmark, smm-factory) describe work I did for others…" Drops "6th case
+  study" framing. Document the `featured: true` as a deliberate override of
+  spec §12, not a bug.
+- **Body-level number reconciliation.** Six locations (lines 66, 112, 211,
+  219, 241, 383): twenty-six → twenty-eight; seventeen → twenty-eight; ~34
+  min → ~56 min arithmetic. MetricGrid (lines 338-340): 12/8/~1.5 → 14/13/~1.1.
+  §3 `ls memory/` listing (lines 116-135): regenerated verbatim from current
+  disk (MEMORY.md + 28 files sorted). §4 MEMORY.md snippet left for a
+  separate pass — expert flagged as "high" not "blocker."
+- **Expert infrastructure, V1.** `.claude/agents/expert.md` (meta-agent,
+  domain-agnostic, 5-phase bootstrap with 🧠 📚 🌐 📋 🎯 progress markers);
+  `.claude/skills/shiploop-expert/SKILL.md` (slash command, parses
+  `phase=pre-ship|in-progress|blind-bug`, dispatches to agent);
+  `.claude/expertise/editorial-portfolio-site.md` (first capsule,
+  `confidence: validated` after 3/3 blind-bug test). CLAUDE.md ShipLoop table
+  gained row **E Expert**; Variant C rollout at Week 1 = opt-in.
+
+**Result.** `node scripts/verify-case-study-numbers.mjs` passes:
+`{ devlog: 35, stable: 10, sprints: 14, daysSpan: 13, memory: 28 }`. Grep for
+stale number words in hrekov-dev.mdx returns zero hits. `tsc --noEmit` clean.
+First real pre-ship expert invocation found 10 real findings (4 blockers, all
+narrative-integrity), credited capsule as "load-bearing" for 6 of them.
+Pattern mechanics proven on first non-blind-test run.
+
+**Lesson.** Three distinct lessons.
+
+1. **Numbers-in-prose guardrail must cover body + JSX, not just frontmatter
+   detail strings.** The 2026-09-27 Sprint 12 lesson said "numbers rot
+   without a guardrail"; the guardrail shipped but was too narrow. Reconciling
+   frontmatter and leaving body prose stale is worse than not reconciling at
+   all — a careful reader sees the numbers crossing each other and loses
+   trust in all of them. The verify script now also inspects `projects.ts`
+   metric string + tagline word; next extension needs to scan MDX body text
+   (regex on number-word + unit) and `<MetricGrid items={…}>` JSX. Promote to
+   STABLE_LOGIC: "numbers-in-prose guards cover body + JSX, not only
+   frontmatter."
+
+2. **Positional claims decay silently after a reorder.** When a case study
+   says "on this page" or "6th case study" or "listed below," any later
+   reordering or `featured` flip invalidates the claim without flagging it
+   anywhere. Capsule already warned about this ("positional content must be
+   audited after any reordering"). Rule: wording that embeds position should
+   say "on this site" or name the sibling directly ("Noble, Angel, Lexora,
+   Fieldmark, smm-factory") — never relative-positional. Promote to
+   STABLE_LOGIC.
+
+3. **Domain-expert pattern works and finds things humans miss.** V1 shipped
+   today, first real invocation found 4 blockers in one case study. The
+   capsule did the load-bearing work on narrative-integrity findings
+   (specifically the "numbers in prose must match disk reality" line from
+   the AI-collab variant section). Honest validation signal from the expert
+   confirmed: capsule-driven for 6 of 10 findings, project-driven for 2,
+   general knowledge for 2. Variant C stays at Week 1 opt-in — need 2-3
+   more real invocations before advancing.
+
+---
+
 ## 2026-09-27 · Sprint 12 — Portfolio meta case study (`hrekov-dev`)
 
 **Problem.** The other five case studies describe client work. The

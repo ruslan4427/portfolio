@@ -16,7 +16,7 @@ readingTime: 4
 
 **Lexora is a vocabulary app that never asks you to look at your phone — playlists of word pairs play through Neural2 voices while you drive, run, or cook.**
 
-`Flutter · Supabase · GCP TTS · Gemini · 2026-08-30 → 2026-09-19`
+`Flutter · Supabase · GCP TTS · Gemini · 2026-08-30 → 2026-09-29`
 
 ## Context
 
@@ -39,7 +39,7 @@ Every vocabulary app treats audio as an extra. In real use — commutes, workout
 
 ## Prompt Architecture — Spec-First Discipline
 
-Every feature — even sub-hour changes — writes a **markdown spec before code**. The `/speckit-*` family (specify → plan → tasks → implement → checklist) is a rail Claude runs on. There are 19 custom skills in `.claude/skills/` — the speckit family plus a shiploop family for QA, brainstorm, and observer roles.
+Every feature — even sub-hour changes — writes a **markdown spec before code**. The `/speckit-*` family (specify → plan → tasks → implement → checklist) is a rail Claude runs on. There are 17 custom skills in `.claude/skills/` — the speckit family plus a shiploop family for QA, brainstorm, and observer roles.
 
 <PromptLog title="CLAUDE.md — the routing rule">
 If the change touches more than 3 files or takes more than an hour, it goes through speckit. If it's a bug, Claude diagnoses → fixes → verifies → DEVLOGs. No exceptions to the DEVLOG step — that's what makes the next session cheap.
@@ -71,11 +71,11 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
 
 ## Results (honest)
 
-- **Build 13** in Apple review as of 2026-09-19 (Build 12 → hotfix Build 13, same day)
-- **61 unit tests** (mocktail + Freezed), 7 integration flows
+- **Build 15** in Apple review as of 2026-09-29. Arc: Build 12 submitted → Build 13 same-day hotfix (rotated Gemini key) → Build 14 moved Gemini behind a Supabase Edge Function with a Vertex AI service account for stable auth → **rejected under Guidelines 5.1.1(i) + 5.1.2(i)** (undisclosed third-party AI) → Build 15 adds an in-app consent gate before any topic string leaves the device
+- **76 unit tests** (mocktail + Freezed) across 12 files, 7 integration flow files
 - **12 supported languages** (dropped Persian when Google TTS had no fa-IR voice)
 - **26–28 MB** iOS bundle, 59 MB Android
-- **0** paying users. The build hasn't been reviewed yet.
+- **0** paying users. Build 15 still in the review queue at time of writing.
 
 ## Reflection
 

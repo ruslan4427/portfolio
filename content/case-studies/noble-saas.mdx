@@ -1,7 +1,7 @@
 ---
 slug: noble-saas
 title: Noble
-tagline: Booking SaaS for solo barbershops — 227 commits, one frozen file.
+tagline: Booking SaaS for solo barbershops — 234 commits, one frozen file.
 role: Full build · solo
 stack:
   - Next.js 16
@@ -17,18 +17,18 @@ featured: true
 publishedAt: "2026-04-08"
 readingTime: 7
 recruiterSummary: |
-  Multi-tenant booking SaaS for solo barbershops — full build, solo, 227 commits over five months. Stripe subscriptions, Twilio A2P 10DLC SMS (passing US carrier compliance), Supabase row-level security for tenant isolation, and an autonomous weekly marketing pipeline running on GitHub Actions.
+  Multi-tenant booking SaaS for solo barbershops — full build, solo, 234 commits since April. Stripe subscriptions, Twilio A2P 10DLC SMS (passing US carrier compliance), Supabase row-level security for tenant isolation, and an autonomous weekly marketing pipeline running on GitHub Actions.
 
-  151 of the 227 commits landed in the first ten days: empty repo to working multi-tenant SaaS. That velocity produced 16 named QA bugs, all fixed in commit 6b29244 and frozen in a 171-line STABLE_LOGIC.md that forbids future refactor of the surviving edge cases.
+  74 of those commits landed in the first ten days — empty repo to live multi-tenant bookings. 152 by April's end, hardened against the 16 named QA bugs that production surfaced. All 16 were fixed in commit 6b29244 and frozen in a 170-line docs/STABLE_LOGIC.md that forbids future refactor of the surviving edge cases.
 
   Steady-state now runs 6–11 commits/month. The interesting work migrated from "build the app" to "build the machine that grows the app" — Claude authors marketing content, not code.
 supportingArtifacts:
   - type: timeline
     label: Build window
-    detail: 2026-04-08 → present · 5 months, 12 days
+    detail: 2026-04-08 → ongoing · 5 months 25 days as of 2026-10-03
   - type: timeline
     label: April sprint
-    detail: 151 commits in first 10 days · empty repo to multi-tenant SaaS
+    detail: 74 commits in 10 days to live bookings · 152 by month's end
   - type: cost
     label: Pricing
     detail: $15/mo flat · 14-day trial · no credit card
@@ -42,18 +42,18 @@ supportingArtifacts:
     label: d6e1b5a
     detail: seed bookedSlotsMap from server on page load, eliminating all client cache issues
   - type: link
-    label: STABLE_LOGIC.md pattern (portfolio DEVLOG)
+    label: STABLE_LOGIC.md pattern (portfolio example)
     href: https://github.com/ruslan4427/portfolio/blob/main/STABLE_LOGIC.md
-    detail: The 171-line file that names each frozen edge case and forbids refactor
+    detail: The same anti-drift pattern as practiced in this portfolio — rules that survive future refactors, promoted from a journal only after proving themselves
 ---
 
-**Noble is a multi-tenant booking SaaS for barbershops and salons: $15/month, 5-minute setup, SMS reminders that actually work. Built with Claude over 227 commits, hardened by 16 named bugs, and running autonomous marketing since June.**
+**Noble is a multi-tenant booking SaaS for barbershops and salons: $15/month, 5-minute setup, SMS reminders that actually work. Built with Claude over 234 commits, hardened by 16 named bugs, and running autonomous marketing since June.**
 
 `Next.js 16 · React 19 · TypeScript · Supabase · Stripe · Twilio · Tailwind v4 · 2026-04-08 → present`
 
 ## Context
 
-Noble is the biggest thing I've built with Claude — 227 commits over five months, 151 of them in the first ten days. It's a real product: Stripe subscriptions running, Twilio SMS with A2P 10DLC compliance passing US carrier checks, Supabase row-level security enforcing tenant isolation at the database layer, and an autonomous weekly marketing pipeline pushing content to Instagram every Monday.
+Noble is the biggest thing I've built with Claude — 234 commits since April, 74 of them in the first ten days and 152 by April's end. It's a real product: Stripe subscriptions running, Twilio SMS with A2P 10DLC compliance passing US carrier checks, Supabase row-level security enforcing tenant isolation at the database layer, and an autonomous weekly marketing pipeline pushing content to Instagram every Monday.
 
 ## Problem
 
@@ -100,7 +100,7 @@ The rest of session context is split across single-purpose files: `CLAUDE.md` (p
 <BeforeAfter>
   <Before date="2026-04-08 → 04-18">
 
-Ten days. 151 commits. A booking page that shipped, worked in dev, worked in staging, and started producing double-bookings within an hour of the first real user.
+Ten days. 74 commits. A booking page that shipped, worked in dev, worked in staging, and started producing double-bookings within an hour of the first real user. By month's end that number had climbed to 152 — the extra 78 commits were the triage of what shipping fast actually produced.
 
 Every failure mode showed up: race conditions on insert (two people booking the same slot because check-then-insert wasn't atomic). Cache stale between browser refresh and server state. Break windows validated wrong. Timezone drift between the browser calendar and the block-timestamps table. Phone regex too permissive. Email accepting garbage.
 
@@ -112,7 +112,7 @@ _"fix: all 16 QA bugs — slot cache, overlap, reschedule, break validation, pho
   </After>
 </BeforeAfter>
 
-**Lesson:** *AI-collaboration velocity is real, and produces exactly the number of bugs you don't test for. 151 commits in 10 days shipped 16 broken edge cases. QA discipline is the ceiling, not code output.*
+**Lesson:** *AI-collaboration velocity is real, and produces exactly the number of bugs you don't test for. 74 commits in 10 days shipped 16 broken edge cases that only showed up under real traffic. QA discipline is the ceiling, not code output.*
 
 ## Iteration Moment #2 — Vercel's cache is not your friend
 
@@ -148,10 +148,10 @@ _"seed bookedSlotsMap from server on page load, eliminating all client cache iss
 <MetricGrid
   columns={4}
   items={[
-    { value: "227", label: "commits", hint: "5 months, 12 days" },
+    { value: "234", label: "commits", hint: "since 2026-04-08" },
     { value: "~10k", label: "LOC", hint: "73 TS files" },
     { value: "16", label: "named bugs", hint: "none regressed" },
-    { value: "3", label: "pivots", hint: "commit hashes inspectable" },
+    { value: "2", label: "pivots", hint: "6b29244, d6e1b5a" },
   ]}
 />
 
@@ -167,8 +167,8 @@ _"seed bookedSlotsMap from server on page load, eliminating all client cache iss
 
 ## Reflection
 
-1. **The April sprint proved two things at once.** AI-collab velocity is real — 10 days from empty repo to working multi-tenant SaaS is not a lie. And that velocity produces exactly the number of bugs your QA didn't cover. The fix isn't slower code; it's a `STABLE_LOGIC.md` that names the bugs after you find them, so the next Claude session doesn't unwind the fixes.
+1. **The April sprint proved two things at once.** AI-collab velocity is real — 74 commits in 10 days to live multi-tenant bookings is not a lie. And that velocity produces exactly the number of bugs your QA didn't cover: 16 of them surfaced in production between day 10 and April's end, pushing the month total to 152. The fix isn't slower code; it's a `STABLE_LOGIC.md` that names the bugs after you find them, so the next Claude session doesn't unwind the fixes.
 
-2. **Steady-state isn't done.** Noble hit feature-complete around June. Commit velocity dropped 10× — 151 to 6–11/month. But the project isn't paused; it moved layers. Claude now writes marketing content, not code. The interesting work migrated from "build the app" to "build the machine that grows the app." That reallocation is what AI-first solo work makes possible — a traditional team wouldn't reslot this cleanly.
+2. **Steady-state isn't done.** Noble hit feature-complete around June. Commit velocity dropped roughly 20× in daily terms — ~7 commits/day during the April sprint to ~0.3 commits/day in steady state (6–11/month). But the project isn't paused; it moved layers. Claude now writes marketing content, not code. The interesting work migrated from "build the app" to "build the machine that grows the app." That reallocation is what AI-first solo work makes possible — a traditional team wouldn't reslot this cleanly.
 
-3. **The most valuable file in this repo is `STABLE_LOGIC.md`, not the code.** It's 171 lines. It documents the exact functions that survived edge cases and forbids future refactors. Anything I ship after this will have one — before the first bug fix, not after the tenth.
+3. **The most valuable file in this repo is `docs/STABLE_LOGIC.md`, not the code.** It's 170 lines. It documents the exact functions that survived edge cases and forbids future refactors. Anything I ship after this will have one — before the first bug fix, not after the tenth.

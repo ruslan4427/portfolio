@@ -1,7 +1,7 @@
 ---
 slug: hrekov-dev
 title: The portfolio that documents itself
-tagline: Fourteen sprints, twenty-six memory files, one recursive proof.
+tagline: Fourteen sprints, twenty-eight memory files, one recursive proof.
 role: Meta · solo build
 stack:
   - Next.js 16
@@ -16,7 +16,7 @@ featured: false
 publishedAt: "2026-09-27"
 readingTime: 7
 recruiterSummary: |
-  This portfolio ships as its own 6th case study. The other five (Noble, Angel, Lexora, Fieldmark, smm-factory) describe client work. This one describes the machine — the memory files, classifier, and promotion discipline — that produced all six, in the open, on the exact site you are reading.
+  This portfolio ships as its own case study, listed first on the home page. The five client cases (Noble, Angel, Lexora, Fieldmark, smm-factory) describe work I did for others. This one describes the machine — the memory files, classifier, and promotion discipline — that produced all six, in the open, on the exact site you are reading.
 
   Written for fractional clients evaluating whether the workflow scales to their engagement. If you're screening for craft, start with Noble. If you're screening for how work happens, start here.
 supportingArtifacts:
@@ -31,13 +31,13 @@ supportingArtifacts:
     href: "https://github.com/ruslan4427/portfolio"
   - type: cost
     label: "DEVLOG → STABLE_LOGIC promotion rate"
-    detail: "10 rules graduated from 35 journal entries · 28.6%"
+    detail: "10 rules graduated from 39 journal entries · 25.6%"
   - type: timeline
     label: "Cadence to date"
-    detail: "14 sprints across 13 calendar days · ~1.1 sprints/day"
+    detail: "14 sprints across 14 calendar days · ~1.0 sprints/day"
   - type: timeline
     label: "Ramp-up saved per new session"
-    detail: "~52 min · 26 memory files × ~2 min context re-hydration each"
+    detail: "~56 min · 28 memory files × ~2 min context re-hydration each"
 devlogRefs:
   - date: "2026-09-24"
     entry: "Font pivot to Playfair Display + ambient dot wave"
@@ -55,7 +55,7 @@ devlogRefs:
 
 ## 1. Cold open
 
-The other five case studies on this page describe work I did for clients.
+The five client case studies on this site describe work I did for others.
 This one describes the site you're reading.
 
 That sounds self-obsessed. It would be, if the site were the point. It
@@ -63,8 +63,8 @@ isn't — the site is a byproduct. The actual artifact is the workflow
 that produced it, and the workflow only holds up if I can show it
 working on something. This portfolio was the something.
 
-Twenty-six memory files. Thirty-five journal entries. Ten of them
-promoted to durable rules. Fourteen sprints across thirteen calendar days,
+Twenty-eight memory files. Thirty-nine journal entries. Ten of them
+promoted to durable rules. Fourteen sprints across fourteen calendar days,
 solo. Every decision is on disk, timestamped, in a public repo you can
 clone. Half the interesting ones are wrong on the first pass — the
 discipline is that the second pass catches them before they compound.
@@ -74,9 +74,11 @@ engagement, don't read a whitepaper. Read the machine that made itself.
 
 <figure className="not-prose my-10">
   <video
-    className="w-full rounded-[16px] shadow-[var(--shadow-card)]"
+    className="w-full rounded-[var(--radius-card)] shadow-[var(--shadow-card)]"
     src="/videos/podcast-hrekov-dev-part1.mp4"
     poster="/videos/podcast-hrekov-dev-part1-poster.jpg"
+    width={1280}
+    height={720}
     controls
     playsInline
     preload="metadata"
@@ -109,19 +111,26 @@ about.
 ## 3. The persistence layer
 
 The workflow lives in one directory:
-`~/.claude/projects/-Users-ruslan-portfolio/memory/`. Seventeen Markdown
+`~/.claude/projects/-Users-ruslan-portfolio/memory/`. Twenty-eight Markdown
 files at time of writing, each with YAML frontmatter, each authored by
 Claude at the exact moment a durable fact crystallized mid-conversation.
 
 ```text
 MEMORY.md
+brainstorm_discovery_domain_expert_agent_2026-10-03.md
 case_study_template.md
 feedback_auto_open_new_files.md
 feedback_css_cascade_first.md
+feedback_hero_content_placement.md
+feedback_mdx_blockjs_false.md
+feedback_prefer_written_source_over_recall.md
+feedback_trust_but_verify_tooling.md
 feedback_visual_direction.md
 iteration-11.md
+iteration-14.md
 iteration-7.md
 iteration-9.md
+iteration-expert-v1.md
 portfolio_active.md
 portfolio_ai_video_pivot.md
 portfolio_content_strategy.md
@@ -130,6 +139,10 @@ portfolio_font_pivot.md
 portfolio_podcast_format.md
 portfolio_voice_cloning.md
 portfolio_workflow.md
+project_heygen_clone.md
+project_video_pilot_pause_2026-09-27.md
+reference_elevenlabs_video_pricing.md
+reference_linkedin_api_endpoint.md
 shiploop_discipline.md
 user_name_romanization.md
 ```
@@ -208,7 +221,7 @@ three times before checking layers.
   it out.
 ```
 
-That is one file out of seventeen. Every one of the others reads like
+That is one file out of twenty-eight. Every one of the others reads like
 this: rule at the top, incident that produced it in the middle, edge
 case guidance at the bottom. No lore, no essays, no aspirational
 principles — just what the machine needs to not repeat yesterday's
@@ -216,29 +229,29 @@ mistake.
 
 ## 4. The MEMORY.md index
 
-Seventeen files is already too many to open blindly at the start of a
+Twenty-eight files is already too many to open blindly at the start of a
 session. Reading them all would eat context before the actual work
 started. So the memory system carries its own directory: `MEMORY.md`,
 a flat list of one-line pointers.
 
 ```markdown
 - [User's surname: Hrekov (not Grekov)](user_name_romanization.md) — Ukrainian romanization Г→H. Full name "Ruslan Hrekov". Gmail keeps the old spelling — do not "fix" the email.
-- [ShipLoop is a discipline, not an event](shiploop_discipline.md) — classify every request; nothing gets built without spec+plan+tasks.
+- [ShipLoop is a discipline, not an event](shiploop_discipline.md) — classify every request; nothing gets built without spec+plan+tasks; how the user invokes ShipLoop.
 - [Portfolio shiploop active](portfolio_active.md) — Sprint 0 bootstrap shipped 2026-09-20; retrofit ShipLoop discipline retroactively.
-- [Portfolio design pivot (2026-09-23)](portfolio_design_pivot.md) — dark Lusion → minimalist editorial. Monochrome + green dot.
+- [Portfolio workflow — wait for shiploop](portfolio_workflow.md) — superseded but kept for historical context.
+- [Portfolio design pivot (2026-09-23)](portfolio_design_pivot.md) — dark Lusion → minimalist editorial. Monochrome + green dot. Reference: Nizar Ali Dribbble 24766210.
 - [Visual direction — reference-first](feedback_visual_direction.md) — never write a design brief from abstract description alone; get concrete references from Ruslan first.
-- [Portfolio font pivot (2026-09-24)](portfolio_font_pivot.md) — Playfair Display upright + strictly monochrome cursor-reactive DotGrid, all tunables in top-of-file CONFIG.
+- [Portfolio Sprint 7 shipped](iteration-7.md) — redesign done 2026-09-23; do not reintroduce dark/three.js/gsap without new spec; copy softening held for user sign-off.
+- [Portfolio font pivot (2026-09-24)](portfolio_font_pivot.md) — Playfair Display upright + strictly monochrome cursor-reactive DotGrid w/ idle breathing wave, all tunables in top-of-file CONFIG.
 - [Portfolio Sprint 9 shipped](iteration-9.md) — single-page → multi-page IA. Global chrome in root layout; Nav route-based w/ prefix match.
-- [CSS cascade before JIT/HMR blame](feedback_css_cascade_first.md) — same Tailwind class works on `<button>` but not `<a>`? It's `@layer` cascade, not compilation.
-- [Portfolio content strategy (2026-09-26)](portfolio_content_strategy.md) — Recruiter primary. Format D+C mix. Dev.to replaces Medium. GA4 chosen.
-- [Portfolio Sprint 11 shipped](iteration-11.md) — Blog foundation + case study L2/L3 + GA4 with EU-gated consent. proxy.ts (not middleware.ts).
+- [CSS cascade before JIT/HMR blame](feedback_css_cascade_first.md) — same Tailwind class works on `<button>` but not `<a>`? It's `@layer` cascade, not compilation. Never inline-style-around a utility that "isn't applying".
 ```
 
 Every line has the same shape: `- [<title>](<file>) — <one-line hook>`.
 Nothing longer, nothing hierarchical. The model reads the index in one
 pass, ranks which files look load-bearing to the current task, and
 opens only those. In practice, a typical session opens two or three
-files, not seventeen. The index is what makes the collection scale.
+files, not twenty-eight. The index is what makes the collection scale.
 
 ## 5. The discipline that produces memory
 
@@ -263,10 +276,10 @@ and why) live on the [About page's stack section](/about#stack). I won't
 duplicate them here; the point of the routing rules is that they're
 one lookup away, not restated everywhere.
 
-## 6. DEVLOG → STABLE\_LOGIC — the 36% number
+## 6. DEVLOG → STABLE\_LOGIC — the 25.6% number
 
-Twenty-five entries in `DEVLOG.md`. Nine of them promoted to
-`STABLE_LOGIC.md`. That's 36%. The other 64% stayed in the journal.
+Thirty-nine entries in `DEVLOG.md`. Ten of them promoted to
+`STABLE_LOGIC.md`. That's 25.6%. The other 74.4% stayed in the journal.
 
 Journaling and learning are not the same thing. A journal captures what
 happened; that's cheap and worth doing. But most of what happened is
@@ -318,9 +331,11 @@ Journaling is the raw material. Promotion is the discipline.
 
 <figure className="not-prose my-10">
   <video
-    className="w-full rounded-[16px] shadow-[var(--shadow-card)]"
+    className="w-full rounded-[var(--radius-card)] shadow-[var(--shadow-card)]"
     src="/videos/podcast-hrekov-dev-part2.mp4"
     poster="/videos/podcast-hrekov-dev-part2-poster.jpg"
+    width={1280}
+    height={720}
     controls
     playsInline
     preload="metadata"
@@ -335,9 +350,9 @@ Journaling is the raw material. Promotion is the discipline.
 <MetricGrid
   columns={3}
   items={[
-    { value: "12", label: "sprints" },
-    { value: "8", label: "calendar days" },
-    { value: "~1.5", label: "sprints / day" },
+    { value: "14", label: "sprints" },
+    { value: "14", label: "calendar days" },
+    { value: "~1.0", label: "sprints / day" },
   ]}
 />
 
@@ -380,7 +395,7 @@ a diff, at minimum:
 - *"Are we still shipping the ElevenLabs voice clone plan?"* — no,
   pivoted to AI video on 2026-09-27; `portfolio_ai_video_pivot.md`.
 
-Rough estimate: two minutes per file × seventeen files ≈ thirty-four
+Rough estimate: two minutes per file × twenty-eight files ≈ fifty-six
 minutes of ramp-up the model doesn't have to spend rebuilding context
 before it can act. That number is soft, but the direction isn't.
 
@@ -456,9 +471,11 @@ Ephemeral task details.
 
 <figure className="not-prose my-10">
   <video
-    className="w-full rounded-[16px] shadow-[var(--shadow-card)]"
+    className="w-full rounded-[var(--radius-card)] shadow-[var(--shadow-card)]"
     src="/videos/podcast-hrekov-dev-part3.mp4"
     poster="/videos/podcast-hrekov-dev-part3-poster.jpg"
+    width={1280}
+    height={720}
     controls
     playsInline
     preload="metadata"

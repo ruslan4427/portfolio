@@ -49,7 +49,7 @@ The rule that keeps sessions sharp: **"Spec + one file, not the codebase."** Cla
 
 ## Iteration Moment
 
-Only one commit exists (`b652cd3`, 2026-05-12) — the entire agent architecture and 4-sprint roadmap were built *before* production code. That's the pivot: instead of jumping into features and refactoring later, I front-loaded the agent design. Sprint 1–3 (auth, HR, marketplace) shipped from that scaffold; Sprint 4 (shop + fleet) is in progress. **Lesson: for a 4-module product, an hour designing the pipeline saves a week of rewrites.**
+Only one commit exists (`b652cd3`, 2026-05-12) — the entire agent architecture and 4-sprint roadmap were built *before* production code. That's the pivot: instead of jumping into features and refactoring later, I front-loaded the agent design. All four sprints (auth, HR, marketplace, shop + fleet) have since been built in the working tree against that scaffold; what remains is the client deployment and the first live users. **Lesson: for a 4-module product, an hour designing the pipeline saves a week of rewrites.**
 
 ## Trade-Offs
 
@@ -60,9 +60,9 @@ Only one commit exists (`b652cd3`, 2026-05-12) — the entire agent architecture
 
 ## Results (honest)
 
-- 1 commit, 4 sprints scoped, 3 shipped
-- 6 agent role files + 4 module knowledge packs
-- Zero production users yet — Sprint 4 gates go-live
+- 1 commit pushed (`b652cd3`, 2026-05-12), 4 sprints built in the working tree — Sprint 1 complete, 2 & 3 within ~1 open item each, Sprint 4 at 27/27 checklist items
+- 5 role contracts in `agents/` (orchestrator, PM, UI-UX designer, developer, reviewer) + 1 `WORKFLOW.md` meta spec + 6 architecture docs in `docs/` (ARCHITECTURE, CONTEXT_MAP, DB_SCHEMA, DESIGN_SYSTEM, DPPA_COMPLIANCE, INTEGRATIONS)
+- Zero production users yet — go-live is gated on deployment, not code
 - V9 design system: mobile-first at 375px, Ohio timezone hard-coded
 
 ## Reflection

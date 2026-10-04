@@ -22,8 +22,17 @@ classified before responding:
 | **D** Discovery | "brainstorm", "design", "ideas", "how should we" | Suggest Opus → /shiploop-brainstorm | **opus** |
 | **M** Memory | "what did we", "status", "where are we" | Read `memory/` → answer | haiku |
 | **O** Observer | "optimize agents", "improve workflow" | /shiploop-observer | sonnet |
+| **E** Expert | "review", "second opinion", "pre-ship check", "root cause" | /shiploop-expert phase=<pre-ship\|in-progress\|blind-bug> | sonnet (via `expert` subagent) |
 
 **Rule for L and D:** state the plan + suggest `/fast` (Opus) before starting.
+
+**Expert consultation (Variant C rollout, Week 1 = opt-in as of 2026-10-03):**
+- L-class tasks: _recommend_ `/shiploop-expert phase=in-progress` after plan
+  lands and again `phase=pre-ship` before merge. User can skip.
+- B-class tasks with no clear root cause: `/shiploop-expert phase=blind-bug`
+  with the symptom.
+- Capsules live in `.claude/expertise/<domain>.md`. First validated capsule:
+  `editorial-portfolio-site.md` (3/3 blind-bug test, 2026-10-03).
 
 ### Lifecycle
 
@@ -58,6 +67,10 @@ Save `memory/` file at each phase boundary:
 - `/shiploop-brainstorm stage=<discovery|post-spec|post-qa|retrospective>` — structured brainstorm
 - `/shiploop-tester` — full QA pipeline
 - `/shiploop-observer` — check chain health, propose optimizations
+- `/shiploop-expert phase=<pre-ship|in-progress|blind-bug>` — consult the
+  domain-expert subagent (`.claude/agents/expert.md`); loads cached
+  capsule from `.claude/expertise/<domain>.md` or researches fresh
+  (hybrid: drafts proposal → user approves → saves)
 
 **Speckit is NOT installed** — spec/plan/tasks documents are authored manually
 in `specs/<N>-<slug>/` following the format described in the shiploop-start
