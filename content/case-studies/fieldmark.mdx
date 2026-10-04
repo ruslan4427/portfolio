@@ -19,6 +19,10 @@ readingTime: 4
 
 `Flutter · Supabase · Riverpod · Firebase FCM · 2026-09-12 → 2026-09-19`
 
+<ValueStatement eyebrow="Pitch">
+A rejection email became the clearest spec of the sprint. Build 20 bounced, Build 21 submitted the next morning, approved.
+</ValueStatement>
+
 ## Context
 
 Installer crews (electric, HVAC, low-voltage) work off paper plans and text messages. A foreman marks up a PDF, hands it out, and then chases status by phone all day. Fieldmark makes the same PDF interactive: pins are tasks, tasks have photos and voice notes, status flows back automatically.
@@ -67,20 +71,34 @@ _feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ —
 
 ## Trade-Offs
 
-1. **Riverpod over Bloc.** Less boilerplate, code generation, faster velocity on a solo project. Cost: fewer middleware plugins.
-2. **Supabase Postgres RLS over Firebase.** Real row-level security in SQL. Cost: no built-in offline sync — handled by `connectivity_plus` + a local queue.
-3. **Native ASAuthorization over web OAuth.** No redirect dance, Apple review passes. Cost: Apple client secret rotates every 6 months — automated with a Python script and a calendar reminder before the first user signed up.
-4. **PKCE flow.** Required for native Apple Sign-In. Cost: nonce validation complexity — mitigated by codegen.
+<NumberedCards
+  columns={2}
+  items={[
+    { title: "Riverpod over Bloc", body: "Less boilerplate, code generation, faster velocity on a solo project. Cost: fewer middleware plugins." },
+    { title: "Supabase Postgres RLS over Firebase", body: "Real row-level security in SQL. Cost: no built-in offline sync — handled by connectivity_plus + a local queue." },
+    { title: "Native ASAuthorization over web OAuth", body: "No redirect dance, Apple review passes. Cost: Apple client secret rotates every 6 months — automated with a Python script and a calendar reminder before the first user signed up." },
+    { title: "PKCE flow", body: "Required for native Apple Sign-In. Cost: nonce validation complexity — mitigated by codegen." },
+  ]}
+/>
 
 ## Results (honest)
 
-- **7 days** from first commit to App Store submission
-- **7 commits**, 5 of them in the final 24h auth sprint
-- **Build 20** rejected → **Build 21** submitted 2026-09-19 → approved and live on the App Store
-- Live with **3 foreman crews** across 3 projects; three post-launch bugs surfaced on real signups within days (OTP delivery, Delete Account, invitation idempotency across deletion) — all diagnosed root-cause and fixed, documented in `DEVLOG.md` so the next session doesn't re-litigate them
+<ImpactStats
+  columns={3}
+  items={[
+    { value: "7 days", label: "First commit → App Store submission" },
+    { value: "7 commits", label: "Five of them in the final 24h auth sprint" },
+    { value: "3 crews", label: "Live across 3 projects after approval" },
+  ]}
+/>
+
+Build 20 rejected → Build 21 submitted 2026-09-19 → approved and live on the App Store. Three post-launch bugs surfaced on real signups within days (OTP delivery, Delete Account, invitation idempotency across deletion) — all diagnosed root-cause and fixed, documented in `DEVLOG.md` so the next session doesn't re-litigate them.
 
 ## Reflection
 
-1. **Rejection emails are the best specs.** Guideline 2.1(a) with the reviewer's screenshot was cleaner than any AC I would have written myself.
-2. **A DEVLOG that captures *why* survives context resets.** Claude Code hits context limits mid-project; DEVLOG is what lets the next session pick up without me re-explaining.
-3. **Automating the boring future task pays off before the future arrives.** The 6-month Apple secret rotation script was written the same day as the auth pivot — because the pivot's context was the only time I'd remember to.
+<Pullquote attribution="Lesson from the Apple Sign-In rewrite">
+Rejection emails are the best specs. Guideline 2.1(a) with the reviewer's screenshot was cleaner than any AC I would have written myself.
+</Pullquote>
+
+1. **A DEVLOG that captures *why* survives context resets.** Claude Code hits context limits mid-project; DEVLOG is what lets the next session pick up without me re-explaining.
+2. **Automating the boring future task pays off before the future arrives.** The 6-month Apple secret rotation script was written the same day as the auth pivot — because the pivot's context was the only time I'd remember to.

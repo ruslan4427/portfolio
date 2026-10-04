@@ -1997,3 +1997,41 @@ Total credit spend: ~470 across the three renders (140 for the original full 8:2
 - **For a multi-part series on one platform, the opening-closing-continuation shape has to be scripted explicitly.** Part 1 is "hello + content, no bye." Part 2 is "continuation, no hello, no bye." Part 3 is "continuation + proper goodbye." Mistake would be each render independently greeting and closing — reader confusion.
 - **Scene Instructions is the consistency driver, not the avatar.** Same block pasted across three sessions produced visibly matching studios. Avatar + voice + settings held second-order.
 - **Credit-per-minute of HeyGen Podcast template holds linearly** across 8-minute renders (verified twice now at ~140 credits per 8 min = ~17.5/min including the fixed 50-credit preview, or ~11/min for just the final render). Earlier estimate of 30/min stays dead.
+
+---
+
+## 2026-10-03 — Visual anchors for case studies + screenshot automation pipeline
+
+**Problem:** Case study bodies are long-form prose with occasional `<Artifact>`/`<MetricGrid>`/`<PromptLog>` punctuation but very little visual scaffolding. A recruiter skimming at speed has nothing to anchor the eye between section headers — the reading experience is a wall of body copy that leans on the reader's willingness to parse. The two Behance references the user flagged (Fluxa + RealstAI) solve this with large editorial statements, numbered principle cards, big-stat panels, and framed product shots that let the eye rest and get re-engaged with specific claims. The portfolio needed the same vocabulary — plus a reproducible way to generate the framed product shots instead of hand-grabbing them each time.
+
+**Decision:** Shipped two layers in one pass:
+
+**Layer A — five MDX visual primitives** (`components/mdx/CaseStudyVisuals.tsx`) wired into the MDXRemote components map alongside existing blog + base mdx components:
+1. `<ValueStatement eyebrow? children />` — border-top/bottom editorial statement, Playfair clamp(28–44px), one per case study max.
+2. `<NumberedCards items={[{title, body}]} columns?={1|2|3} />` — hairline-bordered cards with large faint serif numerals (`01`/`02`/...). Replaces plain ordered-list trade-off blocks when the items are substantial enough to deserve a card each.
+3. `<Pullquote attribution? children />` — left-border vertical rule + Playfair clamp(22–32px) pulled line, Inter attribution underneath.
+4. `<ImpactStats items={[{value,label,hint?}]} columns?={2|3|4} />` — border-top/bottom stat band distinct from `<MetricGrid>` (left-aligned, bigger value, different pacing).
+5. `<Figure src alt caption? width? height? frame?={minimal|flat} />` — `next/image` wrapped in either a hairline card w/ paper-gradient padding (the "minimalist frame" the user asked for, explicitly not photorealistic) or a flat hairline-bordered crop. Lazy-loaded, 2× pixel density via Playwright capture.
+
+**Layer B — screenshot automation**:
+- `scripts/screenshot-web.mjs` — Playwright + chromium headless; six baseline captures (home + /work + /work/hrekov-dev + /blog + /about + mobile home) at 1440×900 and 390×844, 2× DPR, `reducedMotion: "reduce"`, `.fixed.bottom-6` hidden so the floating email pill doesn't bake into every shot. Writes `.webp` q=88 into `public/case-studies/hrekov-dev/`.
+- `scripts/screenshot-flutter.sh` — `boot|launch|capture` subcommands wrapping `xcrun simctl` + `flutter run`. Device env-overridable (defaults `iPhone 16 Pro`). Semi-automated: the operator navigates in Simulator, the script snapshots and files the PNG under `public/case-studies/<slug>/<name>.png`.
+
+Pilot inserted into two case studies:
+- **hrekov-dev** (recursive, on-brand): `<ValueStatement>` under §1 thesis, `<Pullquote>` for the drift lesson at the end of §7, `<Figure>` of the live `/` home screenshot at the top of §10 "The recursive close" — reader scrolls to a frame of the page they're reading.
+- **fieldmark**: `<ValueStatement>` under the pitch bold line, `<NumberedCards columns={2}>` replacing the 4-item Trade-Offs ordered list, `<ImpactStats columns={3}>` replacing the first three bullets of Results, `<Pullquote>` on "Rejection emails are the best specs" at the top of Reflection.
+
+Playwright added as `devDependencies` (not shipped to runtime; `npm run build` ignores it). Chromium browser installed to the ~/.cache/ms-playwright standard path.
+
+**Result:**
+- `npx tsc --noEmit` clean.
+- `npm run verify:numbers` clean (fieldmark numbers unchanged: 7 commits / 7 days / 3 crews).
+- `npm run build` prerendered all 6 case studies with new primitives — no MDX serialization errors (blockJS:false memory rule held; both `items={[...]}` arrays arrived shaped on the server component).
+- Playwright pilot run from prod `https://hrekov.dev` wrote six .webp into `public/case-studies/hrekov-dev/` totaling ~550 KB.
+- Dev-server visual check at 1440 and 390 widths: NumberedCards 2×2 grid collapses to single column, ImpactStats 3-col collapses to single, Pullquote keeps left rule — monochrome palette intact, no new hex values introduced.
+
+**Lesson:**
+- **Visual primitives belong in their own file, not bolted onto BlogComponents.** `blogComponents` is already registered everywhere MDX is rendered; a dedicated `caseStudyVisuals` map keeps the design-system additions discoverable and lets a future reader see at a glance what the editorial grammar for case studies actually is.
+- **Capture floating overlays as a known hazard.** Headless Playwright will faithfully bake in `.fixed.bottom-6` emails, consent banners, and (if present) analytics debug panels. Add the hide-rule to `screenshot-web.mjs` up front; the alternative is re-capturing every pass as the layout evolves.
+- **Where the recursion costs nothing, embrace it.** The hrekov-dev case study's §10 reads "You're browsing the artifact" — placing a `<Figure>` of the actual home page immediately above that sentence doubles the rhetorical weight for zero prose change. The same move for other case studies requires live product screenshots (Noble, Fieldmark via Simulator, Lexora via Simulator). Session 2 agenda.
+- **Playwright v. puppeteer:** picked Playwright because the browser install is a single `npx playwright install chromium` with no runtime download trap, and `addStyleTag` + `reducedMotion` are first-class API — three lines of config swallowed the whole DotGrid/CTA problem.

@@ -1,13 +1,14 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { blogComponents } from "./BlogComponents";
+import { caseStudyVisuals } from "./CaseStudyVisuals";
 import { mdxComponents } from "./MdxComponents";
 
 export function CaseStudyBody({ source }: { source: string }) {
   return (
     <MDXRemote
       source={source}
-      components={{ ...mdxComponents, ...blogComponents }}
+      components={{ ...mdxComponents, ...blogComponents, ...caseStudyVisuals }}
       options={{
         mdxOptions: {
           remarkPlugins: [remarkGfm],
