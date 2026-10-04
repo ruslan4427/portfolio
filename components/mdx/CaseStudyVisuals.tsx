@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Lightbox } from "@/components/ui/Lightbox";
 
 export function ValueStatement({
   children,
@@ -140,6 +143,7 @@ export function Figure({
   frame?: FigureFrame;
   kind?: FigureKind;
 }) {
+  const [open, setOpen] = useState(false);
   const frameClass =
     frame === "flat"
       ? "rounded-[var(--radius-tile)] border border-[color:var(--hairline)] overflow-hidden"
@@ -155,7 +159,12 @@ export function Figure({
   return (
     <figure className="not-prose my-10">
       <div className={wrapperClass}>
-        <div className={frameClass}>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={`Expand ${alt}`}
+          className={`group relative block w-full text-left transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)] ${frameClass}`}
+        >
           <Image
             src={src}
             alt={alt}
@@ -164,21 +173,45 @@ export function Figure({
             sizes={sizes}
             className={imgClass}
           />
-        </div>
+          <span
+            aria-hidden
+            className="pointer-events-none absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/90 text-[color:var(--ink-primary)] opacity-0 backdrop-blur-sm transition group-hover:opacity-100 group-focus-visible:opacity-100"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-3.5 w-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+            </svg>
+          </span>
+        </button>
       </div>
       {caption && (
         <figcaption className="mt-3 text-center font-sans text-xs text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        label={alt}
+        caption={caption}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          sizes="(min-width: 1024px) 80vw, 92vw"
+          className="block h-auto max-h-[86vh] w-auto max-w-full rounded-[var(--radius-tile)] border border-[color:var(--hairline)] object-contain"
+        />
+      </Lightbox>
     </figure>
   );
 }
 
-export const caseStudyVisuals = {
-  ValueStatement,
-  NumberedCards,
-  Pullquote,
-  ImpactStats,
-  Figure,
-};

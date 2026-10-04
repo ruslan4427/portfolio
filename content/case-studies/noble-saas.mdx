@@ -49,7 +49,19 @@ supportingArtifacts:
 
 **Noble is a multi-tenant booking SaaS for barbershops and salons: $15/month, 5-minute setup, SMS reminders that actually work. Built with Claude over 234 commits, hardened by 16 named bugs, and running autonomous marketing since June.**
 
-`Next.js 16 · React 19 · TypeScript · Supabase · Stripe · Twilio · Tailwind v4 · 2026-04-08 → present`
+<StackRow
+  items={[
+    { name: "Next.js", slug: "nextdotjs", version: "16" },
+    { name: "React", slug: "react", version: "19" },
+    { name: "TypeScript", slug: "typescript" },
+    { name: "Supabase", slug: "supabase" },
+    { name: "Stripe", slug: "stripe" },
+    { name: "Twilio", slug: "twilio" },
+    { name: "Tailwind CSS", slug: "tailwindcss", version: "v4" },
+  ]}
+  dateRange="2026-04-08 → present"
+  live={{ href: "https://www.noblelink.app", label: "Live product" }}
+/>
 
 <ValueStatement eyebrow="The number that mattered">
 Seventy-four commits in ten days got Noble to live bookings. Sixteen named bugs got it to production. One frozen file keeps it there.
@@ -71,13 +83,34 @@ Noble is the biggest thing I've built with Claude — 234 commits since April, 7
 
 A solo barber makes $40–60 per cut and does 6–8 cuts a day. They lose 20–30% of that to no-shows — bookings taken by phone, forgotten by the client, and never reminded. Fixing that is not a hard engineering problem. It's a *nobody-can-afford-to-build-it* problem, because the standard tools cost more than the incremental revenue they save.
 
-Three real options exist for a solo shop:
+Three real options exist for a solo shop. Noble sits below all three — same core features, a tenth of the price ladder, nothing a solo owner doesn't need.
 
-- **Booksy** ($49/mo) — full-featured, overkill, price kills the ROI.
-- **Fresha / Square** ($99+/mo) — for chains, not solo shops.
-- **WhatsApp + paper calendar** — free, but doesn't scale past ~30 clients.
+<CompareGrid
+  columns={[
+    { name: "Booksy", price: "$49/mo", verdict: "Overkill" },
+    { name: "Fresha / Square", price: "$99+/mo", verdict: "For chains" },
+    { name: "WhatsApp + paper", price: "Free", verdict: "Breaks at 30 clients" },
+    { name: "Noble", price: "$15/mo", verdict: "Built for solo", highlight: true },
+  ]}
+  rows={[
+    { label: "Online booking page", values: [true, true, false, true] },
+    { label: "SMS reminders", values: [true, true, false, true] },
+    { label: "Staff schedule", values: [true, true, false, true] },
+    { label: "Multi-location / franchise", values: [true, true, false, false] },
+    { label: "Loyalty + marketing dashboard", values: [true, true, false, false] },
+    { label: "Price fits solo-shop ROI", values: [false, false, true, true] },
+    { label: "Scales past 30 clients", values: [true, true, false, true] },
+  ]}
+  caption="Noble gives up the chain-business features and the loyalty program — the two things a solo owner never asks for."
+/>
 
-Noble sits below all three. Same core features (online booking, SMS reminders, staff schedule), $15/mo flat. The trade is: no loyalty program, no marketing dashboard, no franchise features. Solo shops don't need them.
+<Figure
+  src="/case-studies/noble-saas/pricing.webp"
+  alt="Noble pricing page — 'Simple, transparent pricing' headline, Monthly/Yearly toggle, single Starter card at $15/mo listing 5 staff, unlimited bookings, online booking page, calendar & reschedule, email + SMS reminders, custom subdomain, with a 'Start free trial' CTA."
+  caption="One tier, no ladder. The code still carries scaffolding for Pro and Business — hidden until a tenant asks."
+  width={2880}
+  height={1800}
+/>
 
 ## Division of Labor
 
@@ -141,6 +174,88 @@ _"seed bookedSlotsMap from server on page load, eliminating all client cache iss
   </After>
 </BeforeAfter>
 
+<FlowSchema
+  title="Booking-page data flow · before and after commit d6e1b5a"
+  rows={[
+    {
+      label: "Before — three cache layers between truth and the booked slot",
+      tone: "before",
+      meta: "race window 1–5 min",
+      diagram: {
+        width: 900,
+        height: 280,
+        nodes: [
+          { id: "b-user", shape: "role", icon: "user", label: "Browser", x: 50, y: 140 },
+          { id: "b-mount", shape: "event", icon: "browser", label: "SalonClient.tsx", sub: "mounts, hydrates", x: 220, y: 140 },
+          { id: "b-query", shape: "process", icon: "database", label: "Supabase query", sub: "anon · user-scoped", x: 420, y: 140 },
+          { id: "b-cache", shape: "action", icon: "cache", label: "Cache fresh?", sub: "1–5 min TTL", x: 600, y: 140 },
+          { id: "b-fresh", shape: "event", icon: "check", label: "Serve fresh", sub: "miss path", x: 780, y: 55, color: "success" },
+          { id: "b-bug", shape: "event", icon: "bug", label: "Double-book", sub: "insert races at DB", x: 780, y: 225, color: "danger", outcome: "denied" },
+        ],
+        edges: [
+          { from: "b-user", to: "b-mount" },
+          { from: "b-mount", to: "b-query" },
+          { from: "b-query", to: "b-cache" },
+          { from: "b-cache", to: "b-fresh", color: "success", label: "miss" },
+          { from: "b-cache", to: "b-bug", color: "danger", label: "stale" },
+        ],
+      },
+    },
+    {
+      label: "After — server-seeded, zero cache layers",
+      tone: "after",
+      meta: "d6e1b5a · 2026-06-03",
+      diagram: {
+        width: 900,
+        height: 220,
+        nodes: [
+          { id: "a-user", shape: "role", icon: "user", label: "Browser", x: 50, y: 110 },
+          { id: "a-server", shape: "event", icon: "server", label: "Server page.tsx", sub: "force-dynamic", x: 220, y: 110 },
+          { id: "a-admin", shape: "process", icon: "shield", label: "supabaseAdmin", sub: "cache: 'no-store'", x: 420, y: 110 },
+          { id: "a-props", shape: "event", icon: "box", label: "initialBookings", sub: "RSC payload", x: 620, y: 110 },
+          { id: "a-seed", shape: "event", icon: "check", label: "Hydrated state", sub: "polling only", x: 800, y: 110, color: "success", outcome: "approved" },
+        ],
+        edges: [
+          { from: "a-user", to: "a-server" },
+          { from: "a-server", to: "a-admin" },
+          { from: "a-admin", to: "a-props" },
+          { from: "a-props", to: "a-seed" },
+        ],
+      },
+    },
+  ]}
+  caption="The fix wasn't to invalidate smarter — it was to delete every cache layer on the correctness path."
+/>
+
+<Diagram
+  title="Booking request · steady state"
+  width={1000}
+  height={420}
+  legend={[
+    { shape: "role", label: "Actor" },
+    { shape: "event", label: "Event / message" },
+    { shape: "process", label: "Server work" },
+    { shape: "action", label: "Decision" },
+  ]}
+  nodes={[
+    { id: "customer", shape: "role", icon: "user", label: "Customer", x: 60, y: 210 },
+    { id: "pick", shape: "event", icon: "clock", label: "Picks slot", sub: "SalonClient.tsx", x: 270, y: 210 },
+    { id: "api", shape: "process", icon: "api", label: "/api/book", sub: "server action", x: 510, y: 210 },
+    { id: "decide", shape: "action", icon: "lock", label: "Slot free?", sub: "atomic insert", x: 720, y: 210 },
+    { id: "ok", shape: "event", icon: "check", label: "INSERT booking", sub: "RLS-scoped", x: 900, y: 90, color: "success", outcome: "approved" },
+    { id: "fail", shape: "event", icon: "warning", label: "409 Conflict", sub: "unique constraint", x: 900, y: 330, color: "danger", outcome: "denied" },
+  ]}
+  edges={[
+    { from: "customer", to: "pick", label: "clicks time" },
+    { from: "pick", to: "api", label: "POST" },
+    { from: "api", to: "decide" },
+    { from: "decide", to: "ok", color: "success", label: "free" },
+    { from: "decide", to: "fail", color: "danger", label: "taken" },
+    { from: "fail", to: "pick", color: "faint", style: "dashed", label: "retry" },
+  ]}
+  caption="The decision diamond is where the previous version lost — a check-then-insert gap let two sessions pass before either committed. The current path makes the DB arbitrate: whoever wins the UNIQUE constraint keeps the slot; the loser re-opens the slot picker."
+/>
+
 **Lesson:** *Managed platforms cache things you didn't ask them to cache. The right response is not to work around the cache — it's to eliminate the cache layer entirely at the point where correctness matters.*
 
 ## Trade-Offs
@@ -180,6 +295,33 @@ _"seed bookedSlotsMap from server on page load, eliminating all client cache iss
   height={1800}
 />
 
+<PhoneRow
+  items={[
+    {
+      src: "/case-studies/noble-saas/marketing-home-mobile.webp",
+      alt: "Noble marketing page on iPhone — 'Your barbershop online in 5 minutes' hero with Create your salon and See pricing CTAs.",
+      width: 780,
+      height: 1688,
+      label: "Landing",
+    },
+    {
+      src: "/case-studies/noble-saas/pricing-mobile.webp",
+      alt: "Pricing page on iPhone — 'Simple, transparent pricing' with the single $15/mo Starter card and Start free trial CTA.",
+      width: 780,
+      height: 1688,
+      label: "Pricing",
+    },
+    {
+      src: "/case-studies/noble-saas/dashboard-mobile.webp",
+      alt: "Admin dashboard on iPhone — 67% Get started onboarding, 5 staff / 4 services counters, Bookings card.",
+      width: 780,
+      height: 1688,
+      label: "In-app",
+    },
+  ]}
+  caption="The same tenant across the full user journey — landing, pricing, in-app — all driven by one Tailwind v4 @theme block."
+/>
+
 - **7 reels + 7 feed posts per week**, autonomously generated by the marketing system
 - **Stack integrations shipped**: Stripe subscriptions, Twilio A2P 10DLC SMS, Resend email, Sentry error tracking
 
@@ -196,3 +338,59 @@ AI-collaboration velocity is real, and produces exactly the number of bugs you d
 2. **Steady-state isn't done.** Noble hit feature-complete around June. Commit velocity dropped roughly 20× in daily terms — ~7 commits/day during the April sprint to ~0.3 commits/day in steady state (6–11/month). But the project isn't paused; it moved layers. Claude now writes marketing content, not code. The interesting work migrated from "build the app" to "build the machine that grows the app." That reallocation is what AI-first solo work makes possible — a traditional team wouldn't reslot this cleanly.
 
 3. **The most valuable file in this repo is `docs/STABLE_LOGIC.md`, not the code.** It's 170 lines. It documents the exact functions that survived edge cases and forbids future refactors. Anything I ship after this will have one — before the first bug fix, not after the tenth.
+
+<TechNotes
+  title="For engineers — go deeper"
+  items={[
+    {
+      kind: "pattern",
+      label: "STABLE_LOGIC.md",
+      title: "Anti-drift journal, promoted from bugs",
+      description:
+        "The exact rule format that stopped Claude from refactoring away 16 production bug fixes. Public example lives in this portfolio repo.",
+      href: "https://github.com/ruslan4427/portfolio/blob/main/STABLE_LOGIC.md",
+    },
+    {
+      kind: "docs",
+      label: "Supabase SSR + Next.js",
+      title: "Dual-client server-side auth pattern",
+      description:
+        "Why Noble runs an anon client in the browser and a service-role admin client with cache: 'no-store' on the server page. Official guide.",
+      href: "https://supabase.com/docs/guides/auth/server-side/nextjs",
+    },
+    {
+      kind: "docs",
+      label: "Supabase RLS",
+      title: "Row-Level Security for tenant isolation",
+      description:
+        "Multi-tenant boundaries enforced at the database, not the app layer — every row carries its tenant_id and policies gate access.",
+      href: "https://supabase.com/docs/guides/database/postgres/row-level-security",
+    },
+    {
+      kind: "docs",
+      label: "Next.js fetch cache",
+      title: "RSC data fetching + cache: 'no-store'",
+      description:
+        "The force-dynamic / no-store directives that let the booking page seed state on every request. The fix in commit d6e1b5a lives here.",
+      href: "https://nextjs.org/docs/app/api-reference/functions/fetch",
+    },
+    {
+      kind: "flag",
+      label: "Twilio A2P 10DLC",
+      title: "US carrier compliance for SMS reminders",
+      description:
+        "The non-obvious reason booking SMS actually arrives in US inboxes — carrier campaign registration, brand vetting, throughput tiers.",
+      href: "https://www.twilio.com/docs/messaging/compliance/a2p-10dlc",
+    },
+    {
+      kind: "docs",
+      label: "Stripe subscriptions",
+      title: "Flat-fee $15/mo billing, 14-day trial",
+      description:
+        "The subscription + checkout + webhook shape Noble ships with — single price, trial, cancel-at-period-end. Stripe's canonical guide.",
+      href: "https://stripe.com/docs/billing/subscriptions/overview",
+    },
+  ]}
+  caption="External docs are jump-points — the sections above show how they combined in production."
+/>
+

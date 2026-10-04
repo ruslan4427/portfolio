@@ -5,6 +5,39 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-10-04 · Noble visual bundle — Lightbox + BPMN diagrams + TechNotes
+
+**Problem.** Noble's technical story (RLS tenant isolation, booking race window, cache invalidation drift, Twilio A2P 10DLC compliance) was carried mostly by prose. Readers who skimmed the body missed the shape of the system; readers who stopped to read lost the thread because the one existing `<FlowSchema>` was a thin horizontal stack of boxes that didn't speak the vocabulary engineers expect. Screenshots were inline at ~390px wide — fonts in the Noble UI chrome unreadable. No landing point for a technical reader wanting to go deeper after the body closed.
+
+**Decision.** Shipped a bundle of MDX visual primitives + wired Noble to use them:
+
+1. **`components/ui/Lightbox.tsx`** — portal-based (`createPortal` → `document.body`) fullscreen modal. Escapes stacking context so Nav/DotGrid don't bleed through. ESC/click-outside/X close. Body scroll lock. `prefers-reduced-motion` respected (fade only). Pairs with `<ExpandButton>` affordance.
+2. **`components/mdx/CaseStudySchemas.tsx`** — new file hosting six primitives, all `"use client"`:
+   - **`<StackRow>`** — simple-icons brand chips (lazy SVG lookup, falls back to monogram if icon missing).
+   - **`<PhoneRow>`** — 2 or 3 phone frames side-by-side; each phone is a `<button>` opening the screenshot in Lightbox at `max-h-[86vh] object-contain`.
+   - **`<CompareGrid>`** — before/after two-column comparison with hairline columns.
+   - **`<FlowSchema>`** — multi-row BPMN horizontal diagrams. Shape vocabulary: role=circle, event=rounded rect, action=diamond, process=parallelogram. Edge labels perpendicular-offset by 14px to avoid overlapping shapes. Each row has its own Expand button; Lightbox renders the canvas at intrinsic `minWidth` so mobile users scroll horizontally at readable text size.
+   - **`<Diagram>`** — standalone BPMN diagram with the same shape/color/outcome vocabulary (success #22C55E, danger #111, approved ✓, denied ✗).
+   - **`<TechNotes>`** — bento link grid for post-body technical references. Dark inverted badge (`</> TECHNICAL REFERENCES`) + big Playfair heading + hairline divider + REF counter. Each card: monospace eyebrow (kind glyph + label) → Playfair title → sans description → ↗ external / → internal arrow with hover slide.
+3. **`components/mdx/CaseStudyVisuals.tsx`** — converted to `"use client"`; `<Figure>` wrapped in Lightbox so every image site-wide becomes expandable with a hover-revealed static expand icon. Removed the broken `caseStudyVisuals` aggregator object export (client files can't export non-component objects) — `CaseStudyBody.tsx` now imports each primitive individually and spreads them into the MDX components map.
+4. **Noble MDX** (`content/case-studies/noble-saas.mdx`) rewrites: the thin FlowSchema became BPMN per-row with a decision diamond (cache check) + branch, standalone Diagram added for the booking race window, TechNotes block at the end with 6 real refs (STABLE_LOGIC.md, Supabase SSR + RLS docs, Next.js fetch cache, Twilio A2P 10DLC compliance, Stripe subscriptions).
+5. **Mobile scroll affordance** — `md:hidden` right-edge gradient fade on FlowSchema rows signals the horizontal scroll even before touch.
+
+Dependency add: `simple-icons@16.34.0` (only loaded by StackRow; brand SVGs resolved via dynamic property lookup, no sprite bundle).
+
+**Result.** Noble case study renders clean (`npx tsc --noEmit` green). Playwright captures at `/tmp/noble-review/13..16-*.png` confirm desktop and mobile layouts. Lightbox opens on PhoneRow phones, Figure images, FlowSchema rows, Diagram, TechNotes items (external = new tab, internal = same tab). Nav no longer bleeds through modal backdrop on mobile. Mobile diagrams scroll horizontally inside Lightbox at readable text size instead of shrinking to viewport width. TechNotes header reads as "clearly technical" (inverted badge, `</>` glyph, Playfair display scale) after the user flagged the first version as too subtle.
+
+**Lesson.**
+- **Portal first for any fullscreen modal.** `z-index: 100` on a nested element is defeated by any ancestor with a transform (framer-motion mounts, `will-change`, `filter`, backdrop-blur all create containing blocks). `createPortal(..., document.body)` with a `mounted` SSR guard is the only pattern that holds across the stack.
+- **Client-file component modules can't export aggregator objects.** `"use client"` restricts the module to serializable boundary values + component exports. The `export const caseStudyVisuals = { Figure, ImpactStats, ... }` pattern silently returned undefined on the server render path and produced "Expected component Figure to be defined" — fix is to drop the aggregator and import each primitive individually at the use site.
+- **Nested interactive HTML is invalid.** `<button>` inside `<button>` renders without error but breaks tab order and screen-reader semantics. For a card that is itself a button, inner "icon affordance" must be a static `<span aria-hidden>` with the SVG, not an `<ExpandButton>`.
+- **Mobile fullscreen means intrinsic width, not container width.** If the modal shrinks SVG to viewport, nothing was gained — the user still can't read the text. Set `minWidth` to the drawing's intrinsic width and let the Lightbox content area scroll.
+- **BPMN vocab reads instantly to engineers.** Diamond-for-decision + circle-for-role + diagonal-arrow-with-label is a shared schema; a flat row of boxes isn't. Four shape primitives + three colors cover every system diagram the portfolio needs without reinventing a notation.
+- **"Technical" needs to look technical.** The first TechNotes header used only a tiny uppercase eyebrow and the user called it insufficiently distinct. Inversion (ink background, elevated text) plus a `</>` glyph plus a bigger display heading made it unmistakable — monochrome palette still intact, just applied with contrast weight instead of color.
+- **Figure-level primitive upgrades propagate for free.** Because `<Figure>` is used by every case study, adding Lightbox to CaseStudyVisuals.tsx made every image expandable without per-file edits. Verified on fieldmark without regression — confirms the primitive-first approach pays compound dividends.
+
+---
+
 ## 2026-10-03 · ui-ux-pro audit — focus rings, faint text, arbitrary radius
 
 **Problem.** Ran `ui-ux-pro` audit (external skill at
