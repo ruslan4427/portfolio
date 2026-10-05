@@ -1,7 +1,7 @@
 ---
 slug: hrekov-dev
 title: The portfolio that documents itself
-tagline: Fourteen sprints, twenty-eight memory files, one recursive proof.
+tagline: Fourteen sprints, thirty memory files, one recursive proof.
 role: Meta · solo build
 stack:
   - Next.js 16
@@ -37,7 +37,7 @@ supportingArtifacts:
     detail: "14 sprints across 15 calendar days · ~0.9 sprints/day"
   - type: timeline
     label: "Ramp-up saved per new session"
-    detail: "~56 min · 28 memory files × ~2 min context re-hydration each"
+    detail: "~60 min · 30 memory files × ~2 min context re-hydration each"
 devlogRefs:
   - date: "2026-09-24"
     entry: "Font pivot to Playfair Display + ambient dot wave"
@@ -63,7 +63,7 @@ isn't — the site is a byproduct. The actual artifact is the workflow
 that produced it, and the workflow only holds up if I can show it
 working on something. This portfolio was the something.
 
-Twenty-eight memory files. Forty-two journal entries. Ten of them
+Thirty memory files. Forty-two journal entries. Ten of them
 promoted to durable rules. Fourteen sprints across fifteen calendar days,
 solo. Every decision is on disk, timestamped, in a public repo you can
 clone. Half the interesting ones are wrong on the first pass — the
@@ -225,7 +225,7 @@ three times before checking layers.
   it out.
 ```
 
-That is one file out of twenty-eight. Every one of the others reads like
+That is one file out of thirty. Every one of the others reads like
 this: rule at the top, incident that produced it in the middle, edge
 case guidance at the bottom. No lore, no essays, no aspirational
 principles — just what the machine needs to not repeat yesterday's
@@ -233,7 +233,7 @@ mistake.
 
 ## 4. The MEMORY.md index
 
-Twenty-eight files is already too many to open blindly at the start of a
+Thirty files is already too many to open blindly at the start of a
 session. Reading them all would eat context before the actual work
 started. So the memory system carries its own directory: `MEMORY.md`,
 a flat list of one-line pointers.
@@ -255,7 +255,7 @@ Every line has the same shape: `- [<title>](<file>) — <one-line hook>`.
 Nothing longer, nothing hierarchical. The model reads the index in one
 pass, ranks which files look load-bearing to the current task, and
 opens only those. In practice, a typical session opens two or three
-files, not twenty-eight. The index is what makes the collection scale.
+files, not thirty. The index is what makes the collection scale.
 
 ## 5. The discipline that produces memory
 
@@ -387,6 +387,24 @@ Journaling is the raw material. Promotion is the discipline.
   frame="flat"
 />
 
+<Figure
+  src="/case-studies/hrekov-dev/case-page.webp"
+  alt="A hrekov.dev case-study page — long-form MDX with a frontmatter chip row, a value statement, inline figures, and a FlowSchema diagram rendered inside the reading column."
+  caption="A case-study page — long-form MDX with StackRow, FlowSchema, Figure, and TechNotes primitives wired through next-mdx-remote."
+  width={2880}
+  height={1800}
+  frame="flat"
+/>
+
+<Figure
+  src="/case-studies/hrekov-dev/journal.webp"
+  alt="hrekov.dev /journal page — the blog index with a featured essay card at top and a chronological list beneath, filtered by format tag."
+  caption="The Journal index — essays and devlogs with format tags, same MDX pipeline as the case studies."
+  width={2880}
+  height={1800}
+  frame="flat"
+/>
+
 <MetricGrid
   columns={3}
   items={[
@@ -439,7 +457,7 @@ a diff, at minimum:
 - *"Are we still shipping the ElevenLabs voice clone plan?"* — no,
   pivoted to AI video on 2026-09-27; `portfolio_ai_video_pivot.md`.
 
-Rough estimate: two minutes per file × twenty-eight files ≈ fifty-six
+Rough estimate: two minutes per file × thirty files ≈ sixty
 minutes of ramp-up the model doesn't have to spend rebuilding context
 before it can act. That number is soft, but the direction isn't.
 
