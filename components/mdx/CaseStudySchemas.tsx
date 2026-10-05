@@ -756,15 +756,15 @@ export function FlowSchema({
               key={row.label + rIdx}
               className={`relative overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-5 pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] ${rowAccent[tone]}`}
             >
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)]">
+              <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                <div className="font-sans text-[10px] uppercase tracking-wide text-[color:var(--ink-muted)] whitespace-nowrap">
                   <span className="mr-2 font-serif text-[color:var(--ink-primary)]">
                     {tone === "before" ? "◴" : tone === "after" ? "●" : "○"}
                   </span>
                   {row.label}
                 </div>
                 {row.meta && (
-                  <div className="font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
+                  <div className="font-sans text-[10px] tabular-nums text-[color:var(--ink-muted)] whitespace-nowrap">
                     {row.meta}
                   </div>
                 )}

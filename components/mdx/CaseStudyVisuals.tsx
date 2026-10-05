@@ -106,7 +106,7 @@ export function ImpactStats({
     >
       {items.map((item, i) => (
         <div key={i}>
-          <div className="font-serif text-[clamp(36px,5vw,56px)] leading-none text-[color:var(--ink-primary)] tabular-nums">
+          <div className="font-serif text-[clamp(30px,3vw,44px)] leading-none text-[color:var(--ink-primary)] tabular-nums whitespace-nowrap">
             {item.value}
           </div>
           <div className="mt-3 font-sans text-sm text-[color:var(--ink-body)]">
