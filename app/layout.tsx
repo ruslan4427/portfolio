@@ -74,7 +74,7 @@ const personJsonLd = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
         <ConsentProvider>
           <SkipToMain />
           <SmoothScroll>

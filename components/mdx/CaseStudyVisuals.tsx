@@ -18,9 +18,9 @@ export function ValueStatement({
           {eyebrow}
         </div>
       )}
-      <p className="font-serif text-[clamp(28px,4vw,44px)] leading-[1.15] text-[color:var(--ink-primary)]">
+      <div className="font-serif text-[clamp(28px,4vw,44px)] leading-[1.15] text-[color:var(--ink-primary)] [&>p]:m-0 [&>p]:text-[color:var(--ink-primary)] [&>p]:leading-[1.15]">
         {children}
-      </p>
+      </div>
     </aside>
   );
 }
@@ -72,9 +72,9 @@ export function Pullquote({
   return (
     <figure className="not-prose my-10">
       <blockquote className="border-l border-[color:var(--ink-primary)] pl-6">
-        <p className="font-serif text-[clamp(22px,2.8vw,32px)] leading-[1.3] text-[color:var(--ink-primary)]">
+        <div className="font-serif text-[clamp(22px,2.8vw,32px)] leading-[1.3] text-[color:var(--ink-primary)] [&>p]:m-0 [&>p]:text-[color:var(--ink-primary)] [&>p]:leading-[1.3]">
           {children}
-        </p>
+        </div>
       </blockquote>
       {attribution && (
         <figcaption className="mt-3 pl-6 font-sans text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">
