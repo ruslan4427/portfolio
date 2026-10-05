@@ -843,7 +843,7 @@ type DiagramLegendItem = {
 const diagramShapeDims: Record<DiagramShape, { w: number; h: number }> = {
   role: { w: 76, h: 76 },
   event: { w: 160, h: 72 },
-  action: { w: 132, h: 82 },
+  action: { w: 188, h: 108 },
   process: { w: 172, h: 72 },
 };
 
@@ -950,9 +950,22 @@ function DiagramOutcomeBadge({ node }: { node: DiagramNode }) {
 
 function DiagramNodeLabel({ node }: { node: DiagramNode }) {
   const { w, h } = diagramShapeDims[node.shape];
-  const pad = node.shape === "role" ? 10 : node.shape === "action" ? 14 : 12;
-  const innerW = w - pad * 2;
-  const innerH = h - pad * 2;
+  let padX: number;
+  let padY: number;
+  if (node.shape === "action") {
+    padY = Math.round(h * 0.26);
+    const innerHGuess = h - padY * 2;
+    const inscribedW = w * (1 - innerHGuess / h);
+    padX = Math.round((w - inscribedW) / 2);
+  } else if (node.shape === "role") {
+    padX = 10;
+    padY = 10;
+  } else {
+    padX = 12;
+    padY = 12;
+  }
+  const innerW = w - padX * 2;
+  const innerH = h - padY * 2;
   return (
     <foreignObject
       x={node.x - innerW / 2}
