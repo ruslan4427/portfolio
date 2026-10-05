@@ -17,7 +17,20 @@ readingTime: 4
 
 **Angel replaces four disconnected trucking systems — HR screening, maintenance shop, marketplace, fleet ops — with one platform that a driver can log into from a phone in a cab.**
 
-`Next.js 16 · Supabase · Claude Sonnet 4.6 · 2026-05-12 → present`
+<StackRow
+  items={[
+    { name: "Next.js 16", slug: "nextdotjs" },
+    { name: "TypeScript", slug: "typescript" },
+    { name: "Supabase", slug: "supabase" },
+    { name: "Tailwind v4", slug: "tailwindcss" },
+    { name: "Claude Sonnet 4.6", slug: "anthropic" },
+  ]}
+  dateRange="2026-05-12 → present · sprint 4 in working tree"
+/>
+
+<ValueStatement eyebrow="The posture">
+Four modules, one phone-first UI, a mobile cookie-auth drivers use with no signal. The agent pipeline is designed before the first production line of code — not retrofitted after.
+</ValueStatement>
 
 ## Context
 
@@ -39,7 +52,36 @@ Every existing trucking SaaS handles one slice: TMS, or maintenance, or hiring. 
 
 ## Prompt Architecture — the 5-stage pipeline
 
-Every task passes through **five roles**, in order: Orchestrator → PM → Designer → Developer → Reviewer. Each role has its own `AGENTS.md`-declared contract:
+Every task passes through **five roles**, in order: Orchestrator → PM → Designer → Developer → Reviewer. Each role has its own `AGENTS.md`-declared contract.
+
+<FlowSchema
+  title="One task → five explicit handoffs"
+  rows={[
+    {
+      label: "The 5-role contract — declared in AGENTS.md, enforced per task",
+      tone: "neutral",
+      meta: "every sprint runs this",
+      diagram: {
+        width: 1082,
+        height: 220,
+        nodes: [
+          { id: "orch", shape: "role", icon: "user", label: "Me", x: 90, y: 110 },
+          { id: "pm", shape: "action", icon: "doc", label: "PM", sub: "≤5 clarifying Qs", x: 290, y: 110 },
+          { id: "design", shape: "process", icon: "code", label: "Designer", sub: "spec · never codes", x: 490, y: 110 },
+          { id: "dev", shape: "process", icon: "bolt", label: "Developer", sub: "code · never re-designs", x: 690, y: 110 },
+          { id: "rev", shape: "action", icon: "shield", label: "Reviewer", sub: "brief · spec · V9", x: 890, y: 110, color: "success", outcome: "approved" },
+        ],
+        edges: [
+          { from: "orch", to: "pm" },
+          { from: "pm", to: "design" },
+          { from: "design", to: "dev" },
+          { from: "dev", to: "rev" },
+        ],
+      },
+    },
+  ]}
+  caption="Each role has its own AGENTS.md-declared contract. The Reviewer validates against three documents: the Task Brief, the Design Spec, and the V9 design tokens — not against taste."
+/>
 
 <PromptLog title="AGENTS.md — the 5-role contract">
 The PM asks up to 5 clarifying questions and then writes a Task Brief. The Designer never codes. The Developer never re-designs. The Reviewer validates against three docs: Brief, Design Spec, V9 tokens.
@@ -53,16 +95,30 @@ Only one commit exists (`b652cd3`, 2026-05-12) — the entire agent architecture
 
 ## Trade-Offs
 
-1. **Driver auth = phone-cookie, not Supabase Auth.** Drivers log in with a phone number and a cookie, offline. Supabase Auth needs email + connectivity. Cost: I maintain two auth systems.
-2. **3-year speeding violation = auto-reject.** No manual appeal. Insurance risk in trucking makes the appeal path a liability, not a feature.
-3. **30-min shop slots, not dynamic.** Admin configures hours + bay count; slots are a fixed grid. Predictable UX beats optimal packing.
-4. **Marketplace is fully public.** No login, no saved favorites. Maximizes reach; loses buyer tracking.
+<NumberedCards
+  columns={2}
+  items={[
+    { title: "Driver auth = phone-cookie, not Supabase Auth", body: "Drivers log in with a phone number and a cookie, offline. Supabase Auth needs email + connectivity. Cost: I maintain two auth systems." },
+    { title: "3-year speeding violation = auto-reject", body: "No manual appeal. Insurance risk in trucking makes the appeal path a liability, not a feature." },
+    { title: "30-min shop slots, not dynamic", body: "Admin configures hours + bay count; slots are a fixed grid. Predictable UX beats optimal packing." },
+    { title: "Marketplace is fully public", body: "No login, no saved favorites. Maximizes reach; loses buyer tracking." },
+  ]}
+/>
 
 ## Results (honest)
 
-- 1 commit pushed (`b652cd3`, 2026-05-12), 4 sprints built in the working tree — Sprint 1 complete, 2 & 3 within ~1 open item each, Sprint 4 at 27/27 checklist items
-- 5 role contracts in `agents/` (orchestrator, PM, UI-UX designer, developer, reviewer) + 1 `WORKFLOW.md` meta spec + 6 architecture docs in `docs/` (ARCHITECTURE, CONTEXT_MAP, DB_SCHEMA, DESIGN_SYSTEM, DPPA_COMPLIANCE, INTEGRATIONS)
-- Zero production users yet — go-live is gated on deployment, not code
+<ImpactStats
+  columns={4}
+  items={[
+    { value: "4 sprints", label: "built against the scaffold" },
+    { value: "27/27", label: "Sprint 4 checklist items passing" },
+    { value: "5 + 1", label: "role contracts + WORKFLOW spec" },
+    { value: "0 users", label: "go-live is deployment, not code" },
+  ]}
+/>
+
+- 1 commit pushed (`b652cd3`, 2026-05-12); Sprint 1 complete, Sprints 2 & 3 within ~1 open item each, Sprint 4 at 27/27 checklist items in the working tree
+- `agents/` holds the orchestrator, PM, UI-UX designer, developer, and reviewer contracts plus a `WORKFLOW.md` meta spec; `docs/` holds ARCHITECTURE, CONTEXT_MAP, DB_SCHEMA, DESIGN_SYSTEM, DPPA_COMPLIANCE, INTEGRATIONS
 - V9 design system: mobile-first at 375px, Ohio timezone hard-coded
 
 ## Reflection
