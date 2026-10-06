@@ -127,6 +127,48 @@ The system's superpower is the `knowledge/` directory — 12 markdown files (`00
 
 That flipped every Claude session from *"here's a codebase, please read it all"* into *"here's the spec and the one file we're touching."* Sessions got sharp.
 
+```text
+agents/                              knowledge/
+├── intake/        · onboarding Q&A  ├── 00_overview.md
+├── analysis/      · build strategy  ├── 01_intake_agent.md
+├── content/       · weekly plan     ├── 02_analysis_agent.md
+├── approval/      · Slack 3-button  ├── 03_content_pipeline.md
+├── publisher/     · schedule → IG   ├── 04_approval_manager.md
+├── engagement/    · daily actions   ├── 05_publisher_agent.md
+├── analytics/     · weekly rollup   ├── 06_engagement_agent.md
+├── strategy/      · self-improve    ├── 07_analytics_agent.md
+├── orchestrator/  · state machine   ├── 08_self_improvement_agent.md
+├── query/         · ask-anything    ├── 09_agent_query.md
+└── trends/        · hashtag fetch   ├── 10_database_schema.md
+                                     └── 11_orchestrator.md
+```
+
+Every folder in `agents/` has a matching file in `knowledge/`. When the two drift, the knowledge file is the bug — code is ground truth, markdown is the spec that must agree with it.
+
+<TechnicalDetail title="One Monday morning — content pipeline log (trimmed)">
+
+```text
+00:21:01 [INFO] Generating content for 1 clients
+00:21:01 [INFO] Starting content pipeline for Noble
+00:21:04 [INFO] Generating week 2026-06-29 for 'Noble'
+00:21:11 [INFO] Trends fetched for niche='barbershop booking SaaS' geo='US': 0 trending, 3 rising
+00:21:16 [ERROR] Hashtag top medias failed for #barberlife: login_required
+00:22:28 [INFO] Instagram trends collected: 0 hashtags, 0 audio tracks, 0 patterns
+00:22:58 [INFO] POST https://api.anthropic.com/v1/messages → 200 OK
+00:22:59 [INFO] POST https://cloud.leonardo.ai/api/rest/v1/generations → 200 OK
+00:23:08 [INFO] Leonardo background generated: bg.jpg (324KB)
+00:23:13 [INFO] Uploaded feed_post.png → r2.cloudflarestorage.com/clients/.../2026-06-29/day01/
+00:23:14 [INFO]   Day 1 (Monday) [feed_post] saved
+00:29:18 [INFO] Day 2: bg_video=found (Pexels, portrait 2160×4096)
+00:31:46 [INFO] Day 2: animation.mov ready
+00:32:01 [INFO] Day 2: composite OK (2690 KB)
+00:32:01 [INFO] Day 2: music → hustle.mp3
+```
+
+Real excerpt from `logs/content_gen.log`, 2026-06-23. Instagram trend hashtag calls fail with `login_required` (expected when the session cookie isn't refreshed) — the pipeline degrades to niche-only trend data, Anthropic still writes the week, Leonardo generates the backgrounds, R2 stores the renders, Supabase records the Day. Day 1 (feed post) in ~2 min; Day 2 (reel composite with Pexels bg + alpha animation + music) in ~11 min on GH Actions free tier.
+
+</TechnicalDetail>
+
 ## Iteration Moment — a decision I unwound in 21 minutes
 
 <BeforeAfter>
