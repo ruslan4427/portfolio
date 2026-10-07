@@ -113,6 +113,7 @@ raw divs.
 | `BeforeAfter`      | Dated before/after panels around an iteration moment     |
 | `FlowSchema`       | BPMN-style multi-row flow (see §4 — most error-prone)    |
 | `Diagram`          | Single BPMN diagram without row scaffolding              |
+| `WireflowMap`      | User-flow map: browser-window skeletons + 2 arrow kinds  |
 | `PhoneRow`         | 2 or 3 mobile captures (NEVER 1) — click opens fullscreen |
 | `CompareGrid`      | Table-shaped matrix (3+ columns × rows)                  |
 | `NumberedCards`    | Trade-offs, 2 or 4 items, `columns={2}` default          |
@@ -282,6 +283,37 @@ If you find yourself writing `<div className="…">` directly in MDX, stop.
 Either an existing primitive covers the case, or we need a new primitive in
 `CaseStudySchemas.tsx` (that goes through a review). Raw markup in MDX bodies
 rots the system because the styles aren't shared.
+
+### 5.9 `WireflowMap` — canvas ≤ 920 wide, mocks ≤ 24 chars per line
+
+Use `WireflowMap` when the architecture is a sequence of discrete *surfaces*
+(agents, screens, services) rather than a BPMN flow — the orbit in
+`smm-factory.mdx` is the reference. Rules:
+
+- Canvas width ≤ 920. Case-study body column is ~695px wide; anything wider
+  horizontally scrolls or scales down past legibility. Height is flexible.
+- Window default is 160×140. Orchestrator / hub window can be 200×160 with
+  `accent: true` for the green status dot.
+- Mock kinds: `slack` (≤ 4 lines, ≤ 24 chars/line), `list` (≤ 5 items),
+  `grid` (rows × cols thumbnails), `chart` (bar values 0–1), `chips`
+  (text pills), `wireframe` (fallback skeleton bars). Longer text clips.
+- Two edge kinds only: `primary` (ink solid — the main pipeline) and
+  `annotation` (muted dashed — telemetry, routing, callbacks). Mixing more
+  dilutes the two-colour legend.
+- Right-side `callouts` panel is for *context*, not labels: file inventories,
+  decision rules, stack lists. One per diagram max.
+- Always include a 2-item `legend` so the two arrow kinds read instantly.
+- Caption + sub text under each window render with a bg-page text halo
+  (`paintOrder: "stroke"`, `strokeWidth: 3.5`) so edge arrows passing
+  underneath don't bleed through the glyphs. If you add new text labels in
+  SVG that may overlap edge paths, apply the same halo.
+- Each window takes `labelPos: "below" | "above" | "hidden"` (default `below`).
+  Rule: when arrows enter a window from *below* its bottom edge, flip its
+  label to `above` so the vertical approach doesn't cross the caption text.
+  For hub nodes with arrows in all four directions (orchestrator in the
+  reference), use `hidden` and let the surrounding callout carry the label.
+  Keep label orientation symmetric within a row — flipping only the one
+  colliding window reads as a bug.
 
 ---
 

@@ -1448,3 +1448,698 @@ export function TechNotes({
   );
 }
 
+/* --------------------------------------------------------------------------
+ * WireflowMap — user-flow-map style schematic. Browser-window skeletons as
+ * nodes (title bar + traffic-light dots + stylized mock content), primary
+ * ink-solid edges for the main pipeline, muted dashed edges for annotation
+ * routes, right-side callout panels, two-item legend. Use when the system
+ * is a sequence of discrete surfaces/agents rather than a BPMN flow.
+ * -------------------------------------------------------------------------- */
+
+type WireflowMock =
+  | { kind: "slack"; lines: string[] }
+  | { kind: "grid"; rows: number; cols: number }
+  | { kind: "chart"; bars: number[] }
+  | { kind: "list"; items: string[] }
+  | { kind: "chips"; items: string[] }
+  | { kind: "wireframe"; bars?: number };
+
+export type WireflowNode = {
+  id: string;
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  title: string;
+  sub?: string;
+  mock: WireflowMock;
+  accent?: boolean;
+  caption?: string;
+  labelPos?: "below" | "above" | "hidden";
+};
+
+type WireflowEdgeKind = "primary" | "annotation";
+type WireflowBend = "h-first" | "v-first";
+
+export type WireflowEdge = {
+  from: string;
+  to: string;
+  kind: WireflowEdgeKind;
+  bend?: WireflowBend;
+  waypoints?: Array<{ x: number; y: number }>;
+};
+
+export type WireflowCallout = {
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  title?: string;
+  items: string[];
+};
+
+export type WireflowLegendItem = {
+  kind: WireflowEdgeKind;
+  label: string;
+};
+
+const WF_NODE_W = 200;
+const WF_NODE_H = 160;
+const WF_TITLE_H = 26;
+
+function WireflowMockContent({ node }: { node: WireflowNode }) {
+  const w = node.w ?? WF_NODE_W;
+  const h = node.h ?? WF_NODE_H;
+  const px = node.x + 10;
+  const py = node.y + WF_TITLE_H + 8;
+  const innerW = w - 20;
+  const innerH = h - WF_TITLE_H - 16;
+  const m = node.mock;
+
+  if (m.kind === "slack") {
+    const rowH = Math.min(16, innerH / Math.max(m.lines.length, 1));
+    return (
+      <g>
+        {m.lines.map((line, i) => (
+          <g key={i}>
+            <circle
+              cx={px + 5}
+              cy={py + rowH / 2 + i * rowH}
+              r={3.5}
+              fill="var(--hairline)"
+            />
+            <text
+              x={px + 14}
+              y={py + rowH / 2 + i * rowH + 3}
+              fontFamily="var(--font-sans)"
+              fontSize={9}
+              fill="var(--ink-body)"
+            >
+              {line}
+            </text>
+          </g>
+        ))}
+      </g>
+    );
+  }
+
+  if (m.kind === "grid") {
+    const { rows, cols } = m;
+    const gap = 3;
+    const cellW = (innerW - (cols - 1) * gap) / cols;
+    const cellH = (innerH - (rows - 1) * gap) / rows;
+    const squares: React.ReactNode[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        squares.push(
+          <rect
+            key={`${r},${c}`}
+            x={px + c * (cellW + gap)}
+            y={py + r * (cellH + gap)}
+            width={cellW}
+            height={cellH}
+            rx={2}
+            fill="var(--hairline)"
+          />,
+        );
+      }
+    }
+    return <g>{squares}</g>;
+  }
+
+  if (m.kind === "chart") {
+    const max = Math.max(...m.bars, 1);
+    const barGap = 3;
+    const barW = (innerW - (m.bars.length - 1) * barGap) / m.bars.length;
+    return (
+      <g>
+        {m.bars.map((v, i) => {
+          const barH = (v / max) * (innerH - 8);
+          return (
+            <rect
+              key={i}
+              x={px + i * (barW + barGap)}
+              y={py + innerH - barH}
+              width={barW}
+              height={barH}
+              rx={1}
+              fill="var(--ink-faint)"
+            />
+          );
+        })}
+      </g>
+    );
+  }
+
+  if (m.kind === "list") {
+    const rowH = Math.min(15, innerH / Math.max(m.items.length, 1));
+    return (
+      <g>
+        {m.items.map((item, i) => (
+          <g key={i}>
+            <circle
+              cx={px + 3}
+              cy={py + rowH / 2 + i * rowH}
+              r={1.4}
+              fill="var(--ink-muted)"
+            />
+            <text
+              x={px + 10}
+              y={py + rowH / 2 + i * rowH + 3}
+              fontFamily="var(--font-sans)"
+              fontSize={9}
+              fill="var(--ink-body)"
+            >
+              {item}
+            </text>
+          </g>
+        ))}
+      </g>
+    );
+  }
+
+  if (m.kind === "chips") {
+    const chipH = 15;
+    const chipGap = 4;
+    let xcur = px;
+    let ycur = py + 4;
+    return (
+      <g>
+        {m.items.map((item, i) => {
+          const chipW = Math.max(28, item.length * 5.2 + 10);
+          if (xcur + chipW > px + innerW) {
+            xcur = px;
+            ycur += chipH + chipGap;
+          }
+          const el = (
+            <g key={i}>
+              <rect
+                x={xcur}
+                y={ycur}
+                width={chipW}
+                height={chipH}
+                rx={7}
+                fill="transparent"
+                stroke="var(--outline)"
+                strokeWidth={0.8}
+              />
+              <text
+                x={xcur + chipW / 2}
+                y={ycur + chipH / 2 + 3}
+                fontFamily="var(--font-sans)"
+                fontSize={9}
+                fill="var(--ink-body)"
+                textAnchor="middle"
+              >
+                {item}
+              </text>
+            </g>
+          );
+          xcur += chipW + chipGap;
+          return el;
+        })}
+      </g>
+    );
+  }
+
+  const bars = m.bars ?? 4;
+  const rowH = innerH / bars;
+  return (
+    <g>
+      {Array.from({ length: bars }).map((_, i) => (
+        <rect
+          key={i}
+          x={px}
+          y={py + i * rowH + 2}
+          width={innerW * (0.5 + ((i * 37) % 50) / 100)}
+          height={Math.max(rowH - 6, 2)}
+          rx={2}
+          fill="var(--hairline)"
+        />
+      ))}
+    </g>
+  );
+}
+
+function WireflowWindow({ node }: { node: WireflowNode }) {
+  const w = node.w ?? WF_NODE_W;
+  const h = node.h ?? WF_NODE_H;
+  return (
+    <g>
+      <rect
+        x={node.x}
+        y={node.y}
+        width={w}
+        height={h}
+        rx={10}
+        ry={10}
+        fill="var(--bg-elevated)"
+        stroke="var(--outline)"
+        strokeWidth={node.accent ? 1.6 : 1.2}
+      />
+      <line
+        x1={node.x}
+        y1={node.y + WF_TITLE_H}
+        x2={node.x + w}
+        y2={node.y + WF_TITLE_H}
+        stroke="var(--hairline)"
+        strokeWidth={1}
+      />
+      {[0, 1, 2].map((i) => (
+        <circle
+          key={i}
+          cx={node.x + 11 + i * 9}
+          cy={node.y + WF_TITLE_H / 2}
+          r={2.6}
+          fill="var(--ink-faint)"
+        />
+      ))}
+      {node.accent && (
+        <circle
+          cx={node.x + w - 11}
+          cy={node.y + WF_TITLE_H / 2}
+          r={3.2}
+          fill="#22C55E"
+        />
+      )}
+      <text
+        x={node.x + 44}
+        y={node.y + WF_TITLE_H / 2 + 3}
+        fontFamily="var(--font-sans)"
+        fontSize={8.5}
+        fill="var(--ink-muted)"
+        style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}
+      >
+        {node.title}
+      </text>
+      <WireflowMockContent node={node} />
+      {node.labelPos !== "hidden" && (() => {
+        const pos = node.labelPos ?? "below";
+        const captionY =
+          pos === "above"
+            ? node.y - (node.sub ? 20 : 8)
+            : node.y + h + 15;
+        const subY =
+          pos === "above"
+            ? node.y - 7
+            : node.y + h + (node.caption ? 28 : 15);
+        return (
+          <>
+            {node.caption && (
+              <text
+                x={node.x + w / 2}
+                y={captionY}
+                fontFamily="var(--font-sans)"
+                fontSize={10}
+                fill="var(--ink-muted)"
+                textAnchor="middle"
+                stroke="var(--bg-page)"
+                strokeWidth={3.5}
+                strokeLinejoin="round"
+                paintOrder="stroke"
+              >
+                {node.caption}
+              </text>
+            )}
+            {node.sub && (
+              <text
+                x={node.x + w / 2}
+                y={subY}
+                fontFamily="ui-monospace, Menlo, monospace"
+                fontSize={9}
+                fill="var(--ink-faint)"
+                textAnchor="middle"
+                stroke="var(--bg-page)"
+                strokeWidth={3.5}
+                strokeLinejoin="round"
+                paintOrder="stroke"
+              >
+                {node.sub}
+              </text>
+            )}
+          </>
+        );
+      })()}
+    </g>
+  );
+}
+
+function wireflowRect(node: WireflowNode) {
+  const w = node.w ?? WF_NODE_W;
+  const h = node.h ?? WF_NODE_H;
+  return {
+    x: node.x,
+    y: node.y,
+    w,
+    h,
+    cx: node.x + w / 2,
+    cy: node.y + h / 2,
+  };
+}
+
+function routeWireflowEdge(
+  from: WireflowNode,
+  to: WireflowNode,
+  edge: WireflowEdge,
+) {
+  const a = wireflowRect(from);
+  const b = wireflowRect(to);
+  if (edge.waypoints && edge.waypoints.length > 0) {
+    return [{ x: a.cx, y: a.cy }, ...edge.waypoints, { x: b.cx, y: b.cy }];
+  }
+  const bend =
+    edge.bend ??
+    (Math.abs(b.cx - a.cx) > Math.abs(b.cy - a.cy) ? "h-first" : "v-first");
+
+  if (bend === "h-first") {
+    const startX =
+      b.cx > a.cx + a.w / 2
+        ? a.x + a.w
+        : b.cx < a.x
+          ? a.x
+          : a.cx;
+    const startY = a.cy;
+    const endX = b.cx;
+    const endY = b.cy > a.cy ? b.y : b.y + b.h;
+    return [
+      { x: startX, y: startY },
+      { x: endX, y: startY },
+      { x: endX, y: endY },
+    ];
+  }
+  const startY =
+    b.cy > a.cy + a.h / 2
+      ? a.y + a.h
+      : b.cy < a.y
+        ? a.y
+        : a.cy;
+  const startX = a.cx;
+  const endY = b.cy;
+  const endX = b.cx > a.cx ? b.x : b.x + b.w;
+  return [
+    { x: startX, y: startY },
+    { x: startX, y: endY },
+    { x: endX, y: endY },
+  ];
+}
+
+function WireflowEdgeEl({
+  edge,
+  fromNode,
+  toNode,
+  markerIds,
+}: {
+  edge: WireflowEdge;
+  fromNode: WireflowNode;
+  toNode: WireflowNode;
+  markerIds: Record<WireflowEdgeKind, string>;
+}) {
+  const pts = routeWireflowEdge(fromNode, toNode, edge);
+  const d = pts
+    .map((p, i) => (i === 0 ? `M${p.x} ${p.y}` : `L${p.x} ${p.y}`))
+    .join(" ");
+  const stroke =
+    edge.kind === "primary" ? "var(--ink-primary)" : "var(--ink-muted)";
+  return (
+    <path
+      d={d}
+      fill="none"
+      stroke={stroke}
+      strokeWidth={edge.kind === "primary" ? 1.6 : 1.2}
+      strokeDasharray={edge.kind === "annotation" ? "4 3" : undefined}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      markerEnd={`url(#${markerIds[edge.kind]})`}
+    />
+  );
+}
+
+function WireflowCalloutEl({ callout }: { callout: WireflowCallout }) {
+  const w = callout.w ?? 220;
+  const h = callout.h ?? 180;
+  const titleH = callout.title ? 22 : 0;
+  const availH = h - titleH - 20;
+  const rowH = availH / Math.max(callout.items.length, 1);
+  return (
+    <g>
+      <rect
+        x={callout.x}
+        y={callout.y}
+        width={w}
+        height={h}
+        rx={10}
+        ry={10}
+        fill="var(--bg-elevated)"
+        stroke="var(--outline)"
+        strokeWidth={1.2}
+      />
+      {callout.title && (
+        <>
+          <text
+            x={callout.x + 14}
+            y={callout.y + 15}
+            fontFamily="var(--font-sans)"
+            fontSize={9}
+            fill="var(--ink-primary)"
+            style={{ textTransform: "uppercase", letterSpacing: "0.14em" }}
+          >
+            {callout.title}
+          </text>
+          <line
+            x1={callout.x + 14}
+            y1={callout.y + titleH}
+            x2={callout.x + w - 14}
+            y2={callout.y + titleH}
+            stroke="var(--hairline)"
+            strokeWidth={1}
+          />
+        </>
+      )}
+      {callout.items.map((item, i) => {
+        const yBase = callout.y + titleH + 12 + i * rowH + rowH / 2;
+        return (
+          <g key={i}>
+            <circle
+              cx={callout.x + 18}
+              cy={yBase - 3}
+              r={1.6}
+              fill="var(--ink-muted)"
+            />
+            <text
+              x={callout.x + 26}
+              y={yBase}
+              fontFamily="var(--font-sans)"
+              fontSize={10}
+              fill="var(--ink-body)"
+            >
+              {item}
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+function WireflowCanvas({
+  nodes,
+  edges,
+  callouts,
+  width,
+  height,
+  ariaLabel,
+  minWidth,
+}: {
+  nodes: WireflowNode[];
+  edges: WireflowEdge[];
+  callouts?: WireflowCallout[];
+  width: number;
+  height: number;
+  ariaLabel?: string;
+  minWidth?: number;
+}) {
+  const nodeMap: Record<string, WireflowNode> = {};
+  for (const n of nodes) nodeMap[n.id] = n;
+  const markerIds: Record<WireflowEdgeKind, string> = {
+    primary: "wireflow-arrow-primary",
+    annotation: "wireflow-arrow-annotation",
+  };
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label={ariaLabel ?? "Wireflow map"}
+      className="block h-auto w-full"
+      style={{ minWidth: minWidth ?? Math.min(width, 480) }}
+    >
+      <defs>
+        {(Object.keys(markerIds) as WireflowEdgeKind[]).map((k) => (
+          <marker
+            key={k}
+            id={markerIds[k]}
+            viewBox="0 0 10 10"
+            refX={9}
+            refY={5}
+            markerWidth={6}
+            markerHeight={6}
+            orient="auto-start-reverse"
+          >
+            <path
+              d="M 0 0 L 10 5 L 0 10 z"
+              fill={k === "primary" ? "var(--ink-primary)" : "var(--ink-muted)"}
+            />
+          </marker>
+        ))}
+      </defs>
+      <g>
+        {edges.map((e, i) => {
+          const from = nodeMap[e.from];
+          const to = nodeMap[e.to];
+          if (!from || !to) return null;
+          return (
+            <WireflowEdgeEl
+              key={`${e.from}->${e.to}-${i}`}
+              edge={e}
+              fromNode={from}
+              toNode={to}
+              markerIds={markerIds}
+            />
+          );
+        })}
+      </g>
+      <g>
+        {nodes.map((n, i) => (
+          <motion.g
+            key={n.id}
+            initial={{ opacity: 0, y: 4 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.35, delay: i * 0.04, ease: EASE }}
+          >
+            <WireflowWindow node={n} />
+          </motion.g>
+        ))}
+      </g>
+      {callouts && callouts.length > 0 && (
+        <g>
+          {callouts.map((c, i) => (
+            <WireflowCalloutEl key={i} callout={c} />
+          ))}
+        </g>
+      )}
+    </svg>
+  );
+}
+
+export function WireflowMap({
+  title,
+  nodes,
+  edges,
+  callouts,
+  legend,
+  caption,
+  width = 1240,
+  height = 920,
+}: {
+  title?: string;
+  nodes: WireflowNode[];
+  edges: WireflowEdge[];
+  callouts?: WireflowCallout[];
+  legend?: WireflowLegendItem[];
+  caption?: string;
+  width?: number;
+  height?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <figure className="not-prose my-10">
+      {title && (
+        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          {title}
+        </div>
+      )}
+      {legend && legend.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-3 py-2">
+          {legend.map((item) => (
+            <div
+              key={item.kind + item.label}
+              className="flex items-center gap-2 font-sans text-[11px] text-[color:var(--ink-muted)]"
+            >
+              <svg
+                viewBox="0 0 32 10"
+                aria-hidden="true"
+                className="h-3 w-10 shrink-0"
+              >
+                <line
+                  x1={1}
+                  y1={5}
+                  x2={24}
+                  y2={5}
+                  stroke={
+                    item.kind === "primary"
+                      ? "var(--ink-primary)"
+                      : "var(--ink-muted)"
+                  }
+                  strokeWidth={item.kind === "primary" ? 1.6 : 1.2}
+                  strokeDasharray={item.kind === "annotation" ? "4 3" : undefined}
+                />
+                <path
+                  d="M 22 1.5 L 30 5 L 22 8.5"
+                  fill="none"
+                  stroke={
+                    item.kind === "primary"
+                      ? "var(--ink-primary)"
+                      : "var(--ink-muted)"
+                  }
+                  strokeWidth={item.kind === "primary" ? 1.6 : 1.2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="group relative overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4">
+        <WireflowCanvas
+          nodes={nodes}
+          edges={edges}
+          callouts={callouts}
+          width={width}
+          height={height}
+          ariaLabel={title}
+        />
+        <ExpandButton
+          onClick={() => setOpen(true)}
+          label={title ? `Expand ${title}` : "Expand wireflow"}
+          className="absolute right-3 top-3 opacity-70 transition group-hover:opacity-100"
+        />
+      </div>
+      {caption && (
+        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+          {caption}
+        </figcaption>
+      )}
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        label={title}
+        caption={caption}
+      >
+        <div className="w-full">
+          <WireflowCanvas
+            nodes={nodes}
+            edges={edges}
+            callouts={callouts}
+            width={width}
+            height={height}
+            ariaLabel={title}
+            minWidth={width}
+          />
+        </div>
+      </Lightbox>
+    </figure>
+  );
+}
+

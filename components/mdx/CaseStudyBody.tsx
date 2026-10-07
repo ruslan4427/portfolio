@@ -8,6 +8,7 @@ import {
   PhoneRow,
   StackRow,
   TechNotes,
+  WireflowMap,
 } from "./CaseStudySchemas";
 import {
   Figure,
@@ -36,6 +37,7 @@ export function CaseStudyBody({ source }: { source: string }) {
         PhoneRow,
         StackRow,
         TechNotes,
+        WireflowMap,
       }}
       options={{
         mdxOptions: {

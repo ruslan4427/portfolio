@@ -26,7 +26,7 @@ export const projects: Project[] = [
     slug: "hrekov-dev",
     index: "01",
     name: "hrekov-dev",
-    tagline: "The portfolio that documents itself — thirty-two memory files, one recursive proof.",
+    tagline: "The portfolio that documents itself — thirty-three memory files, one recursive proof.",
     role: "Meta · solo build",
     stack: [
       "Next.js 16",
@@ -38,7 +38,7 @@ export const projects: Project[] = [
     ],
     year: "2026",
     status: "shipped",
-    metric: "32 memory files · 10 promoted rules",
+    metric: "33 memory files · 10 promoted rules",
     span: "wide",
     featured: true,
     roleTags: ["full-stack"],

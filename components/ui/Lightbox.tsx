@@ -87,10 +87,12 @@ export function Lightbox({ open, onClose, label, caption, children }: Props) {
                 </svg>
               </button>
             </div>
-            <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[color:var(--bg-page)] p-4 sm:p-6">
-              <div className="flex h-full w-full items-center justify-center">
-                {children}
-              </div>
+            <div
+              data-lenis-prevent
+              className="flex min-h-0 flex-1 overflow-auto overscroll-contain bg-[color:var(--bg-page)] p-4 sm:p-6"
+              style={{ alignItems: "safe center", justifyContent: "safe center" }}
+            >
+              {children}
             </div>
             {caption && (
               <div className="border-t border-[color:var(--hairline)] px-4 py-3 text-center font-sans text-xs text-[color:var(--ink-muted)] sm:px-5">

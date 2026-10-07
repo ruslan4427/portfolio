@@ -1,0 +1,115 @@
+---
+slug: no-company-no-api
+title: No company, no API
+tagline: >-
+  Why my Instagram engagement agent ships on a session cookie instead of
+  Meta's Graph API — and what the clean path actually costs a solo pilot.
+format: skeptic
+publishedAt: "2026-10-06"
+readingTime: 5
+tags:
+  - meta
+  - instagram
+  - platform-gates
+  - automation
+featured: true
+distribution:
+  linkedin:
+    status: pending
+  devto:
+    status: pending
+artifacts:
+  - type: link
+    label: The case study this engagement agent lives in
+    href: /work/smm-factory
+  - type: link
+    label: Instagram Graph API — Business Verification docs
+    href: https://developers.facebook.com/docs/development/release/business-verification/
+related:
+  - shipping-the-cross-poster
+---
+
+The engagement agent on my SMM Factory pilot does two things while the owner is cutting hair: it leaves conversational comments on in-niche Instagram posts, and it replies to incoming DMs. Haiku writes them, the orchestrator rate-limits them, Playwright drives the browser session that posts them. No approval loop — this is the one path in the system that closes the human loop entirely.
+
+That whole stack is wrong by design. The right stack is Instagram Graph API through Meta Business Suite, with `instagram_manage_comments` and `instagram_manage_messages` write-scopes gated behind App Review. The reason I'm shipping on Playwright instead is one gate: Meta Business Verification requires a registered legal entity, and I was running this as a solo pilot without one.
+
+This post is about what that gate actually costs when you can't clear it.
+
+## What App Review wants
+
+The public documentation makes App Review sound like a code review with a privacy policy attached. It isn't. For any Advanced Access scope — which includes anything that writes to another user's account — you have to pass Business Verification first. Business Verification wants:
+
+- A registered legal entity with a verifiable address.
+- A DUNS number, or a local-equivalent registration document (incorporation papers, VAT registration, trade license).
+- Supporting documents on file — a utility bill or bank statement with the business name, matched against government registries Meta cross-references.
+- A privacy policy published on an active production domain, not a Vercel preview URL.
+- An explainer video of the exact user flow, demonstrating the scope's use case.
+
+For an incorporated company this is a two-hour admin task. For a solo developer running a two-month pilot it's the whole deliverable, inverted. The gate didn't exist to filter me out specifically; it exists because this is Meta's single most-abused surface, and the business-entity check is a cheap way to make scaled spam uneconomic. By-design is the right word.
+
+Also — there is no sandbox mode for write-scopes. Standard Access gives you read-only testing against your own account. The moment you want to write to a client's inbox or feed, you need Advanced Access, and that path begins at Business Verification. You cannot ship a demo, show it to someone, and then fix the paperwork. The shipping step **is** the paperwork.
+
+## What I shipped instead
+
+A Playwright session with a long-lived IG cookie, driven by two agents:
+
+- The **publisher** uses the cookie to post content on Mondays after a Slack approval.
+- The **engagement agent** uses the same cookie to comment on target feeds daily and reply to DMs inline.
+
+<PhoneRow
+  items={[
+    {
+      src: "/case-studies/smm-factory/noble-engagement-eternalasting.png",
+      alt: "@eternalasting.event's Instagram post — a Barber Shop tent at a lakeside sunset event. Comments drawer open. The noble.booking account commented 16 weeks ago (hearted by author): 'That Hot Mess Bakery cake looks incredible with the barbershop theme, and the picnic setup is such a creative way to celebrate the anniversary with your crew.' The account owner replied '@noble.booking Thank you !' and hearted the exchange.",
+      width: 1170,
+      height: 2532,
+      label: "Comment landed · heart + thank-you from author",
+    },
+    {
+      src: "/case-studies/smm-factory/noble-engagement-citybarberib.png",
+      alt: "@citybarberib's Instagram post — four barbers on a hilltop at dusk. Comments drawer open. The noble.booking account commented 17 weeks ago (hearted by author): 'How do you keep your tools so clean working mobile like that?' The author replied '@noble.booking you mean the clippers or everything?' — the question earned a conversational back-and-forth, not a one-line acknowledgment.",
+      width: 1170,
+      height: 2532,
+      label: "Started a back-and-forth with the owner",
+    },
+  ]}
+  caption="Two auto-comments the engagement agent left on in-niche accounts (Prestige Barbershop event · City Barber). Both earned author replies and hearts. This is what the cookie-session fallback actually produces — Haiku-written, Playwright-posted, per-account rate-limited enough to pass as a human reader of the feed."
+/>
+
+Haiku generates the text. The orchestrator rate-limits by account and respects an interval floor between actions on the same thread. Everything is logged to Supabase so if an action pattern starts tripping IG's spam heuristics, the ledger can tell us exactly when the pattern changed.
+
+This works. It also has three real costs:
+
+**The cookie rotates.** When IG issues a new session cookie I have to re-authenticate manually. In the content pipeline logs you'll see this as `login_required` on the trends endpoint — same mechanism, different scope. For the publisher I rotate on a weekly cadence; for engagement the ambient failure rate is higher because the surface is more active.
+
+**It's outside Terms of Service.** IG's TOS doesn't make a distinction between a Playwright session with your own cookie and a scraper mimicking your account. If the pattern triggers rate-limit or spam heuristics, the account is paused. The right move at that point is to apologize to the client and accept it, not to look clever.
+
+**It won't scale past a handful of clients.** Session cookies are per-account. If I'm running engagement for ten barbershops, I need ten cookies, ten weekly re-auth cycles, ten rate-limit windows to coordinate. The architecture is linear-cost in client count; the Graph API path would be constant-cost in the orchestrator and linear only in client API quotas.
+
+## What the metrics lie about
+
+The results table on the pilot's case study has one line that reads cleaner than it should:
+
+> 0 IG violations · 2-month pilot
+
+That's a true number. It's also entirely a function of running under rate limits with one client. If I'd scaled the exact same architecture to five clients, the number would've gone up. If I'd shipped under the Graph API with proper scopes, the metric wouldn't exist — compliance is the baseline, not an achievement.
+
+Any time you see a safety metric reported on a cookie-driven system, read it as a statement about pacing, not architecture.
+
+## Should you ship this way?
+
+Depends on exactly one question: are you running a pilot or building the product?
+
+**Pilot.** One client, two-month window, honest conversation with the owner about where the automation touches their account. Playwright + cookie is defensible. You're testing whether the system is worth the paperwork before you buy the paperwork.
+
+**Product.** Any plural number of clients, any plan to open a seat on a demo page. Register the entity, pass Business Verification, go through App Review. The paperwork isn't the cost of the API — it's the cost of writing to someone else's account at scale, and it's load-bearing on the whole product's story.
+
+The failure mode is doing a pilot's architecture past the pilot. The cookie that worked for one barbershop in a two-month window is the exact wrong substrate for anything after that.
+
+## What I'd do differently
+
+Register the entity on day one, not day sixty. The entity doesn't gate the architecture decisions — I'd still have shipped the orchestrator, the Haiku stratification, the Slack approval, the knowledge-markdown system. What it gates is which API the production version runs against, and that question needs answering before the pipeline is load-bearing on a workaround.
+
+The pilot proved the system can run at cost. The thing it didn't prove — because the paperwork wasn't done — is whether the system could run at scale legally. Those are two different questions and I conflated them for most of the pilot.
+
+The clean API wasn't a lie. It was a filter, pointed exactly at builders like me, working exactly as designed.

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ArtifactType } from "@/content/blog";
+import { PhoneRow } from "./CaseStudySchemas";
 
 const artifactIcon: Record<ArtifactType, string> = {
   commit: "⌥",
@@ -270,4 +271,5 @@ export const blogComponents = {
   Before,
   After,
   TechnicalDetail,
+  PhoneRow,
 };

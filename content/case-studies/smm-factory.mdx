@@ -33,6 +33,7 @@ readingTime: 4
     { name: "Render", slug: "render" },
     { name: "GitHub Actions", slug: "githubactions" },
   ]}
+  live={{ label: "@noble.booking", href: "https://www.instagram.com/noble.booking/" }}
   dateRange="dev 2026-06-08 → 2026-07-04 · pilot 2026-07 → 2026-08"
 />
 
@@ -127,23 +128,174 @@ The system's superpower is the `knowledge/` directory — 12 markdown files (`00
 
 That flipped every Claude session from *"here's a codebase, please read it all"* into *"here's the spec and the one file we're touching."* Sessions got sharp.
 
-```text
-agents/                              knowledge/
-├── intake/        · onboarding Q&A  ├── 00_overview.md
-├── analysis/      · build strategy  ├── 01_intake_agent.md
-├── content/       · weekly plan     ├── 02_analysis_agent.md
-├── approval/      · Slack 3-button  ├── 03_content_pipeline.md
-├── publisher/     · schedule → IG   ├── 04_approval_manager.md
-├── engagement/    · daily actions   ├── 05_publisher_agent.md
-├── analytics/     · weekly rollup   ├── 06_engagement_agent.md
-├── strategy/      · self-improve    ├── 07_analytics_agent.md
-├── orchestrator/  · state machine   ├── 08_self_improvement_agent.md
-├── query/         · ask-anything    ├── 09_agent_query.md
-└── trends/        · hashtag fetch   ├── 10_database_schema.md
-                                     └── 11_orchestrator.md
-```
+<WireflowMap
+  title="The orbit — ten agents around one orchestrator, twelve knowledge files behind every decision"
+  width={920}
+  height={780}
+  nodes={[
+    {
+      id: "intake",
+      x: 20, y: 120,
+      w: 160, h: 140,
+      title: "intake",
+      sub: "01_intake_agent",
+      mock: { kind: "slack", lines: ["URL dropped", "noblelink.app", "brand pulled", "+ 4 personas"] },
+      caption: "Account · brand scrape",
+      labelPos: "above",
+    },
+    {
+      id: "analysis",
+      x: 202, y: 120,
+      w: 160, h: 140,
+      title: "analysis",
+      sub: "02_analysis_agent",
+      mock: { kind: "list", items: ["7 verticals", "3 content pillars", "weekly cadence", "dark + gold"] },
+      caption: "Pillars + palette",
+      labelPos: "above",
+    },
+    {
+      id: "content",
+      x: 384, y: 120,
+      w: 160, h: 140,
+      title: "content",
+      sub: "03_content_pipeline",
+      mock: { kind: "grid", rows: 2, cols: 3 },
+      caption: "7 posts drafted",
+      labelPos: "above",
+    },
+    {
+      id: "approval",
+      x: 566, y: 120,
+      w: 160, h: 140,
+      title: "approval",
+      sub: "04_approval",
+      mock: { kind: "slack", lines: ["draft ready", "✓ approved — SMM", "edits captured", "queued"] },
+      caption: "Three-tap gate",
+      labelPos: "above",
+    },
+    {
+      id: "publisher",
+      x: 748, y: 120,
+      w: 160, h: 140,
+      title: "publisher",
+      sub: "05_publisher_agent",
+      mock: { kind: "slack", lines: ["✓ posted 09:00", "@noble.booking", "feed + reel live", "→ ledger"] },
+      caption: "Posted + logged",
+      labelPos: "above",
+    },
+    {
+      id: "orchestrator",
+      x: 254, y: 330,
+      w: 200, h: 160,
+      accent: true,
+      title: "orchestrator",
+      sub: "11_orch.md",
+      mock: { kind: "list", items: ["Rules = Code", "One agent, one job", "Fail loud, log all", "Weekly cron Mon 09:00"] },
+      caption: "The one brain",
+      labelPos: "hidden",
+    },
+    {
+      id: "engagement",
+      x: 20, y: 560,
+      w: 160, h: 140,
+      title: "engagement",
+      sub: "06_engagement_agent",
+      mock: { kind: "slack", lines: ["DM received", "intent: pricing", "reply drafted", "✓ sent"] },
+      caption: "DM auto-reply",
+    },
+    {
+      id: "analytics",
+      x: 202, y: 560,
+      w: 160, h: 140,
+      title: "analytics",
+      sub: "07_analytics_agent",
+      mock: { kind: "chart", bars: [0.5, 0.8, 0.4, 0.9, 0.6, 0.7, 0.5] },
+      caption: "Weekly impressions",
+    },
+    {
+      id: "strategy",
+      x: 384, y: 560,
+      w: 160, h: 140,
+      title: "strategy",
+      sub: "08_self_improvement",
+      mock: { kind: "list", items: ["+3 rules learned", "pillar weights ↑", "retire low-CTR", "promote hooks"] },
+      caption: "Rules self-update",
+    },
+    {
+      id: "trends",
+      x: 566, y: 560,
+      w: 160, h: 140,
+      title: "trends",
+      sub: "hashtag fetch",
+      mock: { kind: "chips", items: ["#barberlife", "#fade", "#booking", "#salon"] },
+      caption: "Niche hashtags",
+    },
+  ]}
+  callouts={[
+    {
+      x: 500, y: 330,
+      w: 400, h: 160,
+      title: "12 knowledge files ground every decision",
+      items: [
+        "00_overview — pipeline map",
+        "01–08 — per-agent specs (intake → strategy)",
+        "09_agent_query — shared memory lookup",
+        "10_database_schema — the one source of truth",
+        "11_orchestrator — routes + CRON + Slack",
+      ],
+    },
+  ]}
+  edges={[
+    { from: "orchestrator", to: "intake",      kind: "primary", bend: "h-first" },
+    { from: "intake",    to: "analysis",     kind: "primary" },
+    { from: "analysis",  to: "content",      kind: "primary" },
+    { from: "content",   to: "approval",     kind: "primary" },
+    { from: "approval",  to: "publisher",    kind: "primary" },
+    { from: "publisher", to: "orchestrator", kind: "annotation", bend: "h-first" },
+    { from: "orchestrator", to: "engagement",  kind: "annotation", bend: "v-first" },
+    { from: "analytics",    to: "orchestrator", kind: "annotation", bend: "v-first" },
+    { from: "strategy",     to: "orchestrator", kind: "annotation", bend: "v-first" },
+    { from: "trends",       to: "orchestrator", kind: "annotation", bend: "h-first" },
+  ]}
+  legend={[
+    { kind: "primary",    label: "Weekly content cycle — Mon 09:00 cron → feed live" },
+    { kind: "annotation", label: "Continuous telemetry & dispatch — utility agents ⇄ orchestrator" },
+  ]}
+  caption="Primary (solid): the closed weekly loop. Orchestrator cron fires Mon 09:00 → intake scrapes the brand → analysis extracts pillars → content drafts the week → approval runs the 3-tap gate → publisher ships the post. Annotation (dashed): everything that runs continuously around that loop. Publisher logs completion back to orchestrator; analytics / strategy / trends feed signals in so next Monday is smarter; orchestrator dispatches engagement for both inbound DMs and scheduled comment-on-feed batches. The right-side callout names the twelve markdown files that ground every decision."
+/>
 
 Every folder in `agents/` has a matching file in `knowledge/`. When the two drift, the knowledge file is the bug — code is ground truth, markdown is the spec that must agree with it.
+
+### The engagement agent — where the system actually touches humans
+
+Content generation is the showy part. The engagement agent is the one that moves the needle on a booking SaaS, because it runs while the owner is cutting hair. Two behaviors, both on cron, both bypassing me entirely:
+
+- **Comments on target feeds.** A daily batch picks in-niche posts (own-niche hashtags from `trends`, competitor accounts flagged in strategy). Haiku writes one conversational line per post — matched to context, no CTA, no emoji spam. The orchestrator rate-limits by account so the pattern reads organic, not scripted.
+- **Replies to DMs.** Incoming DM triggers the agent inline: Haiku reads it, classifies against response templates in `06_engagement_agent.md`, drafts, sends. No Slack-approval on this hop — the whole point of the engagement loop is closing the conversation before the lead cools.
+
+<PhoneRow
+  items={[
+    {
+      src: "/case-studies/smm-factory/noble-engagement-eternalasting.png",
+      alt: "@eternalasting.event's Instagram post — a 'Barber Shop' tent with a Prestige Barbershop sign at a lakeside sunset event in Rockwall, Texas. Comments drawer open. noble.booking commented 16 weeks ago (hearted by author): 'That Hot Mess Bakery cake looks incredible with the barbershop theme, and the picnic setup is such a creative way to celebrate the anniversary with your crew.' The account owner replied '@noble.booking Thank you !' and hearted the reply chain.",
+      width: 1170,
+      height: 2532,
+      label: "Comment landed · heart + thank-you from author",
+    },
+    {
+      src: "/case-studies/smm-factory/noble-engagement-citybarberib.png",
+      alt: "@citybarberib's Instagram post — four barbers standing on a hilltop at dusk overlooking a city sprawl. Comments drawer open. noble.booking commented 17 weeks ago (hearted by author): 'How do you keep your tools so clean working mobile like that?' The author replied '@noble.booking you mean the clippers or everything?' — a genuine back-and-forth, not a bot acknowledgment.",
+      width: 1170,
+      height: 2532,
+      label: "Started a back-and-forth with the owner",
+    },
+  ]}
+  caption="Two real comments the engagement agent left on in-niche accounts (Prestige Barbershop · City Barber). Both earned replies, both were hearted by the account owners. Haiku-written, Playwright-posted, per-account rate-limited — organic enough to pass as a human reader of the feed."
+/>
+
+**The path I wanted and couldn't take.** The clean version is Instagram Graph API through Meta Business Suite — official endpoints for `instagram_manage_comments` and `instagram_manage_messages`. App Review for those write-scopes requires passing Business Verification first: a registered legal entity, business documents on file, DUNS or local equivalent, a reviewed privacy policy on an active production domain. I was running this as a solo pilot — no incorporated company behind it, no fast path to one that didn't bulldoze the point of the pilot. Meta's gate doesn't bend for individuals, by design, and there's no sandbox-mode escape hatch for write scopes.
+
+So the fallback is a Playwright session driven by a long-lived IG cookie, same mechanic the publisher uses to post. It's fragile — cookies rotate, flows break on IG UI updates (the `login_required` in the log below is exactly this failure mode in the trends path) — it's not TOS-clean, and it won't scale past a handful of clients before IG's spam heuristics catch on. For a two-month pilot it was the only way to ship. The `0 IG violations` in Results below reads differently once you know this: it's a function of staying slow and under rate-limit, not of the architecture being clean.
 
 <TechnicalDetail title="One Monday morning — content pipeline log (trimmed)">
 
@@ -190,6 +342,7 @@ Ship, test, kill in 21 minutes.
 
 ## Trade-Offs I'd Explain to a Client
 
+- **No Meta Business API — cookie-session instead.** The clean path for comments + DMs is Instagram Graph API. App Review for the write scopes requires passing Meta's Business Verification, which requires a registered legal entity — I was a solo pilot without a company. No fast way around the gate, by design. Fell back to a Playwright-driven IG session cookie. Fragile, outside TOS, shippable the same evening. The single biggest reason the system isn't production-ready without a corporate wrapper around it first.
 - **GitHub Actions as render farm** instead of a GPU box. 5–15 min latency, offloaded to free tier. Would break past ~50 clients — good problem.
 - **Slack as the only UI.** Every approval, status, insight — Slack. Custom dashboard would've cost weeks; Slack costs zero. Rate limits push me toward batching, which turned out to be a UX win.
 - **Self-Improvement never auto-applies.** Monthly it writes a new strategy version, archives the old, posts summary in Slack. I approve or ignore. Costs me weekly attention. Prevents silent drift into whatever Claude currently thinks is right.
@@ -210,6 +363,35 @@ Ship, test, kill in 21 minutes.
   <Cost label="AI cost" value="$0.30–0.50 / client / week" />
   <Cost label="Human time" value="~1 hr / week" />
 </div>
+
+<Figure
+  src="/case-studies/smm-factory/slack-desktop.png"
+  alt="Desktop Slack · Noblelink workspace, Threads view. The SMM Factory APP is mid-reply at 11:50 AM, breaking down a visual-direction problem on this week's content: 'the visual side isn't landing for you — current visual situation: lots of text-heavy captions in Cyrillic; strategically strong but design/aesthetic feels too generic or corporate; strategy doc calls for dark backgrounds, gold accents, real barbershop floor aesthetic, but not seeing evidence that's implemented yet…' Then three diagnoses — too polished/corporate, stock imagery, color palette mismatch — and three next-step options (visual direction for this week, style guide, flag posts needing rework). The bot is doing the strategist's job inline, inside the exact Slack thread where I'd approve the output."
+  width={2380}
+  height={1582}
+  frame="flat"
+  caption="The entire UI. Noblelink workspace in desktop Slack — the SMM Factory bot is a conversational team member, not a dashboard. Every weekly plan, every approval tap, every strategy debate happens here."
+/>
+
+<PhoneRow
+  items={[
+    {
+      src: "/case-studies/smm-factory/instagram-noble-1059.png",
+      alt: "The @noble.booking Instagram profile at 10:59 — 34 posts, 13 followers, 43 following. Bio reads: 'Online booking for salons & barbers · Get your booking page in minutes · Free trial available · Try it…' with the noblelink.app link. The 'Your dashboard: 9 views in the last 30 days' creator panel is visible — this was a live account the agents published to, not a staging sandbox.",
+      width: 1170,
+      height: 2532,
+      label: "Account · 34 posts, zero manual posting",
+    },
+    {
+      src: "/case-studies/smm-factory/instagram-reel-1059.png",
+      alt: "A reel from the Noble feed — big-type headline 'Clients book while you work.' over a dark background with a Noble booking mockup inside a phone frame, Kevin MacLeod · District Four royalty-free music, 14-DAY FREE TRIAL badge in the top-right. Insights panel reads 159 views. Haiku-written copy, Playwright + FFmpeg render pipeline.",
+      width: 1170,
+      height: 2532,
+      label: "Reel · 159 views, Haiku copy, FFmpeg render",
+    },
+  ]}
+  caption="Two snapshots of what landed — the account the agents published to, and one of the reels that came out of the Playwright + FFmpeg pipeline."
+/>
 
 **The honest read**: 13 followers is small. This is a genuinely narrow audience (specific service tier, specific behavior). The pilot proved the system can run at cost. The open question it didn't resolve — and the reason this stayed a pilot rather than scaling into Noble's live marketing stack — was whether the creative ceiling of autonomous content was high enough for the same targeting to actually convert.
 
