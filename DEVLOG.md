@@ -2213,3 +2213,15 @@ Playwright added as `devDependencies` (not shipped to runtime; `npm run build` i
 - **Capture floating overlays as a known hazard.** Headless Playwright will faithfully bake in `.fixed.bottom-6` emails, consent banners, and (if present) analytics debug panels. Add the hide-rule to `screenshot-web.mjs` up front; the alternative is re-capturing every pass as the layout evolves.
 - **Where the recursion costs nothing, embrace it.** The hrekov-dev case study's §10 reads "You're browsing the artifact" — placing a `<Figure>` of the actual home page immediately above that sentence doubles the rhetorical weight for zero prose change. The same move for other case studies requires live product screenshots (Noble, Fieldmark via Simulator, Lexora via Simulator). Session 2 agenda.
 - **Playwright v. puppeteer:** picked Playwright because the browser install is a single `npx playwright install chromium` with no runtime download trap, and `addStyleTag` + `reducedMotion` are first-class API — three lines of config swallowed the whole DotGrid/CTA problem.
+
+## 2026-10-07 — cron · cross-post batch
+
+**Problem:** 2 scheduled cross-post(s) reached publish time.
+
+**Decision:** publish-due.mjs fired via GH Actions hourly cron.
+
+**Result:** Published: no-company-no-api/linkedin → https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7513476238192304130/; no-company-no-api/devto → https://dev.to/ruslan_hrekov_d296523b326/no-company-no-api-59cd. Failures: 0.
+
+**Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
+
+---
