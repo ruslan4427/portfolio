@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogReadTracker } from "@/components/analytics/BlogReadTracker";
@@ -139,6 +140,23 @@ export default async function BlogPostPage({
             )}
           </div>
         </header>
+
+        {frontmatter.heroImage && (
+          <Reveal delay={0.1} className="px-[var(--gutter)] pb-16">
+            <figure className="mx-auto max-w-[1100px]">
+              <div className="relative aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+                <Image
+                  src={frontmatter.heroImage.src}
+                  alt={frontmatter.heroImage.alt}
+                  fill
+                  sizes="(min-width: 1200px) 1100px, 92vw"
+                  priority
+                  className="object-cover"
+                />
+              </div>
+            </figure>
+          </Reveal>
+        )}
 
         <div className="px-[var(--gutter)] pb-16">
           <BlogPostBody source={source} format={frontmatter.format} />

@@ -35,6 +35,11 @@ export type BlogDistribution = {
   twitter?: { status: "manual" };
 };
 
+export type HeroImage = {
+  src: string;
+  alt: string;
+};
+
 export type BlogFrontmatter = {
   title: string;
   slug: string;
@@ -49,6 +54,7 @@ export type BlogFrontmatter = {
   distribution?: BlogDistribution;
   artifacts?: Artifact[];
   related?: string[];
+  heroImage?: HeroImage;
 };
 
 export type BlogPost = {
@@ -127,6 +133,17 @@ function validateFrontmatter(slug: string, data: Record<string, unknown>): BlogF
     ? data.artifacts.map((a, i) => validateArtifact(slug, a, i))
     : undefined;
 
+  let heroImage: HeroImage | undefined;
+  if (data.heroImage !== undefined) {
+    if (!data.heroImage || typeof data.heroImage !== "object") {
+      fail(slug, "heroImage must be an object with { src, alt }");
+    }
+    const h = data.heroImage as Record<string, unknown>;
+    if (typeof h.src !== "string" || !h.src) fail(slug, "heroImage.src required");
+    if (typeof h.alt !== "string" || !h.alt) fail(slug, "heroImage.alt required");
+    heroImage = { src: h.src, alt: h.alt };
+  }
+
   return {
     title: data.title,
     slug,
@@ -143,6 +160,7 @@ function validateFrontmatter(slug: string, data: Record<string, unknown>): BlogF
     related: Array.isArray(data.related) && data.related.every((s) => typeof s === "string")
       ? (data.related as string[])
       : undefined,
+    heroImage,
   };
 }
 

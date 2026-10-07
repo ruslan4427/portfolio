@@ -11,8 +11,10 @@
     "verify:numbers": "node scripts/verify-case-study-numbers.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.27.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "dotenv": "^18.0.6",
     "framer-motion": "^13.4.0",
     "gray-matter": "^4.0.3",
     "js-yaml": "^5.4.2",
