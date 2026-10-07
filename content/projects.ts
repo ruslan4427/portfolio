@@ -19,6 +19,11 @@ export type Project = {
   featured?: boolean;
   roleTags?: ProjectRoleTag[];
   stackTags?: ProjectStackTag[];
+  preview?: {
+    src: string;
+    alt: string;
+    orientation?: "landscape" | "portrait";
+  };
 };
 
 export const projects: Project[] = [
@@ -43,6 +48,11 @@ export const projects: Project[] = [
     featured: true,
     roleTags: ["full-stack"],
     stackTags: ["next", "ai"],
+    preview: {
+      src: "/case-studies/hrekov-dev/home.webp",
+      alt: "hrekov.dev home page — the portfolio case this card links to, captured from its own live site.",
+      orientation: "landscape",
+    },
   },
   {
     slug: "noble-saas",
@@ -58,6 +68,11 @@ export const projects: Project[] = [
     featured: true,
     roleTags: ["full-stack"],
     stackTags: ["next", "react", "node"],
+    preview: {
+      src: "/case-studies/noble-saas/dashboard.webp",
+      alt: "Noble owner dashboard — bookings, revenue, and today-view in a single pane.",
+      orientation: "landscape",
+    },
   },
   {
     slug: "angel",
@@ -73,6 +88,11 @@ export const projects: Project[] = [
     featured: true,
     roleTags: ["cto", "consulting", "full-stack"],
     stackTags: ["next", "react", "ai"],
+    preview: {
+      src: "/case-studies/angel/pipeline.webp",
+      alt: "Angel's five-stage AI pipeline diagram — Discovery → Spec → Plan → Tasks → Build.",
+      orientation: "landscape",
+    },
   },
   {
     slug: "fieldmark",
@@ -87,6 +107,11 @@ export const projects: Project[] = [
     span: "tall",
     roleTags: ["full-stack"],
     stackTags: ["flutter"],
+    preview: {
+      src: "/case-studies/fieldmark/floor-plan-pins.png",
+      alt: "Fieldmark iOS screen — floor plan with installation pins overlaid.",
+      orientation: "portrait",
+    },
   },
   {
     slug: "lexora",
@@ -101,6 +126,11 @@ export const projects: Project[] = [
     span: "square",
     roleTags: ["full-stack"],
     stackTags: ["flutter", "ai"],
+    preview: {
+      src: "/case-studies/lexora/now-playing.png",
+      alt: "Lexora iOS now-playing screen — vocabulary track with large glyph and progress ring.",
+      orientation: "portrait",
+    },
   },
   {
     slug: "smm-factory",
@@ -116,5 +146,10 @@ export const projects: Project[] = [
     featured: true,
     roleTags: ["full-stack"],
     stackTags: ["ai", "node"],
+    preview: {
+      src: "/case-studies/smm-factory/slack-desktop.png",
+      alt: "Noblelink Slack workspace — the SMM Factory bot mid-reply inside a strategy thread.",
+      orientation: "landscape",
+    },
   },
 ];
