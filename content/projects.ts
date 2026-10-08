@@ -108,9 +108,9 @@ export const projects: Project[] = [
     roleTags: ["full-stack"],
     stackTags: ["flutter"],
     preview: {
-      src: "/case-studies/fieldmark/floor-plan-pins.png",
-      alt: "Fieldmark iOS screen — floor plan with installation pins overlaid.",
-      orientation: "portrait",
+      src: "/case-studies/fieldmark/cover.jpg",
+      alt: "Fieldmark case-study cover — iPhone with the architectural floor plan screen tilted on a saturated blue backdrop, callout cards reading 'Floor 2 · 24 markers', 'Foreman Pin · Camera · Mech Room', and 'Approved · Build 21', beside the Playfair headline 'The plan is the backlog.'",
+      orientation: "landscape",
     },
   },
   {
