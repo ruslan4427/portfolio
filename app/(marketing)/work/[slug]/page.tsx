@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArtifactList } from "@/components/case-study/ArtifactList";
 import { DevlogRefs } from "@/components/case-study/DevlogRefs";
@@ -114,6 +115,23 @@ export default async function CaseStudyPage({
           </Stagger>
         </div>
       </header>
+
+      {frontmatter.heroImage && (
+        <Reveal delay={0.1} className="px-[var(--gutter)] pb-16">
+          <figure className="mx-auto max-w-[1100px]">
+            <div className="relative aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+              <Image
+                src={frontmatter.heroImage.src}
+                alt={frontmatter.heroImage.alt}
+                fill
+                sizes="(min-width: 1200px) 1100px, 92vw"
+                priority
+                className="object-cover"
+              />
+            </div>
+          </figure>
+        </Reveal>
+      )}
 
       {frontmatter.recruiterSummary && (
         <section className="px-[var(--gutter)] pb-12">

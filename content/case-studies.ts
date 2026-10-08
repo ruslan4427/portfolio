@@ -1,7 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-import type { Artifact } from "@/content/blog";
+import type { Artifact, HeroImage } from "@/content/blog";
 
 export type DevlogRef = {
   date: string;
@@ -24,6 +24,7 @@ export type CaseStudyFrontmatter = {
   recruiterSummary?: string;
   supportingArtifacts?: Artifact[];
   devlogRefs?: DevlogRef[];
+  heroImage?: HeroImage;
 };
 
 export type CaseStudy = {
