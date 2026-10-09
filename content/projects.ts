@@ -127,9 +127,9 @@ export const projects: Project[] = [
     roleTags: ["full-stack"],
     stackTags: ["flutter", "ai"],
     preview: {
-      src: "/case-studies/lexora/now-playing.png",
-      alt: "Lexora iOS now-playing screen — vocabulary track with large glyph and progress ring.",
-      orientation: "portrait",
+      src: "/case-studies/lexora/cover.jpg",
+      alt: "Lexora case-study cover — iPhone 15 Pro on a warm off-white dot-grid backdrop showing the Business English Vocab list in uk-UA (Follow up / уточнити, Proposal, Agenda / порядок денний, Budget / бюджет, Invoice / рахунок, Deadline / термін, Meeting / зустріч). A dark pill above the phone reads 'Business English Vocab'; a white callout card to the left shows the list thumbnail labelled 'TOPIC (UKR) · LIST (UKR) / Lesson 1 - Intro'; a white callout to the right reads 'STATUS · Active Learning' in green.",
+      orientation: "landscape",
     },
   },
   {
