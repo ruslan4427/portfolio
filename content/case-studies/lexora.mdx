@@ -9,7 +9,7 @@ stack:
   - Google TTS Neural2
   - Gemini 3.6 Flash
 year: "2026"
-status: in-review
+status: shipped
 publishedAt: "2026-08-30"
 readingTime: 4
 ---
@@ -23,6 +23,10 @@ readingTime: 4
     { name: "Google TTS Neural2", slug: "googlecloud" },
     { name: "Gemini 3.6 Flash", slug: "googlegemini" },
   ]}
+  live={{
+    label: "App Store",
+    href: "https://apps.apple.com/us/app/lexora-audio/id6811505769",
+  }}
   dateRange="2026-08-30 → 2026-09-29"
 />
 
@@ -143,7 +147,7 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
     {
       label: "Build 15 — explicit consent before any topic leaves the device",
       tone: "after",
-      meta: "2026-09-29 · still in review",
+      meta: "2026-09-29 → 2026-10-08 · approved",
       diagram: {
         width: 1082,
         height: 220,
@@ -152,13 +156,13 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
           { id: "gate", shape: "process", icon: "lock", label: "Consent gate", sub: "in-app opt-in · topic string", x: 316, y: 110 },
           { id: "disclose", shape: "event", icon: "shield", label: "AI disclosure UI", sub: "names Gemini + GCP TTS", x: 556, y: 110 },
           { id: "resub", shape: "event", icon: "cloud", label: "Resubmit Build 15", sub: "2026-09-29", x: 776, y: 110 },
-          { id: "pending", shape: "event", icon: "clock", label: "In review", sub: "no outcome yet", x: 986, y: 110, color: "faint" },
+          { id: "approved", shape: "event", icon: "check", label: "Approved", sub: "live · 2026-10-08", x: 980, y: 110, color: "success", outcome: "approved" },
         ],
         edges: [
           { from: "spec", to: "gate" },
           { from: "gate", to: "disclose" },
           { from: "disclose", to: "resub" },
-          { from: "resub", to: "pending", style: "dashed" },
+          { from: "resub", to: "approved", color: "success" },
         ],
       },
     },
@@ -172,7 +176,7 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
     { value: "76 tests", label: "mocktail + Freezed across 19 files" },
     { value: "12 langs", label: "Google TTS Neural2 catalog · Persian dropped" },
     { value: "26–28 MB", label: "iOS bundle · 59 MB on Android" },
-    { value: "0 users", label: "Build 15 pending Apple review" },
+    { value: "Build 15", label: "live on App Store · 2026-10-08" },
   ]}
 />
 

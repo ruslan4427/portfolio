@@ -2225,3 +2225,15 @@ Playwright added as `devDependencies` (not shipped to runtime; `npm run build` i
 **Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
 
 ---
+
+## 2026-10-08 — Lexora Build 15 approved · App Store live
+
+**Problem:** Apple approved Lexora Build 15 — 9 calendar days after resubmission (2026-09-29 → 2026-10-08). Portfolio still carried `status: in-review` on the lexora project card and case study, StackRow had no `live={{}}` tile, FlowSchema row 2 ended on a dashed "pending" node, and the ImpactStats fourth card still said "0 users · Build 15 pending Apple review". Every surface that referenced the review outcome was stale within one minute of approval.
+
+**Decision:** Flip `status` to `shipped` in both `content/projects.ts` and `content/case-studies/lexora.mdx` frontmatter. Add `live={{ label: "App Store", href: "https://apps.apple.com/us/app/lexora-audio/id6811505769" }}` to the StackRow — mandatory per `content/case-studies/CLAUDE.md` §5.3 for shipped products with a public URL. Replace the FlowSchema row-2 terminal node `pending` (shape:event, color:faint, dashed incoming edge, x=986) with `approved` (shape:event, color:success, outcome:"approved" badge, solid success edge, x=980). Shift from 986 → 980 so the outcome badge (+6px past node right edge) stays inside the 1082-wide viewBox per §4.2 rule (max_x ≤ 1082 − 80 − 22 = 980). Update row-2 `meta` from "2026-09-29 · still in review" → "2026-09-29 → 2026-10-08 · approved". Replace ImpactStats item 4 "0 users / Build 15 pending Apple review" with "Build 15 / live on App Store · 2026-10-08". The dev `dateRange` stays "2026-08-30 → 2026-09-29" — verify-case-study-numbers.mjs anchors the tech-stack range end to the lexora repo's last commit date, and approval is a review event, not a code event.
+
+**Result:** `pnpm verify:numbers` passes. Lexora is now the second Flutter case study with a public store listing (Fieldmark being the first).
+
+**Lesson:** Store approval doesn't widen the dev `dateRange` — the tech-stack line stays anchored to the last code commit. Approval signals belong in (a) the FlowSchema terminal node + edge colour, (b) the ImpactStats "status card", and (c) the StackRow `live={{}}` tile. Keep approval date verbatim in all three so the next reader triangulates the same number from three independent surfaces.
+
+---
