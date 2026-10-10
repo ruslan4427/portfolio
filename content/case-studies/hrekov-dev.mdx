@@ -1,7 +1,7 @@
 ---
 slug: hrekov-dev
 title: The portfolio that documents itself
-tagline: Fourteen sprints, thirty-four memory files, one recursive proof.
+tagline: Fourteen sprints, thirty-five memory files, one recursive proof.
 role: Meta · solo build
 stack:
   - Next.js 16
@@ -10,6 +10,23 @@ stack:
   - Tailwind v4
   - Claude Opus
   - Framer Motion
+stackItems:
+  - name: Next.js 16
+    slug: nextdotjs
+  - name: React 19
+    slug: react
+  - name: TypeScript
+    slug: typescript
+  - name: Tailwind v4
+    slug: tailwindcss
+  - name: Claude Opus
+    slug: anthropic
+  - name: Framer Motion
+    slug: framer
+live:
+  label: hrekov.dev
+  href: https://hrekov.dev
+dateRange: "2026-09-20 → 2026-10-10"
 year: "2026"
 status: shipped
 featured: false
@@ -37,7 +54,7 @@ supportingArtifacts:
     detail: "14 sprints across 19 calendar days · ~0.74 sprints/day"
   - type: timeline
     label: "Ramp-up saved per new session"
-    detail: "~68 min · 34 memory files × ~2 min context re-hydration each"
+    detail: "~70 min · 35 memory files × ~2 min context re-hydration each"
 devlogRefs:
   - date: "2026-09-24"
     entry: "Font pivot to Playfair Display + ambient dot wave"
@@ -53,6 +70,12 @@ devlogRefs:
     summary: "One debug hour became one memory file. Every Tailwind-on-anchor question since has been a one-turn answer."
 ---
 
+**hrekov.dev is a Next.js 16 portfolio whose case study is itself — the memory files, DEVLOG entries, and promotion discipline that produced the site are public and walkable in a single repo.**
+
+<ValueStatement eyebrow="Thesis">
+The site is a byproduct. The actual artifact is the workflow that produced it.
+</ValueStatement>
+
 ## 1. Cold open
 
 The five client case studies on this site describe work I did for others.
@@ -63,7 +86,7 @@ isn't — the site is a byproduct. The actual artifact is the workflow
 that produced it, and the workflow only holds up if I can show it
 working on something. This portfolio was the something.
 
-Thirty-four memory files. Fifty-two journal entries. Ten of them
+Thirty-five memory files. Fifty-two journal entries. Ten of them
 promoted to durable rules. Fourteen sprints across nineteen calendar days,
 solo. Every decision is on disk, timestamped, in a public repo you can
 clone. Half the interesting ones are wrong on the first pass — the
@@ -72,9 +95,14 @@ discipline is that the second pass catches them before they compound.
 If you're evaluating whether AI-augmented delivery scales to a real
 engagement, don't read a whitepaper. Read the machine that made itself.
 
-<ValueStatement eyebrow="Thesis">
-The site is a byproduct. The actual artifact is the workflow that produced it.
-</ValueStatement>
+<ImpactStats
+  columns={3}
+  items={[
+    { value: "34", label: "memory files on disk" },
+    { value: "52", label: "DEVLOG entries" },
+    { value: "10 → 19.2%", label: "promoted to STABLE_LOGIC" },
+  ]}
+/>
 
 <figure className="not-prose my-10">
   <video
@@ -151,18 +179,34 @@ shiploop_discipline.md
 user_name_romanization.md
 ```
 
-Four types, deliberately narrow:
+Four types, deliberately narrow. Every entry belongs to exactly one — ad-hoc
+notes drift into a wiki nobody reads.
 
-- **user** — who Ruslan is (surname romanization, technical background,
-  preferences). Written once, rarely edited. Frames how the model speaks.
-- **feedback** — corrections and validated approaches. Every rule carries
-  a **Why** line so future sessions can judge edge cases instead of
-  following blindly. Includes the CSS cascade rule that ended three
-  hours of Tailwind-under-Turbopack debugging.
-- **project** — ongoing initiatives, decisions, dates. The fastest-moving
-  type; entries decay in weeks and get rewritten in place.
-- **reference** — pointers to external systems. Never the data itself,
-  just where to look.
+<NumberedCards
+  columns={2}
+  items={[
+    {
+      icon: "user",
+      title: "user",
+      body: "Who Ruslan is — surname romanization, technical background, preferences. Written once, rarely edited. Frames how the model speaks.",
+    },
+    {
+      icon: "bolt",
+      title: "feedback",
+      body: "Corrections and validated approaches. Every rule carries a Why line so future sessions can judge edge cases instead of following blindly. Includes the CSS cascade rule that ended three hours of Tailwind-under-Turbopack debugging.",
+    },
+    {
+      icon: "pin",
+      title: "project",
+      body: "Ongoing initiatives, decisions, dates. Fastest-moving type; entries decay in weeks and get rewritten in place.",
+    },
+    {
+      icon: "api",
+      title: "reference",
+      body: "Pointers to external systems. Never the data itself, just where to look.",
+    },
+  ]}
+/>
 
 Each file has a minimum shape:
 
@@ -265,15 +309,60 @@ a bug gets a diagnose-fix-verify-log, a large feature gets a full
 spec+plan+tasks triple before a line of code moves. That router is
 ShipLoop — a nine-class classifier applied silently to every prompt
 (Q, B, S, L, R, T, D, M, O), each with its own model tier and its own
-required artifact. The lifecycle is:
+required artifact.
 
-```
-Discovery → Spec → Plan → Tasks → Build → QA → Ship → Retro → (loop)
-```
+<FlowSchema
+  title="ShipLoop · classifier routes each prompt to a model tier, lifecycle drops a memory file at every phase"
+  rows={[
+    {
+      label: "Row 1 · nine classes resolve to three tiers, silently, before any work happens",
+      tone: "neutral",
+      meta: "CLAUDE.md · ShipLoop Protocol",
+      diagram: {
+        width: 1100,
+        height: 240,
+        nodes: [
+          { id: "msg", shape: "role", icon: "user", label: "Message", x: 90, y: 120 },
+          { id: "clf", shape: "action", icon: "bolt", label: "Classify silently", sub: "nine classes", x: 320, y: 120 },
+          { id: "haiku", shape: "event", icon: "doc", label: "Haiku tier", sub: "Q · M", x: 620, y: 50 },
+          { id: "sonnet", shape: "event", icon: "code", label: "Sonnet tier", sub: "B · S · R · T · O", x: 620, y: 120 },
+          { id: "opus", shape: "event", icon: "shield", label: "Opus tier", sub: "L · D", x: 620, y: 190 },
+        ],
+        edges: [
+          { from: "msg", to: "clf" },
+          { from: "clf", to: "haiku", label: "quick" },
+          { from: "clf", to: "sonnet", label: "scoped" },
+          { from: "clf", to: "opus", label: "new scope" },
+        ],
+      },
+    },
+    {
+      label: "Row 2 · lifecycle · nothing skips a phase, every phase ends with a memory file on disk",
+      tone: "neutral",
+      meta: "Discovery → Retro, every pass",
+      diagram: {
+        width: 1100,
+        height: 200,
+        nodes: [
+          { id: "disc", shape: "event", icon: "doc", label: "Discovery", sub: "project-discovery.md", x: 96, y: 100 },
+          { id: "spec", shape: "process", icon: "pin", label: "Spec + Plan + Tasks", sub: "triple on disk", x: 312, y: 100 },
+          { id: "build", shape: "event", icon: "code", label: "Build", sub: "iteration-N.md", x: 528, y: 100 },
+          { id: "qa", shape: "action", icon: "check", label: "QA", sub: "qa-iter-N.md", x: 752, y: 100 },
+          { id: "ship", shape: "event", icon: "cloud", label: "Ship", sub: "release-N.md", x: 976, y: 100, color: "success", outcome: "approved" },
+        ],
+        edges: [
+          { from: "disc", to: "spec" },
+          { from: "spec", to: "build" },
+          { from: "build", to: "qa" },
+          { from: "qa", to: "ship", color: "success" },
+        ],
+      },
+    },
+  ]}
+  caption="Nothing gets built on a 'let's just try it.' When a phase ends, a memory file drops — that is where the persistence layer in §3 gets fed."
+/>
 
-Nothing skips a phase. Nothing gets built on a "let's just try it."
-When a phase ends, a memory file drops — that is where the persistence
-layer in §3 gets fed.
+**Lesson:** *The classifier is one half of the discipline; the lifecycle is the other. Together they turn drift-prone generative work into something that compounds.*
 
 The model-routing rules (which class runs on Haiku, Sonnet, or Opus,
 and why) live on the [About page's stack section](/about#stack). I won't
@@ -281,6 +370,15 @@ duplicate them here; the point of the routing rules is that they're
 one lookup away, not restated everywhere.
 
 ## 6. DEVLOG → STABLE\_LOGIC — the 19.2% number
+
+<ImpactStats
+  columns={3}
+  items={[
+    { value: "52", label: "DEVLOG entries authored" },
+    { value: "10", label: "promoted to STABLE_LOGIC" },
+    { value: "19.2%", label: "promotion rate · the compounding half" },
+  ]}
+/>
 
 Forty-six entries in `DEVLOG.md`. Ten of them promoted to
 `STABLE_LOGIC.md`. That's 19.2%. The other 80.8% stayed in the journal.
@@ -306,29 +404,18 @@ mode on a different element and the rule caught it in the first turn.
 
 The two forms of the same lesson, side by side:
 
-**`DEVLOG.md` · 2026-09-25 (verbatim excerpt):**
+<BeforeAfter>
+  <Before date="DEVLOG · 2026-09-25">
 
-```text
-The tag mattered because `globals.css` had `a { color: inherit; }`
-sitting unlayered. Tailwind v4 emits utility rules inside
-`@layer utilities`. In CSS cascade order, any unlayered rule beats
-any layered rule regardless of specificity — so `a { color: inherit }`
-(spec 0,0,1, unlayered) always won against `.text-[color:var(--cta-ink)]`
-(spec 0,1,0, in `@layer utilities`). Anchors inherited `--ink-body`
-from `body`; buttons don't inherit color, so they were unaffected.
-```
+The tag mattered because `globals.css` had `a { color: inherit; }` sitting unlayered. Tailwind v4 emits utility rules inside `@layer utilities`, and any unlayered rule beats every layered one regardless of specificity. Anchors inherited `--ink-body` from `body`; buttons don't inherit color, so they looked fine.
 
-**`STABLE_LOGIC.md` · promoted (verbatim):**
+  </Before>
+  <After date="STABLE_LOGIC · promoted">
 
-```text
-Every element-level rule in `app/globals.css` lives inside
-`@layer base { ... }`. Never author `html { ... }`, `body { ... }`,
-`a { ... }`, `::selection { ... }` etc. unlayered. Reason: Tailwind v4
-declares the layer order `theme, base, components, utilities`; any
-unlayered rule beats every layered rule regardless of specificity.
-Regression path is anchor-based CTA pills rendering dark-on-dark;
-symptom always looks like a JIT/HMR bug and it never is.
-```
+Every element-level rule in `app/globals.css` lives inside `@layer base { ... }`. Never author `html`, `body`, `a`, `::selection` etc. unlayered. Reason: Tailwind v4's layer order (`theme, base, components, utilities`) means unlayered rules always win. Regression: anchor-based CTA pills rendering dark-on-dark — looks like a JIT bug, never is.
+
+  </After>
+</BeforeAfter>
 
 The DEVLOG entry is a story. The STABLE\_LOGIC entry is a rule.
 Journaling is the raw material. Promotion is the discipline.
@@ -416,10 +503,34 @@ Journaling is the raw material. Promotion is the discipline.
 
 Sixty-plus classified tasks. Five case studies drafted, one shipped
 end-to-end ([Noble is the flagship](/work/noble-saas)), four in review.
-A dot-grid canvas, a font pivot, a full IA restructure from single-page
-to multi-page, a blog foundation, EU-gated consent, a per-slug OG image
-pipeline, an executive/technical view toggle — each with its own spec
-triple or DEVLOG entry naming what broke and what held.
+Four of the shipped surfaces, each with its own spec triple or DEVLOG
+entry naming what broke and what held:
+
+<NumberedCards
+  columns={2}
+  items={[
+    {
+      icon: "browser",
+      title: "Monochrome dot-grid canvas",
+      body: "Cursor-reactive `<canvas>` over the warm-paper page. Every tunable (pitch, dot size, falloff radius, chaos mix) lives in a top-of-file `CONFIG` object. Locked in `portfolio_font_pivot.md`.",
+    },
+    {
+      icon: "box",
+      title: "Single-page → multi-page IA",
+      body: "Sprint 9 restructure. Global chrome in root layout, Nav route-based with prefix match. Journal between Work and About once the blog shipped.",
+    },
+    {
+      icon: "sync",
+      title: "L2 / L3 case-study toggle",
+      body: "Executive vs technical view. `TechnicalDetail` passages CSS-hidden in L2 via a `[data-view]` flip, localStorage-persisted so recruiters stay in exec mode.",
+    },
+    {
+      icon: "shield",
+      title: "EU-gated GA4 consent",
+      body: "`proxy.ts` reads `x-vercel-ip-country`, sets `geo-eu` cookie. Banner shown only in the 31 EU/EEA/CH countries. Non-EU visitors see no banner, no cookie prompt.",
+    },
+  ]}
+/>
 
 The reflex says discipline slows delivery. The measurement disagrees.
 Every spec triple I wrote saved more time on the next session than it
@@ -443,19 +554,34 @@ The failure mode of AI-assisted work isn't speed; it's drift. The memory files a
 ## 8. Context re-hydration saved per session
 
 A fresh session with no memory has to be told, or has to re-derive from
-a diff, at minimum:
+a diff, the exact set of decisions already made. Four of the most
+expensive questions, each resolved by a single file in one turn:
 
-- *"Is the design system dark or light? What are the exact hex values?"*
-  — answered by `portfolio_design_pivot.md` in one line.
-- *"When a Tailwind utility 'doesn't work' on an anchor, is it a JIT
-  bug?"* — no, it's cascade; answered by `feedback_css_cascade_first.md`
-  before I sink another hour.
-- *"Should the display font be italic Playfair?"* — no, that was pivoted
-  out on 2026-09-24; answered by `portfolio_font_pivot.md`.
-- *"What's the user's actual surname — Hrekov or Grekov?"* — Hrekov;
-  the email keeps the old spelling on purpose; `user_name_romanization.md`.
-- *"Are we still shipping the ElevenLabs voice clone plan?"* — no,
-  pivoted to AI video on 2026-09-27; `portfolio_ai_video_pivot.md`.
+<NumberedCards
+  columns={2}
+  items={[
+    {
+      icon: "warning",
+      title: "Dark or light? Exact hex values?",
+      body: "Pivoted to warm paper on 2026-09-23 — `#F5F4EF` page, `#111` ink, `#22C55E` the only chromatic accent (availability dot). Answered by `portfolio_design_pivot.md`.",
+    },
+    {
+      icon: "bug",
+      title: "Tailwind utility fails on `<a>` — JIT bug?",
+      body: "No — it's `@layer` cascade. Unlayered element rules in `globals.css` beat every layered utility. Answered by `feedback_css_cascade_first.md` before another hour sinks in.",
+    },
+    {
+      icon: "doc",
+      title: "Display font — italic Playfair?",
+      body: "Pivoted out on 2026-09-24; display is upright Playfair, body is Inter, no third family. Answered by `portfolio_font_pivot.md`.",
+    },
+    {
+      icon: "mail",
+      title: "Still shipping the ElevenLabs voice clone?",
+      body: "No — pivoted to fully AI-generated video on 2026-09-27 after HeyGen two-camera render landed at 30 credits. Answered by `portfolio_ai_video_pivot.md`.",
+    },
+  ]}
+/>
 
 Rough estimate: two minutes per file × thirty files ≈ sixty
 minutes of ramp-up the model doesn't have to spend rebuilding context
@@ -464,22 +590,35 @@ before it can act. That number is soft, but the direction isn't.
 ## 9. How to steal it
 
 The specific memory files here are project-shaped and won't fit yours.
-The *pattern* is generalizable. What's portable:
+The *pattern* is generalizable. Four portable primitives — each one small
+enough to adopt in an afternoon, strict enough that the system doesn't
+drift into a second junk drawer:
 
-- The four-type taxonomy — **user / feedback / project / reference** —
-  and the discipline that every entry must belong to exactly one. Types
-  give the system a shape; ad-hoc notes eventually devolve into a wiki
-  nobody reads.
-- The frontmatter contract: `name`, `description`, `type`. Nothing
-  more required. The `description` is what the model uses at recall
-  time, so write it for the *future you who has forgotten this exists*.
-- The **Why** line inside every feedback rule. Not just what to do —
-  the reason it exists, usually a past incident. Rules without reasons
-  don't survive edge cases; they get followed blindly or overturned
-  on a whim.
-- `MEMORY.md` as a flat index of pointers, not a document. Keep it
-  under two hundred lines. If it grows past that, the pointers were
-  too verbose or the files too fragmented.
+<NumberedCards
+  columns={2}
+  items={[
+    {
+      icon: "box",
+      title: "Four-type taxonomy",
+      body: "Every entry belongs to exactly one of **user**, **feedback**, **project**, **reference**. Types give the system a shape; ad-hoc notes devolve into a wiki nobody reads.",
+    },
+    {
+      icon: "doc",
+      title: "Three-field frontmatter",
+      body: "`name`, `description`, `type` — nothing more required. The `description` is what the model uses at recall time; write it for the future you who has forgotten this exists.",
+    },
+    {
+      icon: "check",
+      title: "The Why line",
+      body: "Every feedback rule carries a `Why:` line naming the incident that produced it. Rules without reasons don't survive edge cases; they get followed blindly or overturned on a whim.",
+    },
+    {
+      icon: "pin",
+      title: "Flat MEMORY.md index",
+      body: "A one-line pointer per file, nothing hierarchical, kept under 200 lines. If it grows past that, the pointers were too verbose or the files too fragmented.",
+    },
+  ]}
+/>
 
 The actual auto-memory spec these files implement ships inside Claude
 Code itself. The relevant excerpt — types and when-to-save triggers —

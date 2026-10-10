@@ -421,7 +421,7 @@ export function CompareGrid({
   );
 }
 
-type SchematicIcon =
+export type SchematicIcon =
   | "browser"
   | "database"
   | "cloud"
@@ -505,12 +505,18 @@ const schematicIconPaths: Record<SchematicIcon, string> = {
   bug: "M9 4h6m-3 2v2M5 10h14M6 14h12M7 7a5 5 0 0 1 10 0v10a5 5 0 0 1-10 0V7zm-4 7h4m14 0h4M4 20l3-2m14 2-3-2M4 10l3 2m14-2-3 2",
 };
 
-function SchematicIconMark({ name }: { name: SchematicIcon }) {
+export function SchematicIconMark({
+  name,
+  className = "h-5 w-5 shrink-0 text-[color:var(--ink-primary)]",
+}: {
+  name: SchematicIcon;
+  className?: string;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       aria-hidden="true"
-      className="h-5 w-5 shrink-0 text-[color:var(--ink-primary)]"
+      className={className}
       fill="none"
       stroke="currentColor"
       strokeWidth={1.6}
@@ -1287,6 +1293,604 @@ export function Diagram({
           />
         </div>
       </Lightbox>
+    </figure>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * RaceTimeline — horizontal time axis with parallel session lanes.
+ * Specific metaphor for race-condition / concurrency bugs where the arc
+ * IS the vulnerability window. Not BPMN — the X axis is literal time.
+ * -------------------------------------------------------------------------- */
+
+type RTEvent = {
+  t: number; // 0..100 along the row width
+  kind: "pick" | "commit" | "fail" | "ok";
+  label?: string;
+};
+
+type RTSession = {
+  id: string;
+  label: string;
+  events: RTEvent[];
+};
+
+type RTBand = { from: number; to: number; label?: string };
+type RTAxisTick = { t: number; label: string };
+type RTOutcome = { kind: "collision" | "approved" | "denied"; label: string };
+type RTMarker = { t: number; label: string; kind?: "collision" | "converge" };
+
+type RaceTimelineRow = {
+  label: string;
+  tone?: "before" | "after" | "neutral";
+  meta?: string;
+  sessions: RTSession[];
+  window?: RTBand;
+  axisTicks?: RTAxisTick[];
+  marker?: RTMarker;
+  outcome?: RTOutcome;
+};
+
+const RT_WIDTH = 860;
+const RT_LANE_H = 56;
+const RT_PAD_L = 108;
+const RT_PAD_R = 148;
+const RT_PAD_T = 44;
+const RT_PAD_B = 44;
+
+function rtRowHeight(row: RaceTimelineRow) {
+  const laneBlock = row.sessions.length * RT_LANE_H;
+  const bandExtra = row.window ? 20 : 0;
+  return RT_PAD_T + laneBlock + RT_PAD_B + bandExtra;
+}
+
+function rtToneClasses(tone?: RaceTimelineRow["tone"]) {
+  if (tone === "before") {
+    return "border-[color:rgba(220,38,38,0.22)] bg-[color:rgba(220,38,38,0.04)]";
+  }
+  if (tone === "after") {
+    return "border-[color:rgba(34,197,94,0.22)] bg-[color:rgba(34,197,94,0.03)]";
+  }
+  return "border-[color:var(--hairline)] bg-[color:var(--bg-page)]";
+}
+
+function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
+  const h = rtRowHeight(row);
+  const innerW = RT_WIDTH - RT_PAD_L - RT_PAD_R;
+  const laneY = (i: number) => RT_PAD_T + i * RT_LANE_H + RT_LANE_H / 2;
+  const xAt = (t: number) => RT_PAD_L + (Math.max(0, Math.min(100, t)) / 100) * innerW;
+  const axisY = RT_PAD_T + row.sessions.length * RT_LANE_H + 8;
+
+  return (
+    <svg
+      viewBox={`0 0 ${RT_WIDTH} ${h}`}
+      role="img"
+      aria-label={row.label}
+      className="block w-full"
+    >
+      <defs>
+        <pattern id={`rt-hatch-${row.label.replace(/\W+/g, "-")}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(17,17,17,0.14)" strokeWidth="1" />
+        </pattern>
+      </defs>
+
+      {row.window && (
+        <g>
+          <rect
+            x={xAt(row.window.from)}
+            y={RT_PAD_T - 10}
+            width={xAt(row.window.to) - xAt(row.window.from)}
+            height={row.sessions.length * RT_LANE_H + 20}
+            fill={`url(#rt-hatch-${row.label.replace(/\W+/g, "-")})`}
+            opacity="0.9"
+          />
+          <rect
+            x={xAt(row.window.from)}
+            y={RT_PAD_T - 10}
+            width={xAt(row.window.to) - xAt(row.window.from)}
+            height={row.sessions.length * RT_LANE_H + 20}
+            fill="none"
+            stroke="rgba(17,17,17,0.28)"
+            strokeWidth="1"
+            strokeDasharray="4 3"
+          />
+          {row.window.label && (
+            <text
+              x={(xAt(row.window.from) + xAt(row.window.to)) / 2}
+              y={RT_PAD_T - 18}
+              textAnchor="middle"
+              className="fill-[color:var(--ink-muted)] font-sans"
+              fontSize="11"
+            >
+              {row.window.label}
+            </text>
+          )}
+        </g>
+      )}
+
+      {row.sessions.map((s, i) => {
+        const y = laneY(i);
+        return (
+          <g key={s.id}>
+            <text
+              x={RT_PAD_L - 14}
+              y={y + 4}
+              textAnchor="end"
+              className="fill-[color:var(--ink-primary)] font-sans"
+              fontSize="12"
+              fontWeight="500"
+            >
+              {s.label}
+            </text>
+            <line
+              x1={RT_PAD_L}
+              y1={y}
+              x2={RT_WIDTH - RT_PAD_R}
+              y2={y}
+              stroke="rgba(17,17,17,0.22)"
+              strokeWidth="1.2"
+            />
+            {s.events.map((e, ei) => {
+              const cx = xAt(e.t);
+              const isCommit = e.kind === "commit" || e.kind === "ok";
+              const isFail = e.kind === "fail";
+              return (
+                <g key={ei}>
+                  {isCommit ? (
+                    <rect
+                      x={cx - 5}
+                      y={y - 5}
+                      width={10}
+                      height={10}
+                      transform={`rotate(45 ${cx} ${y})`}
+                      fill="#111"
+                      stroke="#F5F4EF"
+                      strokeWidth="1.5"
+                    />
+                  ) : isFail ? (
+                    <g>
+                      <circle cx={cx} cy={y} r={6} fill="#F5F4EF" stroke="#111" strokeWidth="1.6" />
+                      <line x1={cx - 3} y1={y - 3} x2={cx + 3} y2={y + 3} stroke="#111" strokeWidth="1.4" />
+                      <line x1={cx - 3} y1={y + 3} x2={cx + 3} y2={y - 3} stroke="#111" strokeWidth="1.4" />
+                    </g>
+                  ) : (
+                    <circle cx={cx} cy={y} r={5} fill="#111" stroke="#F5F4EF" strokeWidth="1.5" />
+                  )}
+                  {e.label && (
+                    <text
+                      x={cx}
+                      y={y - 12}
+                      textAnchor="middle"
+                      className="fill-[color:var(--ink-body)] font-sans"
+                      fontSize="10.5"
+                    >
+                      {e.label}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+        );
+      })}
+
+      {row.marker && (
+        <g>
+          <line
+            x1={xAt(row.marker.t)}
+            y1={RT_PAD_T - 4}
+            x2={xAt(row.marker.t)}
+            y2={RT_PAD_T + row.sessions.length * RT_LANE_H + 4}
+            stroke="#111"
+            strokeWidth="1.4"
+            strokeDasharray="3 3"
+          />
+          <rect
+            x={xAt(row.marker.t) - 92}
+            y={RT_PAD_T - 36}
+            width={184}
+            height={22}
+            rx={6}
+            fill="#111"
+          />
+          <text
+            x={xAt(row.marker.t)}
+            y={RT_PAD_T - 21}
+            textAnchor="middle"
+            className="fill-[#F5F4EF] font-sans"
+            fontSize="10.5"
+            fontWeight="500"
+          >
+            {row.marker.label}
+          </text>
+        </g>
+      )}
+
+      {row.axisTicks && row.axisTicks.length > 0 && (
+        <g>
+          <line
+            x1={RT_PAD_L}
+            y1={axisY + 18}
+            x2={RT_WIDTH - RT_PAD_R}
+            y2={axisY + 18}
+            stroke="rgba(17,17,17,0.3)"
+            strokeWidth="1"
+          />
+          {row.axisTicks.map((tick, i) => (
+            <g key={i}>
+              <line
+                x1={xAt(tick.t)}
+                y1={axisY + 14}
+                x2={xAt(tick.t)}
+                y2={axisY + 22}
+                stroke="rgba(17,17,17,0.4)"
+                strokeWidth="1"
+              />
+              <text
+                x={xAt(tick.t)}
+                y={axisY + 36}
+                textAnchor="middle"
+                className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
+                fontSize="10"
+              >
+                {tick.label}
+              </text>
+            </g>
+          ))}
+        </g>
+      )}
+
+      {row.outcome && (
+        <g>
+          <rect
+            x={RT_WIDTH - RT_PAD_R + 10}
+            y={RT_PAD_T + (row.sessions.length * RT_LANE_H) / 2 - 24}
+            width={RT_PAD_R - 20}
+            height={48}
+            rx={10}
+            fill={row.outcome.kind === "collision" || row.outcome.kind === "denied" ? "#111" : "#111"}
+          />
+          <text
+            x={RT_WIDTH - RT_PAD_R + 10 + (RT_PAD_R - 20) / 2}
+            y={RT_PAD_T + (row.sessions.length * RT_LANE_H) / 2 + 4}
+            textAnchor="middle"
+            className="fill-[#F5F4EF] font-sans"
+            fontSize="11"
+            fontWeight="600"
+          >
+            {row.outcome.label.split("·").map((part, i, arr) => (
+              <tspan key={i} x={RT_WIDTH - RT_PAD_R + 10 + (RT_PAD_R - 20) / 2} dy={i === 0 ? 0 : 14}>
+                {part.trim()}
+                {i < arr.length - 1 ? " ·" : ""}
+              </tspan>
+            ))}
+          </text>
+        </g>
+      )}
+    </svg>
+  );
+}
+
+export function RaceTimeline({
+  title,
+  rows,
+  caption,
+  legend,
+}: {
+  title?: string;
+  rows: RaceTimelineRow[];
+  caption?: string;
+  legend?: boolean;
+}) {
+  return (
+    <figure className="not-prose my-10">
+      {title && (
+        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          {title}
+        </div>
+      )}
+      {legend !== false && (
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-3 py-2 font-sans text-[11px] text-[color:var(--ink-muted)]">
+          <span className="inline-flex items-center gap-2">
+            <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
+              <circle cx="8" cy="8" r="4" fill="#111" />
+            </svg>
+            picks slot
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
+              <rect x="4" y="4" width="8" height="8" transform="rotate(45 8 8)" fill="#111" />
+            </svg>
+            commits to DB
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
+              <circle cx="8" cy="8" r="4" fill="#F5F4EF" stroke="#111" strokeWidth="1.4" />
+              <line x1="5.5" y1="5.5" x2="10.5" y2="10.5" stroke="#111" strokeWidth="1.2" />
+              <line x1="5.5" y1="10.5" x2="10.5" y2="5.5" stroke="#111" strokeWidth="1.2" />
+            </svg>
+            rejected
+          </span>
+        </div>
+      )}
+      <div className="space-y-4">
+        {rows.map((row, i) => (
+          <div
+            key={i}
+            className={`rounded-[var(--radius-tile)] border overflow-hidden ${rtToneClasses(row.tone)}`}
+          >
+            <div className="flex items-center justify-between gap-4 border-b border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/70 px-4 py-2">
+              <div className="font-sans text-[12px] font-medium text-[color:var(--ink-primary)]">
+                {row.label}
+              </div>
+              {row.meta && (
+                <div className="font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
+                  {row.meta}
+                </div>
+              )}
+            </div>
+            <div className="overflow-x-auto px-2 py-2">
+              <RaceTimelineRowSvg row={row} />
+            </div>
+          </div>
+        ))}
+      </div>
+      {caption && (
+        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * ActivityChart — phase-based bar chart. Each phase has duration + total
+ * count; bar WIDTH scales to duration, bar HEIGHT scales to rate (count /
+ * duration). Reads at a glance as "how a project's heartbeat changed over
+ * time." Markers pin specific events (commit hashes, pivots) onto the axis.
+ * -------------------------------------------------------------------------- */
+
+type ActivityPhase = {
+  id: string;
+  label: string;
+  sub?: string;
+  duration: number; // relative duration unit (days, weeks, whatever — same across phases)
+  count: number; // total events in this phase
+  tone?: "peak" | "high" | "normal" | "low";
+};
+
+type ActivityMarker = {
+  afterPhase: string; // phase id — marker lands on the right edge of this phase
+  label: string;
+  sub?: string;
+};
+
+const AC_WIDTH = 860;
+const AC_HEIGHT = 320;
+const AC_PAD_L = 72;
+const AC_PAD_R = 24;
+const AC_PAD_T = 48;
+const AC_PAD_B = 76;
+
+function acToneFill(tone?: ActivityPhase["tone"]) {
+  if (tone === "peak") return "#111";
+  if (tone === "high") return "rgba(17,17,17,0.78)";
+  if (tone === "low") return "rgba(17,17,17,0.28)";
+  return "rgba(17,17,17,0.5)";
+}
+
+export function ActivityChart({
+  title,
+  phases,
+  markers,
+  unit = "per day",
+  yAxisLabel,
+  caption,
+}: {
+  title?: string;
+  phases: ActivityPhase[];
+  markers?: ActivityMarker[];
+  unit?: string;
+  yAxisLabel?: string;
+  caption?: string;
+}) {
+  const totalDuration = phases.reduce((sum, p) => sum + p.duration, 0);
+  const rates = phases.map((p) => p.count / Math.max(1, p.duration));
+  const maxRate = Math.max(...rates);
+  const innerW = AC_WIDTH - AC_PAD_L - AC_PAD_R;
+  const innerH = AC_HEIGHT - AC_PAD_T - AC_PAD_B;
+
+  const niceYMax = (() => {
+    if (maxRate <= 1) return 1;
+    if (maxRate <= 2) return 2;
+    if (maxRate <= 5) return Math.ceil(maxRate);
+    return Math.ceil(maxRate / 2) * 2;
+  })();
+  const yTicks = [0, niceYMax / 2, niceYMax];
+
+  const barX: number[] = [];
+  let cursor = AC_PAD_L;
+  phases.forEach((p) => {
+    barX.push(cursor);
+    cursor += (p.duration / totalDuration) * innerW;
+  });
+
+  const yAt = (rate: number) => AC_PAD_T + innerH - (rate / niceYMax) * innerH;
+  const baselineY = AC_PAD_T + innerH;
+
+  return (
+    <figure className="not-prose my-10">
+      {title && (
+        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          {title}
+        </div>
+      )}
+      <div className="overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4">
+        <svg
+          viewBox={`0 0 ${AC_WIDTH} ${AC_HEIGHT}`}
+          role="img"
+          aria-label={title ?? "Activity chart"}
+          className="block w-full"
+        >
+          {yTicks.map((v, i) => (
+            <g key={i}>
+              <line
+                x1={AC_PAD_L}
+                y1={yAt(v)}
+                x2={AC_WIDTH - AC_PAD_R}
+                y2={yAt(v)}
+                stroke="rgba(17,17,17,0.08)"
+                strokeWidth="1"
+              />
+              <text
+                x={AC_PAD_L - 8}
+                y={yAt(v) + 3}
+                textAnchor="end"
+                className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
+                fontSize="10"
+              >
+                {v % 1 === 0 ? v.toString() : v.toFixed(1)}
+              </text>
+            </g>
+          ))}
+
+          {yAxisLabel && (
+            <text
+              x={14}
+              y={AC_PAD_T + innerH / 2}
+              textAnchor="middle"
+              transform={`rotate(-90 14 ${AC_PAD_T + innerH / 2})`}
+              className="fill-[color:var(--ink-muted)] font-sans"
+              fontSize="10"
+            >
+              {yAxisLabel}
+            </text>
+          )}
+
+          <line
+            x1={AC_PAD_L}
+            y1={baselineY}
+            x2={AC_WIDTH - AC_PAD_R}
+            y2={baselineY}
+            stroke="rgba(17,17,17,0.3)"
+            strokeWidth="1"
+          />
+
+          {phases.map((p, i) => {
+            const x = barX[i];
+            const w = (p.duration / totalDuration) * innerW;
+            const rate = rates[i];
+            const h = (rate / niceYMax) * innerH;
+            const barW = Math.max(2, w - 6);
+            return (
+              <g key={p.id}>
+                <rect
+                  x={x + 3}
+                  y={baselineY - h}
+                  width={barW}
+                  height={h}
+                  fill={acToneFill(p.tone)}
+                />
+                <text
+                  x={x + w / 2}
+                  y={baselineY - h - 6}
+                  textAnchor="middle"
+                  className="fill-[color:var(--ink-primary)] font-sans tabular-nums"
+                  fontSize="11"
+                  fontWeight="600"
+                >
+                  {rate < 1 ? rate.toFixed(2) : rate < 10 ? rate.toFixed(1) : Math.round(rate)}
+                </text>
+                <text
+                  x={x + w / 2}
+                  y={baselineY + 18}
+                  textAnchor="middle"
+                  className="fill-[color:var(--ink-primary)] font-sans"
+                  fontSize="11"
+                  fontWeight="500"
+                >
+                  {p.label}
+                </text>
+                {p.sub && (
+                  <text
+                    x={x + w / 2}
+                    y={baselineY + 32}
+                    textAnchor="middle"
+                    className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
+                    fontSize="10"
+                  >
+                    {p.sub}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {markers?.map((m, mi) => {
+            const phaseIdx = phases.findIndex((p) => p.id === m.afterPhase);
+            if (phaseIdx < 0) return null;
+            const x = barX[phaseIdx] + (phases[phaseIdx].duration / totalDuration) * innerW;
+            return (
+              <g key={mi}>
+                <line
+                  x1={x}
+                  y1={AC_PAD_T - 8}
+                  x2={x}
+                  y2={baselineY}
+                  stroke="#111"
+                  strokeWidth="1.2"
+                  strokeDasharray="3 3"
+                />
+                <rect
+                  x={x - 76}
+                  y={AC_PAD_T - 32}
+                  width={152}
+                  height={22}
+                  rx={6}
+                  fill="#111"
+                />
+                <text
+                  x={x}
+                  y={AC_PAD_T - 17}
+                  textAnchor="middle"
+                  className="fill-[#F5F4EF] font-sans"
+                  fontSize="10.5"
+                  fontWeight="600"
+                >
+                  {m.label}
+                </text>
+                {m.sub && (
+                  <text
+                    x={x}
+                    y={AC_PAD_T + 4}
+                    textAnchor="middle"
+                    className="fill-[color:var(--ink-muted)] font-sans"
+                    fontSize="9.5"
+                  >
+                    {m.sub}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          <text
+            x={AC_PAD_L}
+            y={AC_HEIGHT - 10}
+            textAnchor="start"
+            className="fill-[color:var(--ink-muted)] font-sans"
+            fontSize="10"
+          >
+            commits {unit}
+          </text>
+        </svg>
+      </div>
+      {caption && (
+        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+          {caption}
+        </figcaption>
+      )}
     </figure>
   );
 }

@@ -2,10 +2,12 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { blogComponents } from "./BlogComponents";
 import {
+  ActivityChart,
   CompareGrid,
   Diagram,
   FlowSchema,
   PhoneRow,
+  RaceTimeline,
   StackRow,
   TechNotes,
   WireflowMap,
@@ -31,10 +33,12 @@ export function CaseStudyBody({ source }: { source: string }) {
         Pullquote,
         ImpactStats,
         Figure,
+        ActivityChart,
         CompareGrid,
         Diagram,
         FlowSchema,
         PhoneRow,
+        RaceTimeline,
         StackRow,
         TechNotes,
         WireflowMap,

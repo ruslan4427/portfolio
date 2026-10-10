@@ -3,6 +3,10 @@
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import { Lightbox } from "@/components/ui/Lightbox";
+import {
+  SchematicIconMark,
+  type SchematicIcon,
+} from "@/components/mdx/CaseStudySchemas";
 
 export function ValueStatement({
   children,
@@ -25,7 +29,11 @@ export function ValueStatement({
   );
 }
 
-type NumberedCardsItem = { title: string; body: string };
+type NumberedCardsItem = {
+  title: string;
+  body: string;
+  icon?: SchematicIcon;
+};
 
 const numberedCols: Record<1 | 2 | 3, string> = {
   1: "grid-cols-1",
@@ -47,8 +55,18 @@ export function NumberedCards({
           key={i}
           className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6"
         >
-          <div className="font-serif text-5xl leading-none text-[color:var(--ink-faint)] tabular-nums">
-            {String(i + 1).padStart(2, "0")}
+          <div className="flex items-start justify-between gap-3">
+            <div className="font-serif text-5xl leading-none text-[color:var(--ink-faint)] tabular-nums">
+              {String(i + 1).padStart(2, "0")}
+            </div>
+            {item.icon && (
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)]">
+                <SchematicIconMark
+                  name={item.icon}
+                  className="h-5 w-5 text-[color:var(--ink-primary)]"
+                />
+              </div>
+            )}
           </div>
           <h3 className="mt-4 font-serif text-xl leading-tight text-[color:var(--ink-primary)]">
             {item.title}

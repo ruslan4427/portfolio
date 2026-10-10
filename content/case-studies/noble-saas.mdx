@@ -71,6 +71,22 @@ Seventy-four commits in ten days got Noble to live bookings. Sixteen named bugs 
 
 Noble is the biggest thing I've built with Claude — 234 commits since April, 74 of them in the first ten days and 152 by April's end. It's a real product: Stripe subscriptions running, Twilio SMS with A2P 10DLC compliance passing US carrier checks, Supabase row-level security enforcing tenant isolation at the database layer, and an autonomous weekly marketing pipeline pushing content to Instagram every Monday.
 
+<ActivityChart
+  title="Commit velocity across four project phases · April 2026 → October 2026"
+  yAxisLabel="commits per day"
+  phases={[
+    { id: "sprint",  label: "Sprint",  sub: "Apr 8–18 · 10d",   duration: 10,  count: 74, tone: "peak" },
+    { id: "triage",  label: "Triage",  sub: "Apr 19–30 · 12d",  duration: 12,  count: 78, tone: "high" },
+    { id: "pivot",   label: "Pivot",   sub: "May–Jun · 60d",    duration: 60,  count: 45, tone: "normal" },
+    { id: "steady",  label: "Steady",  sub: "Jul–Oct · 120d",   duration: 120, count: 37, tone: "low" },
+  ]}
+  markers={[
+    { afterPhase: "triage", label: "6b29244 · all 16 QA bugs" },
+    { afterPhase: "pivot",  label: "d6e1b5a · kill the cache" },
+  ]}
+  caption="Bar width = phase length in days; bar height = commits per day. The same 234 commits that read as a flat number on a résumé actually front-load into a 10-day sprint and a 12-day triage, then collapse ~20× once feature-complete. The project didn't stop — the layer moved from code to marketing agents."
+/>
+
 <Figure
   src="/case-studies/noble-saas/marketing-home.webp"
   alt="noblelink.app landing page — dark theme with gold accents, Noble logo, $15/mo upfront"
@@ -82,6 +98,14 @@ Noble is the biggest thing I've built with Claude — 234 commits since April, 7
 ## Problem
 
 A solo barber makes $40–60 per cut and does 6–8 cuts a day. They lose 20–30% of that to no-shows — bookings taken by phone, forgotten by the client, and never reminded. Fixing that is not a hard engineering problem. It's a *nobody-can-afford-to-build-it* problem, because the standard tools cost more than the incremental revenue they save.
+
+<ImpactStats
+  columns={2}
+  items={[
+    { value: "~$2,600", label: "lost to no-shows per month", hint: "$50 avg cut · 7 cuts/day · 25% no-show rate · 30 days" },
+    { value: "$15", label: "Noble recovers it at", hint: "flat monthly · ~170× payback at steady traffic" },
+  ]}
+/>
 
 Three real options exist for a solo shop. Noble sits below all three — same core features, a tenth of the price ladder, nothing a solo owner doesn't need.
 
@@ -174,101 +198,110 @@ _"seed bookedSlotsMap from server on page load, eliminating all client cache iss
   </After>
 </BeforeAfter>
 
-<FlowSchema
-  title="Booking-page data flow · before and after commit d6e1b5a"
+<RaceTimeline
+  title="Booking-page race window · before and after commit d6e1b5a"
   rows={[
     {
-      label: "Before — three cache layers between truth and the booked slot",
+      label: "Before — cache TTL is the vulnerability window; two sessions see the same free slot",
       tone: "before",
       meta: "race window 1–5 min",
-      diagram: {
-        width: 900,
-        height: 280,
-        nodes: [
-          { id: "b-user", shape: "role", icon: "user", label: "Browser", x: 50, y: 140 },
-          { id: "b-mount", shape: "event", icon: "browser", label: "SalonClient.tsx", sub: "mounts, hydrates", x: 220, y: 140 },
-          { id: "b-query", shape: "process", icon: "database", label: "Supabase query", sub: "anon · user-scoped", x: 420, y: 140 },
-          { id: "b-cache", shape: "action", icon: "cache", label: "Cache fresh?", sub: "1–5 min TTL", x: 600, y: 140 },
-          { id: "b-fresh", shape: "event", icon: "check", label: "Serve fresh", sub: "miss path", x: 780, y: 55, color: "success" },
-          { id: "b-bug", shape: "event", icon: "bug", label: "Double-book", sub: "insert races at DB", x: 780, y: 225, color: "danger", outcome: "denied" },
-        ],
-        edges: [
-          { from: "b-user", to: "b-mount" },
-          { from: "b-mount", to: "b-query" },
-          { from: "b-query", to: "b-cache" },
-          { from: "b-cache", to: "b-fresh", color: "success", label: "miss" },
-          { from: "b-cache", to: "b-bug", color: "danger", label: "stale" },
-        ],
-      },
+      sessions: [
+        {
+          id: "a",
+          label: "Session A",
+          events: [
+            { t: 15, kind: "pick", label: "picks 2 pm" },
+            { t: 78, kind: "commit", label: "INSERT" },
+          ],
+        },
+        {
+          id: "b",
+          label: "Session B",
+          events: [
+            { t: 42, kind: "pick", label: "picks 2 pm" },
+            { t: 88, kind: "commit", label: "INSERT" },
+          ],
+        },
+      ],
+      window: { from: 5, to: 95, label: "cache serves 'slot free' for 1–5 min TTL" },
+      axisTicks: [
+        { t: 0, label: "T₀" },
+        { t: 25, label: "+30s" },
+        { t: 50, label: "+60s" },
+        { t: 75, label: "+2m" },
+        { t: 100, label: "+3m" },
+      ],
+      outcome: { kind: "collision", label: "Double-book" },
     },
     {
-      label: "After — server-seeded, zero cache layers",
+      label: "After — DB arbitrates on insert; losers get 409 and re-pick",
       tone: "after",
       meta: "d6e1b5a · 2026-06-03",
-      diagram: {
-        width: 900,
-        height: 220,
-        nodes: [
-          { id: "a-user", shape: "role", icon: "user", label: "Browser", x: 50, y: 110 },
-          { id: "a-server", shape: "event", icon: "server", label: "Server page.tsx", sub: "force-dynamic", x: 220, y: 110 },
-          { id: "a-admin", shape: "process", icon: "shield", label: "supabaseAdmin", sub: "cache: 'no-store'", x: 420, y: 110 },
-          { id: "a-props", shape: "event", icon: "box", label: "initialBookings", sub: "RSC payload", x: 620, y: 110 },
-          { id: "a-seed", shape: "event", icon: "check", label: "Hydrated state", sub: "polling only", x: 800, y: 110, color: "success", outcome: "approved" },
-        ],
-        edges: [
-          { from: "a-user", to: "a-server" },
-          { from: "a-server", to: "a-admin" },
-          { from: "a-admin", to: "a-props" },
-          { from: "a-props", to: "a-seed" },
-        ],
-      },
+      sessions: [
+        {
+          id: "a",
+          label: "Session A",
+          events: [
+            { t: 15, kind: "pick", label: "picks 2 pm" },
+            { t: 55, kind: "commit", label: "wins UNIQUE" },
+          ],
+        },
+        {
+          id: "b",
+          label: "Session B",
+          events: [
+            { t: 42, kind: "pick", label: "picks 2 pm" },
+            { t: 55, kind: "fail", label: "409 → retry" },
+          ],
+        },
+      ],
+      marker: { t: 55, label: "atomic insert · UNIQUE constraint" },
+      axisTicks: [
+        { t: 0, label: "T₀" },
+        { t: 25, label: "+30s" },
+        { t: 55, label: "race ends" },
+        { t: 100, label: "+3m" },
+      ],
+      outcome: { kind: "approved", label: "One booking" },
     },
   ]}
-  caption="The fix wasn't to invalidate smarter — it was to delete every cache layer on the correctness path."
-/>
-
-<Diagram
-  title="Booking request · steady state"
-  width={1000}
-  height={420}
-  legend={[
-    { shape: "role", label: "Actor" },
-    { shape: "event", label: "Event / message" },
-    { shape: "process", label: "Server work" },
-    { shape: "action", label: "Decision" },
-  ]}
-  nodes={[
-    { id: "customer", shape: "role", icon: "user", label: "Customer", x: 60, y: 210 },
-    { id: "pick", shape: "event", icon: "clock", label: "Picks slot", sub: "SalonClient.tsx", x: 270, y: 210 },
-    { id: "api", shape: "process", icon: "api", label: "/api/book", sub: "server action", x: 510, y: 210 },
-    { id: "decide", shape: "action", icon: "lock", label: "Slot free?", sub: "atomic insert", x: 720, y: 210 },
-    { id: "ok", shape: "event", icon: "check", label: "INSERT booking", sub: "RLS-scoped", x: 900, y: 90, color: "success", outcome: "approved" },
-    { id: "fail", shape: "event", icon: "warning", label: "409 Conflict", sub: "unique constraint", x: 900, y: 330, color: "danger", outcome: "denied" },
-  ]}
-  edges={[
-    { from: "customer", to: "pick", label: "clicks time" },
-    { from: "pick", to: "api", label: "POST" },
-    { from: "api", to: "decide" },
-    { from: "decide", to: "ok", color: "success", label: "free" },
-    { from: "decide", to: "fail", color: "danger", label: "taken" },
-    { from: "fail", to: "pick", color: "faint", style: "dashed", label: "retry" },
-  ]}
-  caption="The decision diamond is where the previous version lost — a check-then-insert gap let two sessions pass before either committed. The current path makes the DB arbitrate: whoever wins the UNIQUE constraint keeps the slot; the loser re-opens the slot picker."
+  caption="Same two sessions, same slot. Before: both commit because the cache said 'free'. After: whoever wins the UNIQUE constraint keeps the slot — the other sees 409 and re-opens the picker. The X axis is literal wall-clock time."
 />
 
 **Lesson:** *Managed platforms cache things you didn't ask them to cache. The right response is not to work around the cache — it's to eliminate the cache layer entirely at the point where correctness matters.*
 
 ## Trade-Offs
 
-**Supabase over Firebase.** Postgres + row-level security lets me push tenant isolation into the database itself. If application code has a bug, the DB still refuses cross-tenant queries. Firestore couldn't guarantee that the same way. Cost: no built-in realtime — solved with server-seed + polling.
-
-**Tailwind v4 with no config file.** Design tokens live in one CSS `@theme` block in `globals.css`. New contributors don't decode a config JS to understand color usage. Cost: complex theme variations (dark mode, seasonal skins) require CSS variable choreography, not JIT compilation.
-
-**Server-render fetch, client-render UI.** Booking page splits into `page.tsx` (server, admin queries) and `SalonClient.tsx` (~650 lines, all interactivity). Security: sensitive queries can't leak to the browser. Cost: two files, prop-drilling coordination.
-
-**One $15 pricing tier, not three.** The code still has scaffolding for Pro ($39) and Business ($79). I decided not to expose them until a customer explicitly asks for tier-2 features. Simplicity at signup beats incremental revenue per tenant. Cost: hidden upside.
-
-**Weekly autonomous content, not manual monthly posts.** The `marketing_system/` directory is a full agent pipeline — Strategist writes a weekly plan, Creator drafts captions, Designer renders reels + carousels (Playwright + FFmpeg), Publisher pushes to Instagram once Meta API is out of Development mode. GitHub Actions runs the whole thing on free tier. Cost: the creative ceiling is bounded by the agent prompts I've written, not by Claude's raw ability.
+<NumberedCards
+  columns={2}
+  items={[
+    {
+      title: "Supabase over Firebase",
+      icon: "database",
+      body: "Postgres + row-level security pushes tenant isolation into the database itself — if the app layer has a bug, the DB still refuses cross-tenant queries. Firestore couldn't guarantee that the same way. Cost: no built-in realtime, solved with server-seed + polling.",
+    },
+    {
+      title: "Tailwind v4, no config file",
+      icon: "code",
+      body: "Design tokens live in one CSS @theme block in globals.css. New contributors don't decode a config JS to understand color usage. Cost: complex theme variations (dark mode, seasonal skins) require CSS variable choreography, not JIT compilation.",
+    },
+    {
+      title: "Server-render fetch, client-render UI",
+      icon: "server",
+      body: "Booking page splits into page.tsx (server, admin queries) and SalonClient.tsx (~650 lines, all interactivity). Security: sensitive queries can't leak to the browser. Cost: two files, prop-drilling coordination.",
+    },
+    {
+      title: "One $15 tier, not three",
+      icon: "pin",
+      body: "The code still carries scaffolding for Pro ($39) and Business ($79) — hidden until a customer explicitly asks for tier-2 features. Simplicity at signup beats incremental revenue per tenant. Cost: hidden upside.",
+    },
+    {
+      title: "Autonomous weekly content, not manual monthly posts",
+      icon: "sync",
+      body: "marketing_system/ is a full agent pipeline — Strategist plans the week, Creator drafts captions, Designer renders reels + carousels (Playwright + FFmpeg), Publisher pushes to Instagram. GitHub Actions runs it on free tier. Cost: the creative ceiling is bounded by the prompts I've written, not Claude's raw ability.",
+    },
+  ]}
+/>
 
 ## Results
 

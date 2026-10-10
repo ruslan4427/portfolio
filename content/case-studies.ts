@@ -10,12 +10,21 @@ export type DevlogRef = {
   href?: string;
 };
 
+export type StackItemFm = {
+  name: string;
+  slug?: string;
+  version?: string;
+};
+
 export type CaseStudyFrontmatter = {
   slug: string;
   title: string;
   tagline: string;
   role: string;
   stack: string[];
+  stackItems?: StackItemFm[];
+  live?: { label?: string; href: string };
+  dateRange?: string;
   year: string;
   status: string;
   featured?: boolean;

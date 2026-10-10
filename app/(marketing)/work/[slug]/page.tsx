@@ -5,10 +5,10 @@ import { ArtifactList } from "@/components/case-study/ArtifactList";
 import { DevlogRefs } from "@/components/case-study/DevlogRefs";
 import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
+import { StackRow } from "@/components/mdx/CaseStudySchemas";
 import { MaskReveal } from "@/components/ui/MaskReveal";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionBadge } from "@/components/ui/SectionBadge";
-import { Stagger, StaggerItem } from "@/components/ui/Stagger";
 import { getCaseStudy } from "@/content/case-studies";
 import { projects } from "@/content/projects";
 
@@ -100,19 +100,15 @@ export default async function CaseStudyPage({
               <span>{frontmatter.readingTime} min read</span>
             </div>
           </Reveal>
-          <Stagger
-            className="mt-6 flex flex-wrap justify-center gap-2"
-            delayChildren={0.45}
-            stagger={0.06}
-          >
-            {frontmatter.stack.map((tech) => (
-              <StaggerItem key={tech} y={12} duration={0.6}>
-                <span className="rounded-full border border-[color:var(--hairline)] px-3 py-1 font-sans text-xs text-[color:var(--ink-body)]">
-                  {tech}
-                </span>
-              </StaggerItem>
-            ))}
-          </Stagger>
+          {frontmatter.stackItems && frontmatter.stackItems.length > 0 && (
+            <Reveal delay={0.45} className="mt-8">
+              <StackRow
+                items={frontmatter.stackItems}
+                live={frontmatter.live}
+                dateRange={frontmatter.dateRange}
+              />
+            </Reveal>
+          )}
         </div>
       </header>
 
