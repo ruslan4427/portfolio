@@ -6,13 +6,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { sendContact } from "@/app/(marketing)/contact/actions";
 import { initialContactState } from "@/app/(marketing)/contact/types";
-import { easeOutExpo } from "@/lib/motion";
 
-const islandSpring = {
+// Buttery, viscous bezier — in-and-out that eases in slowly and settles like
+// a drop. (0.76, 0, 0.24, 1) is "ease-in-out-quart", very fluid.
+const liquidEase: [number, number, number, number] = [0.76, 0, 0.24, 1];
+
+// Slow + heavy spring: feels like dragging through honey, no snap, soft settle.
+const liquidSpring = {
   type: "spring" as const,
-  stiffness: 160,
-  damping: 26,
-  mass: 1.3,
+  stiffness: 55,
+  damping: 22,
+  mass: 2.2,
 };
 
 const panelVariants = {
@@ -20,26 +24,26 @@ const panelVariants = {
   visible: {
     opacity: 1,
     transition: {
-      duration: 0.35,
-      delay: 0.25,
+      duration: 0.8,
+      delay: 0.55,
       when: "beforeChildren" as const,
-      staggerChildren: 0.09,
-      delayChildren: 0.3,
+      staggerChildren: 0.14,
+      delayChildren: 0.6,
     },
   },
   exit: {
     opacity: 0,
-    transition: { duration: 0.22, ease: easeOutExpo },
+    transition: { duration: 0.5, ease: liquidEase },
   },
 };
 
 const rowVariants = {
-  hidden: { opacity: 0, y: 14, filter: "blur(8px)" },
+  hidden: { opacity: 0, y: 18, filter: "blur(10px)" },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.6, ease: easeOutExpo },
+    transition: { duration: 1.1, ease: liquidEase },
   },
 };
 
@@ -73,7 +77,7 @@ export function FloatingEmailCTA() {
   useEffect(() => {
     if (open) {
       setSuccess(false);
-      const t = setTimeout(() => firstFieldRef.current?.focus(), 650);
+      const t = setTimeout(() => firstFieldRef.current?.focus(), 1200);
       return () => clearTimeout(t);
     }
   }, [open]);
@@ -84,7 +88,7 @@ export function FloatingEmailCTA() {
 
   useEffect(() => {
     if (!success || !open) return;
-    const t = setTimeout(() => setOpen(false), 2200);
+    const t = setTimeout(() => setOpen(false), 2800);
     return () => clearTimeout(t);
   }, [success, open]);
 
@@ -97,15 +101,46 @@ export function FloatingEmailCTA() {
       ? state.values
       : { email: "", message: "", name: "Direct Message", intent: "other" };
 
+  // Border-radius wobble — asymmetric mid-morph values give the droplet-
+  // settling look, land back on uniform 28px.
+  const openRadius = [
+    "9999px",
+    "60px 30px 50px 32px",
+    "32px 36px 26px 30px",
+    "28px",
+  ];
+  const closeRadius = [
+    "28px",
+    "40px 28px 44px 24px",
+    "9999px",
+  ];
+
   return (
     <div className="pointer-events-none fixed bottom-6 left-1/2 z-30 -translate-x-1/2">
       <motion.div
         ref={containerRef}
         layout
-        transition={islandSpring}
-        whileHover={!open ? { y: -2, scale: 1.02 } : undefined}
-        whileTap={!open ? { scale: 0.97 } : undefined}
-        className="pointer-events-auto overflow-hidden rounded-[28px] bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform"
+        animate={{
+          borderRadius: open ? openRadius : closeRadius,
+          scale: open ? [0.98, 1.015, 0.995, 1] : [1, 1.02, 1],
+        }}
+        transition={{
+          layout: liquidSpring,
+          borderRadius: {
+            duration: 1.4,
+            ease: liquidEase,
+            times: open ? [0, 0.35, 0.7, 1] : [0, 0.4, 1],
+          },
+          scale: {
+            duration: 1.4,
+            ease: liquidEase,
+            times: open ? [0, 0.3, 0.6, 1] : [0, 0.4, 1],
+          },
+        }}
+        whileHover={!open ? { y: -2, scale: 1.03 } : undefined}
+        whileTap={!open ? { scale: 0.96 } : undefined}
+        style={{ borderRadius: "9999px" }}
+        className="pointer-events-auto overflow-hidden bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform"
       >
         <AnimatePresence mode="wait" initial={false}>
           {!open ? (
@@ -114,10 +149,10 @@ export function FloatingEmailCTA() {
               layout="position"
               type="button"
               onClick={() => setOpen(true)}
-              initial={{ opacity: 0, filter: "blur(8px)" }}
+              initial={{ opacity: 0, filter: "blur(12px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, filter: "blur(8px)" }}
-              transition={{ duration: 0.35, ease: easeOutExpo }}
+              exit={{ opacity: 0, filter: "blur(12px)" }}
+              transition={{ duration: 0.65, ease: liquidEase }}
               aria-label="Open message composer"
               className="group flex items-center gap-3 py-1.5 pl-1.5 pr-5 font-sans text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
@@ -163,22 +198,22 @@ export function FloatingEmailCTA() {
                 {success ? (
                   <motion.div
                     key="success"
-                    initial={{ opacity: 0, scale: 0.9, filter: "blur(8px)" }}
+                    initial={{ opacity: 0, scale: 0.88, filter: "blur(12px)" }}
                     animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.55, ease: easeOutExpo }}
+                    transition={{ duration: 0.9, ease: liquidEase }}
                     className="flex flex-col items-center gap-3 py-6"
                   >
                     <motion.span
                       aria-hidden
-                      initial={{ scale: 0.4, rotate: -12 }}
+                      initial={{ scale: 0.3, rotate: -18 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{
                         type: "spring",
-                        stiffness: 180,
-                        damping: 20,
-                        mass: 1.2,
-                        delay: 0.15,
+                        stiffness: 90,
+                        damping: 18,
+                        mass: 1.8,
+                        delay: 0.3,
                       }}
                       className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300"
                     >
@@ -197,17 +232,21 @@ export function FloatingEmailCTA() {
                           initial={{ pathLength: 0 }}
                           animate={{ pathLength: 1 }}
                           transition={{
-                            duration: 0.7,
-                            ease: easeOutExpo,
-                            delay: 0.35,
+                            duration: 1.1,
+                            ease: liquidEase,
+                            delay: 0.6,
                           }}
                         />
                       </svg>
                     </motion.span>
                     <motion.span
-                      initial={{ opacity: 0, y: 6 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.45, delay: 0.6, ease: easeOutExpo }}
+                      transition={{
+                        duration: 0.8,
+                        delay: 1.1,
+                        ease: liquidEase,
+                      }}
                       className="font-sans text-sm"
                     >
                       Delivered. I&rsquo;ll get back soon.
@@ -252,8 +291,9 @@ export function FloatingEmailCTA() {
                         whileTap={{ scale: 0.9 }}
                         transition={{
                           type: "spring",
-                          stiffness: 400,
-                          damping: 18,
+                          stiffness: 220,
+                          damping: 20,
+                          mass: 1.2,
                         }}
                         aria-label="Close"
                         className="ml-auto rounded-full p-1.5 text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
@@ -312,7 +352,7 @@ export function FloatingEmailCTA() {
                           initial={{ opacity: 0, height: 0, y: -4 }}
                           animate={{ opacity: 1, height: "auto", y: 0 }}
                           exit={{ opacity: 0, height: 0, y: -4 }}
-                          transition={{ duration: 0.2, ease: easeOutExpo }}
+                          transition={{ duration: 0.4, ease: liquidEase }}
                           className="overflow-hidden font-sans text-xs text-red-300"
                         >
                           {errorMessage}
@@ -333,8 +373,9 @@ export function FloatingEmailCTA() {
                         whileTap={pending ? undefined : { scale: 0.96 }}
                         transition={{
                           type: "spring",
-                          stiffness: 420,
+                          stiffness: 220,
                           damping: 22,
+                          mass: 1.2,
                         }}
                         className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 font-sans text-sm text-black transition-opacity hover:opacity-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                       >
@@ -342,10 +383,10 @@ export function FloatingEmailCTA() {
                           {pending ? (
                             <motion.span
                               key="sending"
-                              initial={{ opacity: 0, y: 4 }}
+                              initial={{ opacity: 0, y: 6 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.15 }}
+                              exit={{ opacity: 0, y: -6 }}
+                              transition={{ duration: 0.3, ease: liquidEase }}
                               className="inline-flex items-center gap-1.5"
                             >
                               <motion.span
@@ -353,7 +394,7 @@ export function FloatingEmailCTA() {
                                 animate={{ rotate: 360 }}
                                 transition={{
                                   repeat: Infinity,
-                                  duration: 0.9,
+                                  duration: 1.2,
                                   ease: "linear",
                                 }}
                                 className="inline-block h-3 w-3 rounded-full border-2 border-black/20 border-t-black"
@@ -363,10 +404,10 @@ export function FloatingEmailCTA() {
                           ) : (
                             <motion.span
                               key="send"
-                              initial={{ opacity: 0, y: 4 }}
+                              initial={{ opacity: 0, y: 6 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.15 }}
+                              exit={{ opacity: 0, y: -6 }}
+                              transition={{ duration: 0.3, ease: liquidEase }}
                               className="inline-flex items-center gap-1.5"
                             >
                               Send
