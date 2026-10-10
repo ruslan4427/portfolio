@@ -1,6 +1,41 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 import type { ArtifactType } from "@/content/blog";
 import { PhoneRow } from "./CaseStudySchemas";
+
+export function Figure({
+  src,
+  alt,
+  caption,
+  width,
+  height,
+}: {
+  src: string;
+  alt: string;
+  caption?: string;
+  width: number;
+  height: number;
+}) {
+  return (
+    <figure className="not-prose my-10">
+      <div className="overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          sizes="(min-width: 768px) 70ch, 92vw"
+          className="block h-auto w-full"
+        />
+      </div>
+      {caption && (
+        <figcaption className="mt-4 text-center font-sans text-xs leading-relaxed text-[color:var(--ink-muted)]">
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
 
 const artifactIcon: Record<ArtifactType, string> = {
   commit: "⌥",
@@ -272,4 +307,5 @@ export const blogComponents = {
   After,
   TechnicalDetail,
   PhoneRow,
+  Figure,
 };

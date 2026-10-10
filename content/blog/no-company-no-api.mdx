@@ -15,7 +15,7 @@ tags:
 featured: true
 heroImage:
   src: /blog/no-company-no-api/hero.jpg
-  alt: Editorial ink illustration of a tall closed metal gate with an empty ID-badge slot in the lock; a solo developer with a laptop stands small to the left.
+  alt: Editorial ink illustration of a tall closed double gate with a "Business Verification Required" sign across the top; incorporation, utility bill and VAT papers scattered at the base. A solo developer with a laptop stands small to the left.
 distribution:
   linkedin:
     status: posted
@@ -53,6 +53,14 @@ The public documentation makes App Review sound like a code review with a privac
 - Supporting documents on file — a utility bill or bank statement with the business name, matched against government registries Meta cross-references.
 - A privacy policy published on an active production domain, not a Vercel preview URL.
 - An explainer video of the exact user flow, demonstrating the scope's use case.
+
+<Figure
+  src="/blog/no-company-no-api/paperwork-stack.jpg"
+  alt="Editorial ink illustration — a tall stack of papers labelled Incorporation Documents, Utility Bills, Business License, Privacy Policy Printout, DUNS Registration, with a glowing API key floating above the top. A solo developer with a laptop stands small at the base, looking up."
+  width={1376}
+  height={768}
+  caption="The ask behind one API key. None of these documents are unreasonable to produce — they're unreasonable to produce as the first deliverable, before the system is proven worth incorporating around."
+/>
 
 For an incorporated company this is a two-hour admin task. For a solo developer running a two-month pilot it's the whole deliverable, inverted. The gate didn't exist to filter me out specifically; it exists because this is Meta's single most-abused surface, and the business-entity check is a cheap way to make scaled spam uneconomic. By-design is the right word.
 
@@ -106,6 +114,14 @@ That's a true number. It's also entirely a function of running under rate limits
 Any time you see a safety metric reported on a cookie-driven system, read it as a statement about pacing, not architecture.
 
 ## Should you ship this way?
+
+<Figure
+  src="/blog/no-company-no-api/graveyard-fork.jpg"
+  alt="Editorial ink illustration — a path forks at the foot of a solo developer with a laptop. The left branch leads uphill past tombstones labelled DUNS, VAT, Privacy Policy, App Review, Cookie, and an APPROVED headstone at the top. The right branch is a soft grass trail with a single cookie crumb leading toward a wooden sign labelled TOS in the distance."
+  width={1376}
+  height={768}
+  caption="Two paths, both end in a graveyard — one of filings you cleared, one of terms you crossed. The honest version of the pilot/product question is: which graveyard are you willing to pay for, and when."
+/>
 
 Depends on exactly one question: are you running a pilot or building the product?
 
