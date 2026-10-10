@@ -10,6 +10,7 @@ import { ExternalLinkTracker } from "@/components/analytics/ExternalLinkTracker"
 import { GA4 } from "@/components/analytics/GA4";
 import { PageViews } from "@/components/analytics/PageViews";
 import { DotGrid } from "@/components/canvas/DotGrid";
+import { BackToTop } from "@/components/layout/BackToTop";
 import { FloatingEmailCTA } from "@/components/layout/FloatingEmailCTA";
 import { Footer } from "@/components/layout/Footer";
 import { Nav } from "@/components/layout/Nav";
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Footer />
             </div>
             <FloatingEmailCTA />
+            <BackToTop />
           </SmoothScroll>
           <ConsentBanner />
           <ExternalLinkTracker />
