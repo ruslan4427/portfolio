@@ -9,7 +9,7 @@ import { initialContactState } from "@/app/(marketing)/contact/types";
 
 // Asymmetric easing: accelerate on open, decelerate on close.
 // Open — easeInExpo: holds near-zero velocity, then whips into place.
-const openEase: [number, number, number, number] = [0.7, 0, 0.84, 0];
+const openEase: [number, number, number, number] = [0.3, 0, 0.5, 0];
 // Close — easeOutExpo mirror: fast exit, settles gently back to pill.
 const closeEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
