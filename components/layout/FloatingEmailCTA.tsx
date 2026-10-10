@@ -7,43 +7,56 @@ import { usePathname } from "next/navigation";
 import { sendContact } from "@/app/(marketing)/contact/actions";
 import { initialContactState } from "@/app/(marketing)/contact/types";
 
-// Asymmetric easing: accelerate on open, decelerate on close.
-// Open — easeInExpo: holds near-zero velocity, then whips into place.
-const openEase: [number, number, number, number] = [0.76, 0, 0.24, 1];
-// Close — easeOutExpo mirror: fast exit, settles gently back to pill.
-const closeEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
+// Collapse (exit): ease-in-cubic — accelerates away.
+const collapseEase: [number, number, number, number] = [0.5, 0, 0.75, 0];
+// Emerge (enter): ease-out-expo — fast arrival, soft settle.
+const emergeEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const OPEN_DUR = 0.45;
-const CLOSE_DUR = 0.3;
+const COLLAPSE_DUR = 0.22;
+const EMERGE_DUR = 0.4;
 
-const panelVariants = {
-  hidden: { opacity: 0 },
+const shellVariants = {
+  hidden: { opacity: 0, scale: 0.6, y: 24 },
   visible: {
     opacity: 1,
+    scale: 1,
+    y: 0,
     transition: {
-      duration: 0.26,
-      // Content comes in near the end of the ease-in ramp, after shape has
-      // mostly reached full size (~75% of OPEN_DUR).
-      delay: OPEN_DUR * 0.72,
+      duration: EMERGE_DUR,
+      ease: emergeEase,
       when: "beforeChildren" as const,
-      staggerChildren: 0.05,
-      delayChildren: OPEN_DUR * 0.78,
+      staggerChildren: 0.045,
+      delayChildren: EMERGE_DUR * 0.5,
     },
   },
   exit: {
-    // Fade content out fast so the shape can start its ease-out morph.
     opacity: 0,
-    transition: { duration: 0.14, ease: closeEase },
+    scale: 0.6,
+    y: 24,
+    transition: { duration: COLLAPSE_DUR, ease: collapseEase },
   },
 };
 
 const rowVariants = {
-  hidden: { opacity: 0, y: 6 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.32, ease: openEase },
+    transition: { duration: 0.28, ease: emergeEase },
   },
+};
+
+// Minimal stagger wrapper for the form — no own transform, just cascades
+// "visible" to the row children with a slight delay inside the panel.
+const formStagger = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.045,
+      delayChildren: EMERGE_DUR * 0.55,
+    },
+  },
+  exit: {},
 };
 
 export function FloatingEmailCTA() {
@@ -101,39 +114,25 @@ export function FloatingEmailCTA() {
       : { email: "", message: "", name: "Direct Message", intent: "other" };
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-30 -translate-x-1/2">
-      <motion.div
-        ref={containerRef}
-        layout
-        animate={{ borderRadius: open ? 28 : 9999 }}
-        transition={{
-          layout: {
-            duration: open ? OPEN_DUR : CLOSE_DUR,
-            ease: open ? openEase : closeEase,
-          },
-          borderRadius: {
-            duration: open ? OPEN_DUR : CLOSE_DUR,
-            ease: open ? openEase : closeEase,
-          },
-        }}
-        initial={false}
-        style={{ borderRadius: 9999 }}
-        whileTap={!open ? { scale: 0.96 } : undefined}
-        className="pointer-events-auto overflow-hidden bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform"
-      >
-        <AnimatePresence mode="popLayout" initial={false}>
-          {!open ? (
-            <motion.button
-              key="trigger"
-              type="button"
-              onClick={() => setOpen(true)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.16, ease: closeEase }}
-              aria-label="Open message composer"
-              className="group flex items-center gap-3 py-1.5 pl-1.5 pr-5 font-sans text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-            >
+    <div
+      ref={containerRef}
+      className="pointer-events-none fixed bottom-6 left-1/2 z-30 -translate-x-1/2"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {!open ? (
+          <motion.button
+            key="trigger"
+            type="button"
+            onClick={() => setOpen(true)}
+            variants={shellVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            whileTap={{ scale: 0.96 }}
+            style={{ transformOrigin: "bottom center" }}
+            aria-label="Open message composer"
+            className="pointer-events-auto group flex items-center gap-3 rounded-full bg-[color:var(--cta)] py-1.5 pl-1.5 pr-5 font-sans text-sm text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          >
               <span
                 aria-hidden
                 className="relative h-9 w-9 overflow-hidden rounded-full bg-[color:var(--ink-primary)]"
@@ -162,15 +161,16 @@ export function FloatingEmailCTA() {
                 <span>Send me a message</span>
               </span>
             </motion.button>
-          ) : (
-            <motion.div
-              key="panel"
-              variants={panelVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="w-[min(420px,calc(100vw-32px))] p-4"
-            >
+        ) : (
+          <motion.div
+            key="panel"
+            variants={shellVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            style={{ transformOrigin: "bottom center" }}
+            className="pointer-events-auto w-[min(420px,calc(100vw-32px))] overflow-hidden rounded-[28px] bg-[color:var(--cta)] p-4 text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform"
+          >
               <AnimatePresence mode="wait" initial={false}>
                 {success ? (
                   <motion.div
@@ -178,7 +178,7 @@ export function FloatingEmailCTA() {
                     initial={{ opacity: 0, scale: 0.94 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ duration: 0.3, ease: closeEase }}
+                    transition={{ duration: 0.3, ease: emergeEase }}
                     className="flex flex-col items-center gap-3 py-6"
                   >
                     <motion.span
@@ -210,7 +210,7 @@ export function FloatingEmailCTA() {
                           animate={{ pathLength: 1 }}
                           transition={{
                             duration: 0.45,
-                            ease: closeEase,
+                            ease: emergeEase,
                             delay: 0.2,
                           }}
                         />
@@ -222,7 +222,7 @@ export function FloatingEmailCTA() {
                       transition={{
                         duration: 0.3,
                         delay: 0.35,
-                        ease: closeEase,
+                        ease: emergeEase,
                       }}
                       className="font-sans text-sm"
                     >
@@ -233,7 +233,7 @@ export function FloatingEmailCTA() {
                   <motion.form
                     key="form"
                     action={formAction}
-                    variants={panelVariants}
+                    variants={formStagger}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
@@ -329,7 +329,7 @@ export function FloatingEmailCTA() {
                           initial={{ opacity: 0, height: 0, y: -4 }}
                           animate={{ opacity: 1, height: "auto", y: 0 }}
                           exit={{ opacity: 0, height: 0, y: -4 }}
-                          transition={{ duration: 0.22, ease: closeEase }}
+                          transition={{ duration: 0.22, ease: emergeEase }}
                           className="overflow-hidden font-sans text-xs text-red-300"
                         >
                           {errorMessage}
@@ -363,7 +363,7 @@ export function FloatingEmailCTA() {
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.18, ease: closeEase }}
+                              transition={{ duration: 0.18, ease: emergeEase }}
                               className="inline-flex items-center gap-1.5"
                             >
                               <motion.span
@@ -384,7 +384,7 @@ export function FloatingEmailCTA() {
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.18, ease: closeEase }}
+                              transition={{ duration: 0.18, ease: emergeEase }}
                               className="inline-flex items-center gap-1.5"
                             >
                               Send
@@ -409,10 +409,9 @@ export function FloatingEmailCTA() {
                   </motion.form>
                 )}
               </AnimatePresence>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
