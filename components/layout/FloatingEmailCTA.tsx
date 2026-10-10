@@ -13,8 +13,8 @@ const openEase: [number, number, number, number] = [0.42, 0, 1, 1];
 // Close — ease-out (whisks away first, settles gently back to pill).
 const closeEase: [number, number, number, number] = [0, 0, 0.22, 1];
 
-const OPEN_DUR = 0.6;
-const CLOSE_DUR = 0.5;
+const OPEN_DUR = 0.3;
+const CLOSE_DUR = 0.2;
 
 const panelVariants = {
   hidden: { opacity: 0 },
