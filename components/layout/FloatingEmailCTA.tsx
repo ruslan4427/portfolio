@@ -8,13 +8,13 @@ import { sendContact } from "@/app/(marketing)/contact/actions";
 import { initialContactState } from "@/app/(marketing)/contact/types";
 
 // Asymmetric easing: accelerate on open, decelerate on close.
-// Open — ease-in (slow start, builds speed into the panel reveal).
-const openEase: [number, number, number, number] = [0.42, 0, 1, 1];
-// Close — ease-out (whisks away first, settles gently back to pill).
-const closeEase: [number, number, number, number] = [0, 0, 0.22, 1];
+// Open — easeInExpo: holds near-zero velocity, then whips into place.
+const openEase: [number, number, number, number] = [0.7, 0, 0.84, 0];
+// Close — easeOutExpo mirror: fast exit, settles gently back to pill.
+const closeEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const OPEN_DUR = 0.3;
-const CLOSE_DUR = 0.2;
+const OPEN_DUR = 0.45;
+const CLOSE_DUR = 0.3;
 
 const panelVariants = {
   hidden: { opacity: 0 },
