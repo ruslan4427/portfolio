@@ -7,30 +7,33 @@ import { usePathname } from "next/navigation";
 import { sendContact } from "@/app/(marketing)/contact/actions";
 import { initialContactState } from "@/app/(marketing)/contact/types";
 
-const iosEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
+// Asymmetric easing: accelerate on open, decelerate on close.
+// Open — ease-in (slow start, builds speed into the panel reveal).
+const openEase: [number, number, number, number] = [0.42, 0, 1, 1];
+// Close — ease-out (whisks away first, settles gently back to pill).
+const closeEase: [number, number, number, number] = [0, 0, 0.22, 1];
 
-const shapeSpring = {
-  type: "spring" as const,
-  stiffness: 220,
-  damping: 30,
-  mass: 1,
-};
+const OPEN_DUR = 0.6;
+const CLOSE_DUR = 0.5;
 
 const panelVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      duration: 0.28,
-      delay: 0.22,
+      duration: 0.26,
+      // Content comes in near the end of the ease-in ramp, after shape has
+      // mostly reached full size (~75% of OPEN_DUR).
+      delay: OPEN_DUR * 0.72,
       when: "beforeChildren" as const,
-      staggerChildren: 0.055,
-      delayChildren: 0.28,
+      staggerChildren: 0.05,
+      delayChildren: OPEN_DUR * 0.78,
     },
   },
   exit: {
+    // Fade content out fast so the shape can start its ease-out morph.
     opacity: 0,
-    transition: { duration: 0.18, ease: iosEase },
+    transition: { duration: 0.14, ease: closeEase },
   },
 };
 
@@ -39,7 +42,7 @@ const rowVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: iosEase },
+    transition: { duration: 0.32, ease: openEase },
   },
 };
 
@@ -104,8 +107,14 @@ export function FloatingEmailCTA() {
         layout
         animate={{ borderRadius: open ? 28 : 9999 }}
         transition={{
-          layout: shapeSpring,
-          borderRadius: { duration: 0.45, ease: iosEase },
+          layout: {
+            duration: open ? OPEN_DUR : CLOSE_DUR,
+            ease: open ? openEase : closeEase,
+          },
+          borderRadius: {
+            duration: open ? OPEN_DUR : CLOSE_DUR,
+            ease: open ? openEase : closeEase,
+          },
         }}
         initial={false}
         style={{ borderRadius: 9999 }}
@@ -121,7 +130,7 @@ export function FloatingEmailCTA() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.16, ease: iosEase }}
+              transition={{ duration: 0.16, ease: closeEase }}
               aria-label="Open message composer"
               className="group flex items-center gap-3 py-1.5 pl-1.5 pr-5 font-sans text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
@@ -169,7 +178,7 @@ export function FloatingEmailCTA() {
                     initial={{ opacity: 0, scale: 0.94 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ duration: 0.3, ease: iosEase }}
+                    transition={{ duration: 0.3, ease: closeEase }}
                     className="flex flex-col items-center gap-3 py-6"
                   >
                     <motion.span
@@ -201,7 +210,7 @@ export function FloatingEmailCTA() {
                           animate={{ pathLength: 1 }}
                           transition={{
                             duration: 0.45,
-                            ease: iosEase,
+                            ease: closeEase,
                             delay: 0.2,
                           }}
                         />
@@ -213,7 +222,7 @@ export function FloatingEmailCTA() {
                       transition={{
                         duration: 0.3,
                         delay: 0.35,
-                        ease: iosEase,
+                        ease: closeEase,
                       }}
                       className="font-sans text-sm"
                     >
@@ -320,7 +329,7 @@ export function FloatingEmailCTA() {
                           initial={{ opacity: 0, height: 0, y: -4 }}
                           animate={{ opacity: 1, height: "auto", y: 0 }}
                           exit={{ opacity: 0, height: 0, y: -4 }}
-                          transition={{ duration: 0.22, ease: iosEase }}
+                          transition={{ duration: 0.22, ease: closeEase }}
                           className="overflow-hidden font-sans text-xs text-red-300"
                         >
                           {errorMessage}
@@ -354,7 +363,7 @@ export function FloatingEmailCTA() {
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.18, ease: iosEase }}
+                              transition={{ duration: 0.18, ease: closeEase }}
                               className="inline-flex items-center gap-1.5"
                             >
                               <motion.span
@@ -375,7 +384,7 @@ export function FloatingEmailCTA() {
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.18, ease: iosEase }}
+                              transition={{ duration: 0.18, ease: closeEase }}
                               className="inline-flex items-center gap-1.5"
                             >
                               Send
