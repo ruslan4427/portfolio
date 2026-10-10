@@ -85,9 +85,9 @@ const SCENE_HTML = `
     </div>
   </div>
 
-  <span class="hd-r0 hd-m" style="position:absolute;left:544px;top:346px;width:36px;height:36px;border-radius:50%;background:rgba(20,20,20,.25);pointer-events:none"></span>
-  <span class="hd-r1 hd-m" style="position:absolute;left:965px;top:171px;width:36px;height:36px;border-radius:50%;background:rgba(20,20,20,.25);pointer-events:none"></span>
-  <span class="hd-r2 hd-m" style="position:absolute;left:916px;top:687px;width:36px;height:36px;border-radius:50%;background:rgba(20,20,20,.25);pointer-events:none"></span>
+  <span class="hd-r0 hd-m" style="position:absolute;left:310px;top:346px;width:36px;height:36px;border-radius:50%;background:rgba(20,20,20,.25);pointer-events:none"></span>
+  <span class="hd-r1 hd-m" style="position:absolute;left:731px;top:171px;width:36px;height:36px;border-radius:50%;background:rgba(20,20,20,.25);pointer-events:none"></span>
+  <span class="hd-r2 hd-m" style="position:absolute;left:682px;top:687px;width:36px;height:36px;border-radius:50%;background:rgba(20,20,20,.25);pointer-events:none"></span>
 
   <div class="hd-wg0 hd-m" style="position:absolute;left:112px;top:170px;transform-origin:100% 100%">
     <div class="hd-par1 hd-m" style="display:flex;align-items:center;gap:10px;padding:14px 22px;border-radius:999px;background:#1f1f20;color:#fff;font-size:21px;font-weight:500;letter-spacing:-.01em;box-shadow:0 10px 24px rgba(0,0,0,.18);white-space:nowrap">
