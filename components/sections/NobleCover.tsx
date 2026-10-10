@@ -15,7 +15,7 @@ const SCENE_HTML = `
 </svg>
 
 <div class="nb-scene nb-m" style="position:absolute;inset:0">
-  <div class="nb-win nb-m" style="position:absolute;left:362px;top:92px;width:1200px;height:640px">
+  <div class="nb-win nb-m" style="position:absolute;left:128px;top:92px;width:1200px;height:640px">
     <div style="position:relative;width:100%;height:100%;transform:scale(.88);transform-origin:0 50%">
       <div style="position:relative;width:100%;height:100%;border-radius:13px;overflow:hidden;background:#0f0d0a;box-shadow:0 0 0 1px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.1), 0 40px 90px rgba(28,22,10,.30), 0 10px 30px rgba(0,0,0,.18)">
         <div style="position:relative;height:52px;display:flex;align-items:center;gap:16px;padding:0 16px 0 18px;box-sizing:border-box;background:linear-gradient(180deg, #33312f, #2a2927);border-bottom:1px solid #0a0a0a">
