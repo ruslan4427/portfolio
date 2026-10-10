@@ -6,6 +6,42 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { sendContact } from "@/app/(marketing)/contact/actions";
 import { initialContactState } from "@/app/(marketing)/contact/types";
+import { easeOutExpo } from "@/lib/motion";
+
+const islandSpring = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 30,
+  mass: 1.1,
+};
+
+const panelVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.18,
+      delay: 0.08,
+      when: "beforeChildren" as const,
+      staggerChildren: 0.05,
+      delayChildren: 0.12,
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.12 },
+  },
+};
+
+const rowVariants = {
+  hidden: { opacity: 0, y: 10, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.35, ease: easeOutExpo },
+  },
+};
 
 export function FloatingEmailCTA() {
   const pathname = usePathname();
@@ -37,7 +73,8 @@ export function FloatingEmailCTA() {
   useEffect(() => {
     if (open) {
       setSuccess(false);
-      setTimeout(() => firstFieldRef.current?.focus(), 220);
+      const t = setTimeout(() => firstFieldRef.current?.focus(), 320);
+      return () => clearTimeout(t);
     }
   }, [open]);
 
@@ -65,22 +102,24 @@ export function FloatingEmailCTA() {
       <motion.div
         ref={containerRef}
         layout
-        transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.9 }}
-        className="pointer-events-auto overflow-hidden rounded-[28px] bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)]"
+        transition={islandSpring}
+        whileHover={!open ? { y: -2, scale: 1.02 } : undefined}
+        whileTap={!open ? { scale: 0.97 } : undefined}
+        className="pointer-events-auto overflow-hidden rounded-[28px] bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform"
       >
         <AnimatePresence mode="wait" initial={false}>
           {!open ? (
             <motion.button
               key="trigger"
-              layout
+              layout="position"
               type="button"
               onClick={() => setOpen(true)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
+              initial={{ opacity: 0, filter: "blur(6px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, filter: "blur(6px)" }}
+              transition={{ duration: 0.18, ease: easeOutExpo }}
               aria-label="Open message composer"
-              className="group flex items-center gap-3 py-1.5 pl-1.5 pr-5 font-sans text-sm hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-transform duration-200"
+              className="group flex items-center gap-3 py-1.5 pl-1.5 pr-5 font-sans text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
               <span
                 aria-hidden
@@ -113,147 +152,244 @@ export function FloatingEmailCTA() {
           ) : (
             <motion.div
               key="panel"
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, delay: 0.05 }}
+              layout="position"
+              variants={panelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
               className="w-[min(420px,calc(100vw-32px))] p-4"
             >
-              {success ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center gap-2 py-6"
-                >
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10"
+              <AnimatePresence mode="wait" initial={false}>
+                {success ? (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.9, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.35, ease: easeOutExpo }}
+                    className="flex flex-col items-center gap-3 py-6"
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                  </span>
-                  <span className="font-sans text-sm">
-                    Delivered. I&rsquo;ll get back soon.
-                  </span>
-                </motion.div>
-              ) : (
-                <form action={formAction} className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <span
+                    <motion.span
                       aria-hidden
-                      className="relative h-9 w-9 overflow-hidden rounded-full bg-[color:var(--ink-primary)]"
-                    >
-                      <Image
-                        src="/videos/hero-poster.jpg"
-                        alt=""
-                        fill
-                        sizes="36px"
-                        className="object-cover"
-                      />
-                    </span>
-                    <div className="flex flex-col font-sans leading-tight">
-                      <span className="text-sm">Ruslan Hrekov</span>
-                      <span className="text-[11px] text-white/55">
-                        Usually replies within a day
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpen(false)}
-                      aria-label="Close"
-                      className="ml-auto rounded-full p-1.5 text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                      initial={{ scale: 0.4, rotate: -12 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 18,
+                        delay: 0.08,
+                      }}
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300"
                     >
                       <svg
-                        width="16"
-                        height="16"
+                        width="22"
+                        height="22"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="1.6"
+                        strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        <path d="M18 6 6 18" />
-                        <path d="m6 6 12 12" />
+                        <motion.path
+                          d="M20 6 9 17l-5-5"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{
+                            duration: 0.45,
+                            ease: easeOutExpo,
+                            delay: 0.18,
+                          }}
+                        />
                       </svg>
-                    </button>
-                  </div>
-
-                  <input type="hidden" name="name" value={prefill.name} />
-                  <input type="hidden" name="intent" value={prefill.intent} />
-                  <input
-                    type="text"
-                    name="_gotcha"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    className="hidden"
-                  />
-
-                  <input
-                    ref={firstFieldRef}
-                    type="email"
-                    name="email"
-                    required
-                    placeholder="your@email.com"
-                    defaultValue={prefill.email}
-                    autoComplete="email"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 font-sans text-sm text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/10 focus:outline-none"
-                  />
-                  <textarea
-                    name="message"
-                    required
-                    rows={3}
-                    minLength={20}
-                    maxLength={5000}
-                    placeholder="What are you working on? (20+ chars)"
-                    defaultValue={prefill.message}
-                    className="resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 font-sans text-sm text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/10 focus:outline-none"
-                  />
-                  {errorMessage && (
-                    <p className="font-sans text-xs text-red-300">
-                      {errorMessage}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <span className="font-sans text-[11px] text-white/40">
-                      Private — delivered to my inbox.
-                    </span>
-                    <button
-                      type="submit"
-                      disabled={pending}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 font-sans text-sm text-black transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                    </motion.span>
+                    <motion.span
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.3 }}
+                      className="font-sans text-sm"
                     >
-                      {pending ? "Sending…" : "Send"}
-                      {!pending && (
+                      Delivered. I&rsquo;ll get back soon.
+                    </motion.span>
+                  </motion.div>
+                ) : (
+                  <motion.form
+                    key="form"
+                    action={formAction}
+                    variants={panelVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="flex flex-col gap-3"
+                  >
+                    <motion.div
+                      variants={rowVariants}
+                      className="flex items-center gap-3"
+                    >
+                      <span
+                        aria-hidden
+                        className="relative h-9 w-9 overflow-hidden rounded-full bg-[color:var(--ink-primary)]"
+                      >
+                        <Image
+                          src="/videos/hero-poster.jpg"
+                          alt=""
+                          fill
+                          sizes="36px"
+                          className="object-cover"
+                        />
+                      </span>
+                      <div className="flex flex-col font-sans leading-tight">
+                        <span className="text-sm">Ruslan Hrekov</span>
+                        <span className="text-[11px] text-white/55">
+                          Usually replies within a day
+                        </span>
+                      </div>
+                      <motion.button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        whileHover={{ scale: 1.1, rotate: 90 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 18,
+                        }}
+                        aria-label="Close"
+                        className="ml-auto rounded-full p-1.5 text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                      >
                         <svg
-                          width="12"
-                          height="12"
+                          width="16"
+                          height="16"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="2"
+                          strokeWidth="1.6"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <path d="M5 12h14" />
-                          <path d="m12 5 7 7-7 7" />
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
                         </svg>
+                      </motion.button>
+                    </motion.div>
+
+                    <input type="hidden" name="name" value={prefill.name} />
+                    <input type="hidden" name="intent" value={prefill.intent} />
+                    <input
+                      type="text"
+                      name="_gotcha"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      className="hidden"
+                    />
+
+                    <motion.input
+                      variants={rowVariants}
+                      ref={firstFieldRef}
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="your@email.com"
+                      defaultValue={prefill.email}
+                      autoComplete="email"
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 font-sans text-sm text-white placeholder:text-white/40 transition-colors focus:border-white/30 focus:bg-white/10 focus:outline-none"
+                    />
+                    <motion.textarea
+                      variants={rowVariants}
+                      name="message"
+                      required
+                      rows={3}
+                      minLength={20}
+                      maxLength={5000}
+                      placeholder="What are you working on? (20+ chars)"
+                      defaultValue={prefill.message}
+                      className="resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 font-sans text-sm text-white placeholder:text-white/40 transition-colors focus:border-white/30 focus:bg-white/10 focus:outline-none"
+                    />
+                    <AnimatePresence>
+                      {errorMessage && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0, y: -4 }}
+                          animate={{ opacity: 1, height: "auto", y: 0 }}
+                          exit={{ opacity: 0, height: 0, y: -4 }}
+                          transition={{ duration: 0.2, ease: easeOutExpo }}
+                          className="overflow-hidden font-sans text-xs text-red-300"
+                        >
+                          {errorMessage}
+                        </motion.p>
                       )}
-                    </button>
-                  </div>
-                </form>
-              )}
+                    </AnimatePresence>
+                    <motion.div
+                      variants={rowVariants}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="font-sans text-[11px] text-white/40">
+                        Private — delivered to my inbox.
+                      </span>
+                      <motion.button
+                        type="submit"
+                        disabled={pending}
+                        whileHover={pending ? undefined : { scale: 1.04 }}
+                        whileTap={pending ? undefined : { scale: 0.96 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 420,
+                          damping: 22,
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 font-sans text-sm text-black transition-opacity hover:opacity-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          {pending ? (
+                            <motion.span
+                              key="sending"
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.15 }}
+                              className="inline-flex items-center gap-1.5"
+                            >
+                              <motion.span
+                                aria-hidden
+                                animate={{ rotate: 360 }}
+                                transition={{
+                                  repeat: Infinity,
+                                  duration: 0.9,
+                                  ease: "linear",
+                                }}
+                                className="inline-block h-3 w-3 rounded-full border-2 border-black/20 border-t-black"
+                              />
+                              Sending
+                            </motion.span>
+                          ) : (
+                            <motion.span
+                              key="send"
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.15 }}
+                              className="inline-flex items-center gap-1.5"
+                            >
+                              Send
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                              </svg>
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                    </motion.div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>
