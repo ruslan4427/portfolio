@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/content/projects";
+import { AnimatedCover } from "./AnimatedCover";
+import { FieldmarkCover } from "./FieldmarkCover";
+import { HrekovDevCover } from "./HrekovDevCover";
+import { NobleCover } from "./NobleCover";
+import { SmmFactoryCover } from "./SmmFactoryCover";
 
 const statusLabel: Record<Project["status"], string> = {
   shipped: "Shipped",
@@ -45,6 +50,36 @@ export function ProjectCard({ project }: { project: Project }) {
                     </div>
                   </div>
                 </>
+              ) : project.slug === "lexora" ? (
+                <AnimatedCover
+                  src={preview.src}
+                  alt={preview.alt}
+                  sizes="(min-width: 1200px) 580px, (min-width: 768px) 48vw, 92vw"
+                />
+              ) : project.slug === "fieldmark" ? (
+                <FieldmarkCover
+                  src={preview.src}
+                  alt={preview.alt}
+                  sizes="(min-width: 1200px) 580px, (min-width: 768px) 48vw, 92vw"
+                />
+              ) : project.slug === "smm-factory" ? (
+                <SmmFactoryCover
+                  src={preview.src}
+                  alt={preview.alt}
+                  sizes="(min-width: 1200px) 580px, (min-width: 768px) 48vw, 92vw"
+                />
+              ) : project.slug === "noble-saas" ? (
+                <NobleCover
+                  src={preview.src}
+                  alt={preview.alt}
+                  sizes="(min-width: 1200px) 580px, (min-width: 768px) 48vw, 92vw"
+                />
+              ) : project.slug === "hrekov-dev" ? (
+                <HrekovDevCover
+                  src={preview.src}
+                  alt={preview.alt}
+                  sizes="(min-width: 1200px) 580px, (min-width: 768px) 48vw, 92vw"
+                />
               ) : (
                 <Image
                   src={preview.src}

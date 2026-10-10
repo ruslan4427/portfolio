@@ -177,6 +177,436 @@ html.lenis body {
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }
 
+/* ---------- Lexora animated cover (ProjectCard) ---------- */
+
+.lx-cover-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f2f2ee;
+  container-type: inline-size;
+}
+.lx-cover-scene {
+  position: relative;
+  width: 1312px;
+  height: 816px;
+  transform: scale(calc(100cqw / 1312px));
+  transform-origin: top left;
+  font-family: var(--font-sans, Inter, "Helvetica Neue", sans-serif);
+  color: #141414;
+}
+.lx-cover-fallback {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-cover-wrap { display: none; }
+  .lx-cover-fallback { display: block; }
+}
+
+.lx-m {
+  animation-duration: 8s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lx-dots {
+  background-image: radial-gradient(circle, #cfcfca 2.2px, transparent 2.6px);
+  background-size: 82px 82px;
+  background-position: 31px 31px;
+  animation-name: lx-dotsIn;
+}
+@keyframes lx-dotsIn { 0%{opacity:0;transform:scale(1.04)} 8%,92%{opacity:1;transform:scale(1)} 99%,100%{opacity:0} }
+.lx-arc { stroke-dasharray: 1200; animation-name: lx-arcDraw; }
+.lx-arc2 { animation-name: lx-arcDraw2; }
+@keyframes lx-arcDraw { 0%,2%{stroke-dashoffset:1200} 20%,92%{stroke-dashoffset:0;opacity:1} 99%,100%{stroke-dashoffset:0;opacity:0} }
+@keyframes lx-arcDraw2 { 0%,6%{stroke-dashoffset:1200} 24%,92%{stroke-dashoffset:0;opacity:1} 99%,100%{stroke-dashoffset:0;opacity:0} }
+.lx-phone { animation-name: lx-phoneIn; }
+@keyframes lx-phoneIn { 0%,5%{opacity:0;transform:translateY(90px) scale(.96)} 20%,91%{opacity:1;transform:none} 98%,100%{opacity:0;transform:translateY(-30px)} }
+.lx-float { animation: lx-floaty 5s ease-in-out infinite; }
+.lx-float2 { animation: lx-floaty 6s ease-in-out -2s infinite; }
+.lx-float3 { animation: lx-floaty 5.5s ease-in-out -1s infinite; }
+@keyframes lx-floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+.lx-top { animation-name: lx-topIn; }
+@keyframes lx-topIn { 0%,14%{opacity:0;transform:translateY(-8px)} 20%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+.lx-ring-pulse { animation: lx-ringPulse 2s ease-out infinite; }
+@keyframes lx-ringPulse { 0%{transform:scale(1);opacity:.55} 80%,100%{transform:scale(1.9);opacity:0} }
+.lx-r0{animation-name:lx-r0}.lx-r1{animation-name:lx-r1}.lx-r2{animation-name:lx-r2}.lx-r3{animation-name:lx-r3}.lx-r4{animation-name:lx-r4}.lx-r5{animation-name:lx-r5}.lx-r6{animation-name:lx-r6}.lx-r7{animation-name:lx-r7}
+@keyframes lx-r0 { 0%,16%{opacity:0;transform:translateX(34px)} 23%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r1 { 0%,18%{opacity:0;transform:translateX(34px)} 25%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r2 { 0%,20%{opacity:0;transform:translateX(34px)} 27%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r3 { 0%,22%{opacity:0;transform:translateX(34px)} 29%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r4 { 0%,24%{opacity:0;transform:translateX(34px)} 31%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r5 { 0%,26%{opacity:0;transform:translateX(34px)} 33%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r6 { 0%,28%{opacity:0;transform:translateX(34px)} 35%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+@keyframes lx-r7 { 0%,30%{opacity:0;transform:translateX(34px)} 37%,92%{opacity:1;transform:none} 97%,100%{opacity:0} }
+.lx-g0{animation-name:lx-g0}.lx-g1{animation-name:lx-g1}.lx-g2{animation-name:lx-g2}.lx-g3{animation-name:lx-g3}.lx-g4{animation-name:lx-g4}.lx-g5{animation-name:lx-g5}.lx-g6{animation-name:lx-g6}.lx-g7{animation-name:lx-g7}
+@keyframes lx-g0 { 0%,56%{background:#cfcfca;transform:scale(1)} 57.5%{transform:scale(2)} 59%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g1 { 0%,59%{background:#cfcfca;transform:scale(1)} 60.5%{transform:scale(2)} 62%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g2 { 0%,62%{background:#cfcfca;transform:scale(1)} 63.5%{transform:scale(2)} 65%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g3 { 0%,65%{background:#cfcfca;transform:scale(1)} 66.5%{transform:scale(2)} 68%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g4 { 0%,68%{background:#cfcfca;transform:scale(1)} 69.5%{transform:scale(2)} 71%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g5 { 0%,71%{background:#cfcfca;transform:scale(1)} 72.5%{transform:scale(2)} 74%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g6 { 0%,74%{background:#cfcfca;transform:scale(1)} 75.5%{transform:scale(2)} 77%,100%{background:#1c8f4e;transform:scale(1)} }
+@keyframes lx-g7 { 0%,77%{background:#cfcfca;transform:scale(1)} 78.5%{transform:scale(2)} 80%,100%{background:#1c8f4e;transform:scale(1)} }
+.lx-pill { animation-name: lx-pillIn; }
+@keyframes lx-pillIn { 0%,34%{opacity:0;transform:scale(.6)} 39%{opacity:1;transform:scale(1.06)} 42%,92%{opacity:1;transform:scale(1)} 97%,100%{opacity:0;transform:scale(.9)} }
+.lx-lesson { animation-name: lx-lessonIn; }
+@keyframes lx-lessonIn { 0%,40%{opacity:0;transform:translateX(-60px)} 49%,92%{opacity:1;transform:none} 97%,100%{opacity:0;transform:translateX(-20px)} }
+.lx-status { animation-name: lx-statusIn; }
+@keyframes lx-statusIn { 0%,48%{opacity:0;transform:translateY(30px) scale(.94)} 56%,92%{opacity:1;transform:none} 97%,100%{opacity:0;transform:translateY(10px)} }
+.lx-word { animation-name: lx-wordIn; }
+@keyframes lx-wordIn { 0%,53%{opacity:0;letter-spacing:.12em;filter:blur(4px)} 60%,92%{opacity:1;letter-spacing:-.01em;filter:blur(0)} 97%,100%{opacity:0} }
+.lx-bar { animation-name: lx-barFill; }
+@keyframes lx-barFill { 0%,56%{transform:scaleX(0)} 80%,92%{transform:scaleX(1)} 97%,100%{transform:scaleX(1);opacity:0} }
+
+/* ---------- Fieldmark animated cover (ProjectCard) ---------- */
+
+.fm-cover-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f2f2ee;
+  container-type: inline-size;
+}
+.fm-cover-scene {
+  position: relative;
+  width: 1312px;
+  height: 816px;
+  transform: scale(calc(100cqw / 1312px));
+  transform-origin: top left;
+  font-family: var(--font-sans, Inter, "Helvetica Neue", sans-serif);
+  color: #141414;
+}
+.fm-cover-fallback { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fm-cover-wrap { display: none; }
+  .fm-cover-fallback { display: block; }
+}
+
+.fm-m {
+  animation-duration: 8s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+.fm-dots {
+  background-image: radial-gradient(circle, #cfcfca 2.2px, transparent 2.6px);
+  background-size: 82px 82px;
+  background-position: 31px 31px;
+  animation-name: fm-dotsIn;
+}
+@keyframes fm-dotsIn { 0%{opacity:0;transform:scale(1.04);animation-timing-function:ease-out} 10%,90%{opacity:1;transform:scale(1);animation-timing-function:ease-in} 99%,100%{opacity:0;transform:scale(1)} }
+.fm-arc { stroke-dasharray:1200; animation-name:fm-arcDraw; }
+.fm-arc2 { animation-name:fm-arcDraw2; }
+@keyframes fm-arcDraw { 0%,2%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 24%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+@keyframes fm-arcDraw2 { 0%,5%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 28%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+.fm-scene { animation-name:fm-sway; transform-origin:70% 55%; }
+@keyframes fm-sway { 0%,22%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out} 55%{transform:translate(-8px,-6px) rotate(-.5deg);animation-timing-function:ease-in-out} 88%,100%{transform:translate(0,0) rotate(0)} }
+.fm-phone { animation-name:fm-phoneIn; }
+@keyframes fm-phoneIn { 0%,2%{opacity:0;animation-timing-function:ease-out} 9%,92%{opacity:1;animation-timing-function:ease-in} 98%,100%{opacity:0} }
+.fm-phone3d { animation-name:fm-phone3d; }
+@keyframes fm-phone3d {
+  0%,2%{transform:scale(1.1) perspective(1800px) translate3d(160px,300px,-260px) rotateX(42deg) rotateY(-48deg) rotateZ(12deg);animation-timing-function:cubic-bezier(.2,.75,.3,1)}
+  16%{transform:scale(1.1) perspective(1800px) translate3d(0,-10px,0) rotateX(-4deg) rotateY(4deg) rotateZ(-0.8deg);animation-timing-function:cubic-bezier(.4,0,.3,1)}
+  23%,88%{transform:scale(1.1) perspective(1800px) translate3d(0,0,0) rotateX(0) rotateY(0) rotateZ(0);animation-timing-function:cubic-bezier(.55,0,.75,.2)}
+  98%,100%{transform:scale(1.1) perspective(1800px) translate3d(0,-50px,-160px) rotateX(-12deg) rotateY(26deg) rotateZ(-2deg)}
+}
+.fm-d0,.fm-d1,.fm-d2,.fm-d3 { transform-origin:0 50%; }
+.fm-d0 { animation-name:fm-d0; }
+@keyframes fm-d0 { 0%,15%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.5)} 20%,100%{opacity:1;transform:scale(1)} }
+.fm-d1 { animation-name:fm-d1; }
+@keyframes fm-d1 { 0%,17%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.5)} 22%,100%{opacity:1;transform:scale(1)} }
+.fm-d2 { animation-name:fm-d2; }
+@keyframes fm-d2 { 0%,19%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.5)} 24%,100%{opacity:1;transform:scale(1)} }
+.fm-d3 { animation-name:fm-d3; }
+@keyframes fm-d3 { 0%,21%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.5)} 26%,100%{opacity:1;transform:scale(1)} }
+.fm-pill { animation-name:fm-pillIn; transform-origin:85% 50%; }
+@keyframes fm-pillIn { 0%,13%{opacity:0;transform:translate(70px,14px) scale(.55);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 24%,86%{opacity:1;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 92%,100%{opacity:0;transform:translate(70px,14px) scale(.55)} }
+.fm-lesson { animation-name:fm-lessonIn; transform-origin:100% 50%; }
+@keyframes fm-lessonIn { 0%,17%{opacity:0;transform:translate(150px,0) scale(.8);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 29%,87%{opacity:1;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 93%,100%{opacity:0;transform:translate(150px,0) scale(.8)} }
+.fm-status { animation-name:fm-statusIn; transform-origin:0 0; }
+@keyframes fm-statusIn { 0%,21%{opacity:0;transform:translate(-90px,-50px) scale(.8);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 33%,88%{opacity:1;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 94%,100%{opacity:0;transform:translate(-90px,-50px) scale(.8)} }
+.fm-pin { transform-origin:50% 100%; }
+.fm-p0 { animation-name:fm-p0; }
+@keyframes fm-p0 { 0%,25%{opacity:0;transform:translateY(-8px);animation-timing-function:cubic-bezier(.3,1.6,.5,1)} 28%,100%{opacity:1;transform:translateY(0)} }
+.fm-p1 { animation-name:fm-p1; }
+@keyframes fm-p1 { 0%,27%{opacity:0;transform:translateY(-8px);animation-timing-function:cubic-bezier(.3,1.6,.5,1)} 30%,100%{opacity:1;transform:translateY(0)} }
+.fm-p2 { animation-name:fm-p2; }
+@keyframes fm-p2 { 0%,29%{opacity:0;transform:translateY(-8px);animation-timing-function:cubic-bezier(.3,1.6,.5,1)} 32%,100%{opacity:1;transform:translateY(0)} }
+.fm-p3 { animation-name:fm-p3; }
+@keyframes fm-p3 { 0%,31%{opacity:0;transform:translateY(-8px);animation-timing-function:cubic-bezier(.3,1.6,.5,1)} 34%,100%{opacity:1;transform:translateY(0)} }
+.fm-word { animation-name:fm-wordIn; }
+@keyframes fm-wordIn { 0%,27%{opacity:0;letter-spacing:.12em;filter:blur(4px);animation-timing-function:ease-out} 35%,100%{opacity:1;letter-spacing:-.02em;filter:blur(0)} }
+.fm-bar { animation-name:fm-barFill; }
+@keyframes fm-barFill { 0%,29%{transform:scaleX(0);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 44%,100%{transform:scaleX(1)} }
+.fm-par1 { animation-name:fm-par1; }
+.fm-par2 { animation-name:fm-par2; }
+.fm-par3 { animation-name:fm-par3; }
+@keyframes fm-par1 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-12px,-8px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes fm-par2 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-16px,4px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes fm-par3 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(10px,-12px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+
+/* ---------- SMM Factory animated cover (ProjectCard) ---------- */
+
+.sm-cover-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f2f2ee;
+  container-type: inline-size;
+}
+.sm-cover-scene {
+  position: relative;
+  width: 1312px;
+  height: 816px;
+  transform: scale(calc(100cqw / 1312px));
+  transform-origin: top left;
+  font-family: var(--font-sans, Inter, "Helvetica Neue", sans-serif);
+  color: #141414;
+}
+.sm-cover-fallback { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-cover-wrap { display: none; }
+  .sm-cover-fallback { display: block; }
+}
+
+.sm-m {
+  animation-duration: 8s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+.sm-dots {
+  background-image: radial-gradient(circle, #cfcfca 2.2px, transparent 2.6px);
+  background-size: 82px 82px;
+  background-position: 31px 31px;
+  animation-name: sm-dotsIn;
+}
+@keyframes sm-dotsIn { 0%{opacity:0;transform:scale(1.04);animation-timing-function:ease-out} 10%,90%{opacity:1;transform:scale(1);animation-timing-function:ease-in} 99%,100%{opacity:0;transform:scale(1)} }
+.sm-arc { stroke-dasharray:1200; animation-name:sm-arcDraw; }
+.sm-arc2 { animation-name:sm-arcDraw2; }
+@keyframes sm-arcDraw { 0%,2%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 24%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+@keyframes sm-arcDraw2 { 0%,5%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 28%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+.sm-scene { animation-name:sm-sway; transform-origin:70% 55%; }
+@keyframes sm-sway { 0%,22%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out} 55%{transform:translate(-8px,-6px) rotate(-.5deg);animation-timing-function:ease-in-out} 88%,100%{transform:translate(0,0) rotate(0)} }
+.sm-phone { animation-name:sm-phoneIn; }
+@keyframes sm-phoneIn { 0%,2%{opacity:0;animation-timing-function:ease-out} 9%,92%{opacity:1;animation-timing-function:ease-in} 98%,100%{opacity:0} }
+.sm-phone3d { animation-name:sm-phone3d; }
+@keyframes sm-phone3d {
+  0%,2%{transform:scale(1.1) perspective(1600px) translate3d(240px,40px,-320px) rotateX(8deg) rotateY(-84deg) rotateZ(0);animation-timing-function:cubic-bezier(.25,.7,.2,1)}
+  22%{transform:scale(1.1) perspective(1600px) translate3d(0,0,0) rotateX(5deg) rotateY(-15deg) rotateZ(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  40%{transform:scale(1.1) perspective(1600px) translate3d(0,-4px,0) rotateX(6deg) rotateY(-26deg) rotateZ(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  58%{transform:scale(1.1) perspective(1600px) translate3d(0,2px,0) rotateX(3deg) rotateY(-10deg) rotateZ(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  76%{transform:scale(1.1) perspective(1600px) translate3d(0,-3px,0) rotateX(6deg) rotateY(-24deg) rotateZ(0);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  88%{transform:scale(1.1) perspective(1600px) translate3d(0,0,0) rotateX(5deg) rotateY(-16deg) rotateZ(0);animation-timing-function:cubic-bezier(.55,0,.8,.3)}
+  98%,100%{transform:scale(1.1) perspective(1600px) translate3d(-260px,-20px,-320px) rotateX(8deg) rotateY(78deg) rotateZ(0)}
+}
+.sm-sheen { animation-name:sm-sheen; background:linear-gradient(105deg, rgba(255,255,255,0) 38%, rgba(255,255,255,.34) 46%, rgba(255,255,255,.08) 50%, rgba(255,255,255,0) 56%); background-size:300% 100%; background-repeat:no-repeat; }
+@keyframes sm-sheen { 0%,2%{background-position:0% 0;animation-timing-function:cubic-bezier(.25,.7,.2,1)} 22%,39.9%{background-position:100% 0} 40%{background-position:0% 0;animation-timing-function:cubic-bezier(.45,0,.55,1)} 75%,100%{background-position:100% 0} }
+.sm-pshadow { animation-name:sm-pshadow; transform-origin:50% 50%; }
+@keyframes sm-pshadow {
+  0%,2%{opacity:0;transform:translate(150px,20px) scaleX(.2);animation-timing-function:cubic-bezier(.25,.7,.2,1)}
+  22%{opacity:1;transform:translate(34px,34px) scaleX(.86);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  40%{opacity:1;transform:translate(48px,36px) scaleX(.78);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  58%{opacity:1;transform:translate(24px,32px) scaleX(.92);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  76%{opacity:1;transform:translate(46px,36px) scaleX(.8);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  88%{opacity:1;transform:translate(34px,34px) scaleX(.86);animation-timing-function:cubic-bezier(.55,0,.8,.3)}
+  98%,100%{opacity:0;transform:translate(-170px,20px) scaleX(.2)}
+}
+.sm-pill { animation-name:sm-pillIn; transform-origin:85% 50%; }
+@keyframes sm-pillIn { 0%,13%{opacity:0;transform:translate(70px,14px) scale(.55);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 24%,86%{opacity:1;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 92%,100%{opacity:0;transform:translate(70px,14px) scale(.55)} }
+.sm-lesson { animation-name:sm-lessonIn; transform-origin:100% 50%; }
+@keyframes sm-lessonIn { 0%,17%{opacity:0;transform:translate(150px,0) scale(.8);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 29%,87%{opacity:1;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 93%,100%{opacity:0;transform:translate(150px,0) scale(.8)} }
+.sm-status { animation-name:sm-statusIn; transform-origin:0 0; }
+@keyframes sm-statusIn { 0%,21%{opacity:0;transform:translate(-90px,-50px) scale(.8);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 33%,88%{opacity:1;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 94%,100%{opacity:0;transform:translate(-90px,-50px) scale(.8)} }
+.sm-word { animation-name:sm-wordIn; }
+@keyframes sm-wordIn { 0%,27%{opacity:0;letter-spacing:.12em;filter:blur(4px);animation-timing-function:ease-out} 35%,100%{opacity:1;letter-spacing:-.02em;filter:blur(0)} }
+.sm-par1 { animation-name:sm-par1; }
+.sm-par2 { animation-name:sm-par2; }
+.sm-par3 { animation-name:sm-par3; }
+@keyframes sm-par1 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-12px,-8px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes sm-par2 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-16px,4px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes sm-par3 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(10px,-12px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+.sm-h0 { animation-name:sm-h0; } @keyframes sm-h0 { 0%,15%{opacity:0;animation-timing-function:ease-out} 17%{opacity:1;animation-timing-function:ease-in} 23%,100%{opacity:0} }
+.sm-h1 { animation-name:sm-h1; } @keyframes sm-h1 { 0%,17%{opacity:0;animation-timing-function:ease-out} 19%,88%{opacity:1;animation-timing-function:ease-in} 94%,100%{opacity:0} }
+.sm-h2 { animation-name:sm-h2; } @keyframes sm-h2 { 0%,19%{opacity:0;animation-timing-function:ease-out} 21%{opacity:1;animation-timing-function:ease-in} 27%,100%{opacity:0} }
+.sm-h3 { animation-name:sm-h3; } @keyframes sm-h3 { 0%,21%{opacity:0;animation-timing-function:ease-out} 23%{opacity:1;animation-timing-function:ease-in} 29%,100%{opacity:0} }
+.sm-h4 { animation-name:sm-h4; } @keyframes sm-h4 { 0%,23%{opacity:0;animation-timing-function:ease-out} 25%{opacity:1;animation-timing-function:ease-in} 31%,100%{opacity:0} }
+.sm-k0 { animation-name:sm-k0; } @keyframes sm-k0 { 0%,27%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 31%,100%{opacity:1;transform:scale(1)} }
+.sm-k1 { animation-name:sm-k1; } @keyframes sm-k1 { 0%,28.5%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 32.5%,100%{opacity:1;transform:scale(1)} }
+.sm-k2 { animation-name:sm-k2; } @keyframes sm-k2 { 0%,30%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 34%,100%{opacity:1;transform:scale(1)} }
+.sm-k3 { animation-name:sm-k3; } @keyframes sm-k3 { 0%,31.5%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 35.5%,100%{opacity:1;transform:scale(1)} }
+.sm-k4 { animation-name:sm-k4; } @keyframes sm-k4 { 0%,33%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.2,.9,.3,1.25)} 37%,100%{opacity:1;transform:scale(1)} }
+
+/* ---------- Noble animated cover (ProjectCard) ---------- */
+
+.nb-cover-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f2f2ee;
+  container-type: inline-size;
+}
+.nb-cover-scene {
+  position: relative;
+  width: 1312px;
+  height: 816px;
+  transform: scale(calc(100cqw / 1312px));
+  transform-origin: top left;
+  font-family: Manrope, var(--font-sans, Inter, "Helvetica Neue", sans-serif);
+  color: #141414;
+}
+.nb-cover-fallback { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .nb-cover-wrap { display: none; }
+  .nb-cover-fallback { display: block; }
+}
+
+.nb-m {
+  animation-duration: 8s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+.nb-dots {
+  background-image: radial-gradient(circle, #cfcfca 2.2px, transparent 2.6px);
+  background-size: 82px 82px;
+  background-position: 31px 31px;
+  animation-name: nb-dotsIn;
+}
+@keyframes nb-dotsIn { 0%{opacity:0;transform:scale(1.04);animation-timing-function:ease-out} 10%,90%{opacity:1;transform:scale(1);animation-timing-function:ease-in} 99%,100%{opacity:0;transform:scale(1)} }
+.nb-arc { stroke-dasharray:1200; animation-name:nb-arcDraw; }
+.nb-arc2 { animation-name:nb-arcDraw2; }
+@keyframes nb-arcDraw { 0%,2%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 24%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+@keyframes nb-arcDraw2 { 0%,5%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 28%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+.nb-scene { animation-name:nb-sway; transform-origin:70% 55%; }
+@keyframes nb-sway { 0%,22%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out} 55%{transform:translate(-8px,-6px) rotate(-.5deg);animation-timing-function:ease-in-out} 88%,100%{transform:translate(0,0) rotate(0)} }
+.nb-win { animation-name:nb-winIn; transform-origin:44% 50%; }
+@keyframes nb-winIn {
+  0%,2%{opacity:0;transform:perspective(2200px) translateX(560px) rotateY(-72deg);animation-timing-function:cubic-bezier(.22,.85,.3,1)}
+  9%{opacity:1}
+  20%{transform:perspective(2200px) translateX(-8px) rotateY(3deg);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  27%,88%{opacity:1;transform:perspective(2200px) translateX(0) rotateY(0);animation-timing-function:cubic-bezier(.55,0,.8,.3)}
+  98%,100%{opacity:0;transform:perspective(2200px) translateX(560px) rotateY(-72deg)}
+}
+.nb-pill { animation-name:nb-pillIn; transform-origin:85% 50%; }
+@keyframes nb-pillIn { 0%,26%{opacity:0;transform:translateX(1180px);animation-timing-function:cubic-bezier(.18,.9,.25,1.12)} 36%,84%{opacity:1;transform:translateX(0);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 91%,100%{opacity:0;transform:translateX(1180px)} }
+.nb-lesson { animation-name:nb-lessonIn; transform-origin:100% 50%; }
+@keyframes nb-lessonIn { 0%,30%{opacity:0;transform:translateX(440px);animation-timing-function:cubic-bezier(.18,.9,.25,1.12)} 40%,85%{opacity:1;transform:translateX(0);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 92%,100%{opacity:0;transform:translateX(440px)} }
+.nb-status { animation-name:nb-statusIn; }
+@keyframes nb-statusIn { 0%,34%{opacity:0;transform:translateX(1180px);animation-timing-function:cubic-bezier(.18,.9,.25,1.12)} 44%,86%{opacity:1;transform:translateX(0);animation-timing-function:cubic-bezier(.55,0,.75,.2)} 93%,100%{opacity:0;transform:translateX(1180px)} }
+.nb-word { animation-name:nb-wordIn; }
+@keyframes nb-wordIn { 0%,38%{opacity:0;letter-spacing:.12em;filter:blur(4px);animation-timing-function:ease-out} 46%,100%{opacity:1;letter-spacing:-.02em;filter:blur(0)} }
+.nb-par1 { animation-name:nb-par1; }
+.nb-par2 { animation-name:nb-par2; }
+.nb-par3 { animation-name:nb-par3; }
+@keyframes nb-par1 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-12px,-8px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes nb-par2 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-16px,4px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes nb-par3 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(10px,-12px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+.nb-fill { animation-name:nb-fillK; transform-origin:0 50%; }
+@keyframes nb-fillK { 0%,22%{transform:scaleX(0);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 36%,100%{transform:scaleX(1)} }
+.nb-k0, .nb-k1 { transform-origin:50% 50%; }
+.nb-k0 { animation-name:nb-k0; } @keyframes nb-k0 { 0%,24%{transform:scale(0);animation-timing-function:cubic-bezier(.2,.9,.3,1.5)} 28%,100%{transform:scale(1)} }
+.nb-k1 { animation-name:nb-k1; } @keyframes nb-k1 { 0%,27%{transform:scale(0);animation-timing-function:cubic-bezier(.2,.9,.3,1.5)} 31%,100%{transform:scale(1)} }
+.nb-ringarc { animation-name:nb-ringK; }
+@keyframes nb-ringK { 0%,34%{stroke-dashoffset:176;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 46%,100%{stroke-dashoffset:58} }
+.nb-c0 { animation-name:nb-c0; } @keyframes nb-c0 { 0%,14%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 22%,100%{opacity:1;transform:translateY(0)} }
+.nb-c1 { animation-name:nb-c1; } @keyframes nb-c1 { 0%,16%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 24%,100%{opacity:1;transform:translateY(0)} }
+.nb-c2 { animation-name:nb-c2; } @keyframes nb-c2 { 0%,18%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 26%,100%{opacity:1;transform:translateY(0)} }
+.nb-c3 { animation-name:nb-c3; } @keyframes nb-c3 { 0%,19.5%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 27.5%,100%{opacity:1;transform:translateY(0)} }
+.nb-c4 { animation-name:nb-c4; } @keyframes nb-c4 { 0%,21%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 29%,100%{opacity:1;transform:translateY(0)} }
+.nb-c5 { animation-name:nb-c5; } @keyframes nb-c5 { 0%,22.5%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 30.5%,100%{opacity:1;transform:translateY(0)} }
+.nb-c6 { animation-name:nb-c6; } @keyframes nb-c6 { 0%,24%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 32%,100%{opacity:1;transform:translateY(0)} }
+.nb-c7 { animation-name:nb-c7; } @keyframes nb-c7 { 0%,26%{opacity:0;transform:translateY(16px);animation-timing-function:cubic-bezier(.2,.75,.3,1)} 34%,100%{opacity:1;transform:translateY(0)} }
+
+/* ---------- hrekov.dev animated cover (ProjectCard) ---------- */
+
+.hd-cover-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f2f2ee;
+  container-type: inline-size;
+}
+.hd-cover-scene {
+  position: relative;
+  width: 1312px;
+  height: 816px;
+  transform: scale(calc(100cqw / 1312px));
+  transform-origin: top left;
+  font-family: Manrope, var(--font-sans, Inter, "Helvetica Neue", sans-serif);
+  color: #141414;
+}
+.hd-cover-fallback { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hd-cover-wrap { display: none; }
+  .hd-cover-fallback { display: block; }
+}
+
+.hd-m {
+  animation-duration: 10s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+.hd-dots {
+  background-image: radial-gradient(circle, #cfcfca 2.2px, transparent 2.6px);
+  background-size: 82px 82px;
+  background-position: 31px 31px;
+  animation-name: hd-dotsIn;
+}
+@keyframes hd-dotsIn { 0%{opacity:0;transform:scale(1.04);animation-timing-function:ease-out} 10%,90%{opacity:1;transform:scale(1);animation-timing-function:ease-in} 99%,100%{opacity:0;transform:scale(1)} }
+.hd-arc { stroke-dasharray:1200; animation-name:hd-arcDraw; }
+.hd-arc2 { animation-name:hd-arcDraw2; }
+@keyframes hd-arcDraw { 0%,2%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 24%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+@keyframes hd-arcDraw2 { 0%,5%{stroke-dashoffset:1200;opacity:1;animation-timing-function:cubic-bezier(.2,.75,.3,1)} 28%,90%{stroke-dashoffset:0;opacity:1;animation-timing-function:ease-in} 99%,100%{stroke-dashoffset:0;opacity:0} }
+.hd-scene { animation-name:hd-sway; transform-origin:70% 55%; }
+@keyframes hd-sway { 0%,22%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out} 55%{transform:translate(-8px,-6px) rotate(-.5deg);animation-timing-function:ease-in-out} 88%,100%{transform:translate(0,0) rotate(0)} }
+.hd-win { animation-name:hd-winIn; }
+@keyframes hd-winIn { 0%,2%{opacity:0;transform:translateY(24px) scale(.97);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 11%,90%{opacity:1;transform:translateY(0) scale(1);animation-timing-function:cubic-bezier(.55,0,.8,.3)} 97%,100%{opacity:0;transform:translateY(16px) scale(.97)} }
+.hd-load { animation-name:hd-loadK; transform-origin:0 50%; }
+@keyframes hd-loadK { 0%,7%{opacity:1;transform:scaleX(0);animation-timing-function:cubic-bezier(.3,.6,.4,1)} 13%{transform:scaleX(.62);animation-timing-function:linear} 15%{transform:scaleX(.7);animation-timing-function:cubic-bezier(.5,0,.3,1)} 18%{opacity:1;transform:scaleX(1)} 20%,100%{opacity:0;transform:scaleX(1)} }
+.hd-atitle { animation-name:hd-atitleK; } @keyframes hd-atitleK { 0%,9%{opacity:0} 12%,100%{opacity:1} }
+.hd-pagebg { animation-name:hd-pagebgK; } @keyframes hd-pagebgK { 0%,15%{opacity:0} 20%,100%{opacity:1} }
+.hd-clock { animation-name:hd-clockK; animation-timing-function:steps(10,end); }
+@keyframes hd-clockK { 0%{transform:translateY(0)} 100%{transform:translateY(-130px)} }
+.hd-hl { animation-name:hd-hlK; }
+@keyframes hd-hlK { 0%,52%{transform:translateX(0);width:52px;animation-timing-function:cubic-bezier(.45,0,.55,1)} 56%,100%{transform:translateX(52px);width:56px} }
+.hd-navHome { animation-name:hd-navHomeK; } @keyframes hd-navHomeK { 0%,53%{color:#111} 55%,100%{color:#6b6b6b} }
+.hd-navCases { animation-name:hd-navCasesK; } @keyframes hd-navCasesK { 0%,53%{color:#6b6b6b} 55%,100%{color:#111} }
+.hd-disc { animation-name:hd-discK; } @keyframes hd-discK { 0%,66%{transform:translateY(0)} 68%{transform:translateY(4px)} 70%{transform:translateY(0)} 72%{transform:translateY(3px)} 74%,100%{transform:translateY(0)} }
+.hd-nv { animation-name:hd-nvA; } @keyframes hd-nvA { 0%,18%{opacity:0;transform:translateY(-6px);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 24%,100%{opacity:1;transform:translateY(0)} }
+.hd-dt { animation-name:hd-dtA; } @keyframes hd-dtA { 0%,19%{opacity:0;transform:translateY(-6px);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 25%,100%{opacity:1;transform:translateY(0)} }
+.hd-w0 { animation-name:hd-w0; } @keyframes hd-w0 { 0%,20%{transform:translateY(150%);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 28%,100%{transform:translateY(0)} }
+.hd-w1 { animation-name:hd-w1; } @keyframes hd-w1 { 0%,22.5%{transform:translateY(150%);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 30.5%,100%{transform:translateY(0)} }
+.hd-w2 { animation-name:hd-w2; } @keyframes hd-w2 { 0%,25%{transform:translateY(150%);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 33%,100%{transform:translateY(0)} }
+.hd-av { animation-name:hd-avK; } @keyframes hd-avK { 0%,24%{opacity:0;transform:scale(.4);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 31%,100%{opacity:1;transform:scale(1)} }
+.hd-s0 { animation-name:hd-s0; } @keyframes hd-s0 { 0%,29%{opacity:0;transform:scale(.4);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 34%,100%{opacity:1;transform:scale(1)} }
+.hd-s1 { animation-name:hd-s1; } @keyframes hd-s1 { 0%,30.5%{opacity:0;transform:scale(.4);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 35.5%,100%{opacity:1;transform:scale(1)} }
+.hd-s2 { animation-name:hd-s2; } @keyframes hd-s2 { 0%,32%{opacity:0;transform:scale(.4);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 37%,100%{opacity:1;transform:scale(1)} }
+.hd-s3 { animation-name:hd-s3; } @keyframes hd-s3 { 0%,33.5%{opacity:0;transform:scale(.4);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 38.5%,100%{opacity:1;transform:scale(1)} }
+.hd-pg { animation-name:hd-pgA; } @keyframes hd-pgA { 0%,31%{opacity:0;transform:translateY(14px);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 39%,100%{opacity:1;transform:translateY(0)} }
+.hd-ds { animation-name:hd-dsA; } @keyframes hd-dsA { 0%,34%{opacity:0;transform:translateY(8px);animation-timing-function:cubic-bezier(.2,.8,.2,1)} 40%,100%{opacity:1;transform:translateY(0)} }
+.hd-cursor { animation-name:hd-cursorK; }
+@keyframes hd-cursorK { 0%,34%{opacity:0;transform:translate(1300px,800px);animation-timing-function:cubic-bezier(.45,0,.55,1)} 35%{opacity:1} 42%,44%{transform:translate(562px,364px);animation-timing-function:cubic-bezier(.45,0,.55,1)} 52%,55%{transform:translate(983px,189px);animation-timing-function:cubic-bezier(.45,0,.55,1)} 65%,67%{opacity:1;transform:translate(934px,705px);animation-timing-function:cubic-bezier(.45,0,.55,1)} 78%,100%{opacity:0;transform:translate(1010px,760px)} }
+.hd-press { animation-name:hd-pressK; transform-origin:2px 2px; }
+@keyframes hd-pressK { 0%,42.5%{transform:scale(1)} 43.2%{transform:scale(.82)} 44%,53.5%{transform:scale(1)} 54.2%{transform:scale(.82)} 55%,65.5%{transform:scale(1)} 66.2%{transform:scale(.82)} 67%,100%{transform:scale(1)} }
+.hd-r0 { animation-name:hd-r0; } @keyframes hd-r0 { 0%,43%{opacity:0;transform:scale(.2)} 43.6%{opacity:.55;transform:scale(.5);animation-timing-function:ease-out} 48%,100%{opacity:0;transform:scale(2.4)} }
+.hd-r1 { animation-name:hd-r1; } @keyframes hd-r1 { 0%,54%{opacity:0;transform:scale(.2)} 54.6%{opacity:.55;transform:scale(.5);animation-timing-function:ease-out} 59%,100%{opacity:0;transform:scale(2.4)} }
+.hd-r2 { animation-name:hd-r2; } @keyframes hd-r2 { 0%,66%{opacity:0;transform:scale(.2)} 66.6%{opacity:.55;transform:scale(.5);animation-timing-function:ease-out} 71%,100%{opacity:0;transform:scale(2.4)} }
+.hd-wg0 { animation-name:hd-wg0; } @keyframes hd-wg0 { 0%,43.5%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 51%,86%{opacity:1;transform:scale(1);animation-timing-function:cubic-bezier(.55,0,.8,.3)} 91%,100%{opacity:0;transform:scale(.3)} }
+.hd-wg1 { animation-name:hd-wg1; } @keyframes hd-wg1 { 0%,54.5%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 62%,87%{opacity:1;transform:scale(1);animation-timing-function:cubic-bezier(.55,0,.8,.3)} 92%,100%{opacity:0;transform:scale(.3)} }
+.hd-wg2 { animation-name:hd-wg2; } @keyframes hd-wg2 { 0%,66.5%{opacity:0;transform:scale(.3);animation-timing-function:cubic-bezier(.2,.9,.3,1.3)} 74%,88%{opacity:1;transform:scale(1);animation-timing-function:cubic-bezier(.55,0,.8,.3)} 93%,100%{opacity:0;transform:scale(.3)} }
+.hd-par1 { animation-name:hd-par1; }
+.hd-par2 { animation-name:hd-par2; }
+.hd-par3 { animation-name:hd-par3; }
+@keyframes hd-par1 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-12px,-8px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes hd-par2 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(-16px,4px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+@keyframes hd-par3 { 0%,24%{transform:translate(0,0);animation-timing-function:ease-in-out} 55%{transform:translate(10px,-12px);animation-timing-function:ease-in-out} 86%,100%{transform:translate(0,0)} }
+
 /* ---------- Focus (a11y) ---------- */
 
 :focus-visible {
