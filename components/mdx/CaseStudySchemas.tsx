@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import * as simpleIcons from "simple-icons";
 import type { SimpleIcon } from "simple-icons";
 import { Lightbox } from "@/components/ui/Lightbox";
+import { FieldmarkFloorPlan } from "@/components/mdx/phones/FieldmarkFloorPlan";
 import { FieldmarkPlaceMarker } from "@/components/mdx/phones/FieldmarkPlaceMarker";
 import { FieldmarkPlansList } from "@/components/mdx/phones/FieldmarkPlansList";
 import { LexoraLogin } from "@/components/mdx/phones/LexoraLogin";
@@ -218,6 +219,7 @@ type PhoneRowItem = {
   label?: string;
   kind?:
     | "image"
+    | "fieldmark-floor-plan"
     | "fieldmark-place-marker"
     | "fieldmark-plans-list"
     | "lexora-login"
@@ -231,6 +233,7 @@ type PhoneRowItem = {
 };
 
 const PHONE_COMPONENTS: Record<string, () => React.ReactNode> = {
+  "fieldmark-floor-plan": () => <FieldmarkFloorPlan />,
   "fieldmark-place-marker": () => <FieldmarkPlaceMarker />,
   "fieldmark-plans-list": () => <FieldmarkPlansList />,
   "lexora-login": () => <LexoraLogin />,
