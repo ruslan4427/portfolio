@@ -119,6 +119,42 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
 
 ## Results (honest)
 
+<Diagram
+  title="Topic string → iOS lock-screen playback · the Build 15 steady state"
+  width={1500}
+  height={620}
+  legend={[
+    { shape: "role", label: "Learner" },
+    { shape: "event", label: "Signal / data" },
+    { shape: "process", label: "Server work" },
+    { shape: "action", label: "Gate" },
+  ]}
+  nodes={[
+    { id: "learner", shape: "role", icon: "user", label: "Learner", x: 90, y: 100 },
+    { id: "topic", shape: "event", icon: "bolt", label: "Topic string", sub: "Business English 101", x: 410, y: 100 },
+    { id: "consent", shape: "action", icon: "lock", label: "AI consent", sub: "build 15 only", x: 730, y: 100 },
+    { id: "edge", shape: "process", icon: "server", label: "Supabase Edge Fn", sub: "Vertex AI SA auth", x: 1050, y: 100 },
+    { id: "gemini", shape: "process", icon: "cloud", label: "Gemini 3.6 Flash", sub: "application/json", x: 1050, y: 280 },
+    { id: "playlist", shape: "event", icon: "database", label: "Playlist words", sub: "trigger · word_count atomic", x: 1370, y: 280 },
+    { id: "tts", shape: "process", icon: "cloud", label: "Google TTS Neural2", sub: "12 voices · 1.5s / 20 words", x: 1370, y: 460 },
+    { id: "cache", shape: "event", icon: "database", label: "MP3 cache", sub: "silence 1–5s · offline", x: 1050, y: 460 },
+    { id: "player", shape: "process", icon: "bolt", label: "just_audio", sub: "background + lock-screen", x: 730, y: 460 },
+    { id: "lockscreen", shape: "event", icon: "shield", label: "iOS lock screen", sub: "eyes anywhere but phone", x: 410, y: 460, color: "success", outcome: "approved" },
+  ]}
+  edges={[
+    { from: "learner", to: "topic", label: "Generate with AI" },
+    { from: "topic", to: "consent" },
+    { from: "consent", to: "edge", color: "success", label: "granted" },
+    { from: "edge", to: "gemini", label: "signed call" },
+    { from: "gemini", to: "playlist", label: "8 pairs · JSON" },
+    { from: "playlist", to: "tts", label: "per-word render" },
+    { from: "tts", to: "cache", label: "MP3 per track" },
+    { from: "cache", to: "player", label: "offline-first" },
+    { from: "player", to: "lockscreen", color: "success" },
+  ]}
+  caption="One topic string becomes a playlist of Neural2-rendered word pairs, cached locally so planes and subways still play. The Build 15 consent gate is the first gate the request passes; the lock-screen bubble is where the eyes-off-phone pitch gets honoured."
+/>
+
 <FlowSchema
   title="Build 12 → Build 15 · the Apple review arc"
   rows={[
@@ -130,11 +166,11 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
         width: 1082,
         height: 240,
         nodes: [
-          { id: "b12", shape: "event", icon: "cloud", label: "Build 12", sub: "shipped w/ empty key · 401", x: 96, y: 120 },
-          { id: "b13", shape: "event", icon: "code", label: "Build 13", sub: "same-day · Gemini key rotated", x: 276, y: 120 },
-          { id: "b14", shape: "event", icon: "server", label: "Build 14", sub: "Edge Function + Vertex AI SA", x: 466, y: 120 },
+          { id: "b12", shape: "event", icon: "cloud", label: "Build 12", sub: "empty key · 401", x: 96, y: 120 },
+          { id: "b13", shape: "event", icon: "code", label: "Build 13", sub: "same-day · rotated", x: 276, y: 120 },
+          { id: "b14", shape: "event", icon: "server", label: "Build 14", sub: "Edge Fn + Vertex SA", x: 466, y: 120 },
           { id: "review", shape: "action", icon: "shield", label: "Apple review", sub: "AI disclosed?", x: 676, y: 120 },
-          { id: "reject", shape: "event", icon: "mail", label: "Rejected", sub: "Guidelines 5.1.1(i) + 5.1.2(i)", x: 896, y: 120, color: "danger", outcome: "denied" },
+          { id: "reject", shape: "event", icon: "mail", label: "Rejected", sub: "5.1.1(i) + 5.1.2(i)", x: 896, y: 120, color: "danger", outcome: "denied" },
         ],
         edges: [
           { from: "b12", to: "b13" },
@@ -153,7 +189,7 @@ Migrated `generation_service.dart` to Gemini 3.6 Flash. GCP account already had 
         height: 220,
         nodes: [
           { id: "spec", shape: "event", icon: "doc", label: "Rejection as spec", sub: "DEVLOG · verbatim", x: 96, y: 110 },
-          { id: "gate", shape: "process", icon: "lock", label: "Consent gate", sub: "in-app opt-in · topic string", x: 316, y: 110 },
+          { id: "gate", shape: "process", icon: "lock", label: "Consent gate", sub: "in-app opt-in", x: 316, y: 110 },
           { id: "disclose", shape: "event", icon: "shield", label: "AI disclosure UI", sub: "names Gemini + GCP TTS", x: 556, y: 110 },
           { id: "resub", shape: "event", icon: "cloud", label: "Resubmit Build 15", sub: "2026-09-29", x: 776, y: 110 },
           { id: "approved", shape: "event", icon: "check", label: "Approved", sub: "live · 2026-10-08", x: 980, y: 110, color: "success", outcome: "approved" },

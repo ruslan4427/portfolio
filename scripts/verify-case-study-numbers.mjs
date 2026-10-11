@@ -429,9 +429,13 @@ if (disk.memory !== null) {
 
 // 8. hrekov-dev.mdx <MetricGrid items={…}> JSX — sprints / calendar days / sprints-per-day
 //    (STABLE_LOGIC rule 2026-10-03: JSX items array must reconcile against disk)
+//    Note: hrekov-dev now ships multiple MetricGrids; pick the one that actually
+//    carries the sprint labels so a sibling grid (e.g. §3 type-distribution) can't
+//    shadow this check by taking the first-match slot.
 {
   const mdxSrc = readFileSync(MDX, "utf8");
-  const gridMatch = mdxSrc.match(/<MetricGrid[\s\S]*?items=\{\[([\s\S]*?)\]\}/);
+  const allGrids = [...mdxSrc.matchAll(/<MetricGrid[\s\S]*?items=\{\[([\s\S]*?)\]\}/g)];
+  const gridMatch = allGrids.find((g) => /label:\s*"sprints"/i.test(g[1])) ?? null;
   if (gridMatch) {
     const items = gridMatch[1];
     const parseItem = (label) => {

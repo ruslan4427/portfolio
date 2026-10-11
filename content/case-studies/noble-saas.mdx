@@ -99,12 +99,14 @@ Noble is the biggest thing I've built with Claude — 234 commits since April, 7
 
 A solo barber makes $40–60 per cut and does 6–8 cuts a day. They lose 20–30% of that to no-shows — bookings taken by phone, forgotten by the client, and never reminded. Fixing that is not a hard engineering problem. It's a *nobody-can-afford-to-build-it* problem, because the standard tools cost more than the incremental revenue they save.
 
-<ImpactStats
-  columns={2}
-  items={[
-    { value: "~$2,600", label: "lost to no-shows per month", hint: "$50 avg cut · 7 cuts/day · 25% no-show rate · 30 days" },
-    { value: "$15", label: "Noble recovers it at", hint: "flat monthly · ~170× payback at steady traffic" },
+<PaybackBar
+  title="Monthly no-show loss vs Noble subscription"
+  headline={{ value: "~170×", label: "payback at steady traffic" }}
+  rows={[
+    { label: "Noble", value: 15, display: "$15 / mo", sub: "flat monthly subscription" },
+    { label: "No-shows", value: 2600, display: "~$2,600 / mo", sub: "$50 avg cut · 7 cuts/day · 25% no-show rate · 30 days" },
   ]}
+  caption="One subscription recovers roughly one hundred and seventy times its own cost in rescued revenue — the whole business case fits in one bar."
 />
 
 Three real options exist for a solo shop. Noble sits below all three — same core features, a tenth of the price ladder, nothing a solo owner doesn't need.
@@ -266,6 +268,43 @@ _"seed bookedSlotsMap from server on page load, eliminating all client cache iss
     },
   ]}
   caption="Same two sessions, same slot. Before: both commit because the cache said 'free'. After: whoever wins the UNIQUE constraint keeps the slot — the other sees 409 and re-opens the picker. The X axis is literal wall-clock time."
+/>
+
+<Diagram
+  title="Booking request · steady state"
+  width={1500}
+  height={620}
+  legend={[
+    { shape: "role", label: "Actor" },
+    { shape: "event", label: "Event / message" },
+    { shape: "process", label: "Server work" },
+    { shape: "action", label: "Decision" },
+  ]}
+  nodes={[
+    { id: "customer", shape: "role", icon: "user", label: "Customer", x: 90, y: 100 },
+    { id: "pick", shape: "event", icon: "clock", label: "Picks slot", sub: "SalonClient.tsx", x: 320, y: 100 },
+    { id: "api", shape: "process", icon: "api", label: "/api/book", sub: "server action", x: 320, y: 310 },
+    { id: "auth", shape: "action", icon: "lock", label: "Signed in?", sub: "NextAuth JWT", x: 560, y: 310 },
+    { id: "decide", shape: "action", icon: "shield", label: "Slot free?", sub: "atomic insert", x: 820, y: 310 },
+    { id: "ok", shape: "event", icon: "check", label: "INSERT booking", sub: "RLS-scoped", x: 1080, y: 200, color: "success", outcome: "approved" },
+    { id: "fail", shape: "event", icon: "warning", label: "409 Conflict", sub: "unique constraint", x: 1080, y: 420, color: "danger", outcome: "denied" },
+    { id: "sms", shape: "event", icon: "mail", label: "Twilio SMS", sub: "confirm to customer", x: 1310, y: 120 },
+    { id: "admin", shape: "event", icon: "sync", label: "SSE broadcast", sub: "to admin dashboard", x: 1310, y: 280 },
+    { id: "login", shape: "event", icon: "lock", label: "Sign-in modal", sub: "redirect-back", x: 1080, y: 540, color: "faint" },
+  ]}
+  edges={[
+    { from: "customer", to: "pick", label: "clicks time" },
+    { from: "pick", to: "api", label: "POST" },
+    { from: "api", to: "auth" },
+    { from: "auth", to: "decide", color: "success", label: "yes" },
+    { from: "auth", to: "login", color: "faint", label: "no" },
+    { from: "decide", to: "ok", color: "success", label: "free" },
+    { from: "decide", to: "fail", color: "danger", label: "taken" },
+    { from: "ok", to: "sms" },
+    { from: "ok", to: "admin" },
+    { from: "fail", to: "pick", color: "faint", style: "dashed", label: "retry" },
+  ]}
+  caption="Two lanes — client sends up top, server decides below. Auth gates anonymous callers to a sign-in modal; the decision diamond lets the DB arbitrate who keeps the slot (whoever wins the UNIQUE constraint stays, the loser re-opens the picker). On success, two downstream fan-outs fire in parallel: Twilio SMS to the customer and an SSE broadcast to the admin dashboard. On conflict, a dashed retry re-opens the picker without blaming the user."
 />
 
 **Lesson:** *Managed platforms cache things you didn't ask them to cache. The right response is not to work around the cache — it's to eliminate the cache layer entirely at the point where correctness matters.*

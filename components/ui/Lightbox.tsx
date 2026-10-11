@@ -107,34 +107,3 @@ export function Lightbox({ open, onClose, label, caption, children }: Props) {
   );
 }
 
-export function ExpandButton({
-  onClick,
-  label = "Expand",
-  className = "",
-}: {
-  onClick: () => void;
-  label?: string;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/90 text-[color:var(--ink-primary)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-[color:var(--bg-elevated)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)] ${className}`}
-    >
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        className="h-3.5 w-3.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-      </svg>
-    </button>
-  );
-}

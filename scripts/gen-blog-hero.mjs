@@ -14,7 +14,7 @@
 // the post's frontmatter heroImage.src.
 
 import { GoogleGenAI } from "@google/genai";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
 
@@ -39,28 +39,60 @@ const flags = Object.fromEntries(
 );
 const model = flags.model ?? "gemini-3.1-flash-image";
 
-const STYLE = [
-  "Editorial black-and-white illustration",
-  "high-contrast ink on warm paper (#F5F4EF)",
-  "minimal line art with occasional cross-hatching",
-  "abstract conceptual composition favoring generous negative space",
-  "16:7 horizontal banner",
-  "no text, no logos, no watermarks",
-  "cinematic composition in the vein of a New Yorker illustration meets Linear changelog",
-].join(". ");
+const STYLES = {
+  fabric: [
+    "Cinematic photorealistic product mockup, 16:7 horizontal banner",
+    "the device rests on richly draped dark fabric with dramatic soft folds and highlights — black leather or heavy matte textile — the drapes fill the entire frame",
+    "strictly monochrome environment: only black / charcoal / warm grey tones in the fabric and any surrounding elements",
+    "single directional soft key light sculpting the fabric folds, deep shadow in the valleys, specular highlights on the ridges",
+    "shallow depth of field, device razor sharp, fabric softly out of focus at the edges",
+    "device positioned off-center with generous negative space of draped fabric around it",
+    "the device screen is the ONLY source of color in the frame",
+    "no text, no logos, no watermarks anywhere outside the device screen",
+    "reference aesthetic: premium Dribbble SaaS mockup shots on dark leather drapes, Apple keynote product stills",
+  ].join(". "),
+  flat: [
+    "Clean studio product press image, flat solid background filling the whole frame edge to edge",
+    "absolutely no fabric, no cloth, no drape, no folds, no texture, no grain, no weave, no leather, no highlights of material — just a completely smooth digital backdrop",
+    "the device is the ONLY object in the frame apart from its own soft diffused drop shadow on the backdrop",
+    "no text, no logos, no watermarks anywhere outside the device screen",
+    "reference aesthetic: Apple keynote press renders, minimal studio catalog shots",
+  ].join(". "),
+};
+const style = flags.style ?? "fabric";
+const STYLE = STYLES[style] ?? STYLES.fabric;
 
-const prompt = `${STYLE}. Subject: ${subject}.`;
+const screenPath = flags.screen ? path.resolve(flags.screen) : null;
+const screenInline = screenPath
+  ? {
+      inlineData: {
+        mimeType: screenPath.endsWith(".jpg") || screenPath.endsWith(".jpeg") ? "image/jpeg" : "image/png",
+        data: (await readFile(screenPath)).toString("base64"),
+      },
+    }
+  : null;
+
+const subjectSuffix = screenInline
+  ? " Place the exact UI from the attached reference screenshot onto the device screen with pixel fidelity — do not redraw, retype, or paraphrase its text; crop/scale to fit the screen but preserve all content, typography and layout verbatim."
+  : "";
+
+const prompt = `${STYLE}. Subject: ${subject}.${subjectSuffix}`;
+
+const contents = screenInline
+  ? [{ role: "user", parts: [{ text: prompt }, screenInline] }]
+  : prompt;
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 console.log(`model=${model}`);
 console.log(`prompt: ${prompt.slice(0, 160)}...`);
+if (screenPath) console.log(`screen reference: ${path.relative(process.cwd(), screenPath)}`);
 
 async function generateWithRetry(attempts = 4) {
   for (let i = 1; i <= attempts; i++) {
     try {
       const t0 = Date.now();
-      const response = await ai.models.generateContent({ model, contents: prompt });
+      const response = await ai.models.generateContent({ model, contents });
       return { response, ms: Date.now() - t0 };
     } catch (err) {
       const status = err.status ?? 0;

@@ -112,7 +112,10 @@ raw divs.
 | `ValueStatement`   | Thesis block near top of body                            |
 | `BeforeAfter`      | Dated before/after panels around an iteration moment     |
 | `FlowSchema`       | BPMN-style multi-row flow (see §4 — most error-prone)    |
-| `Diagram`          | Single BPMN diagram without row scaffolding              |
+| `Diagram`          | Single BPMN diagram without row scaffolding (see §6.1)   |
+| `RaceTimeline`     | Time-sequenced lanes (sessions × events) — race/arc stories (see §6.2) |
+| `ActivityChart`    | Phase-based bar chart: duration × rate across project phases (see §6.3) |
+| `PaybackBar`       | Horizontal 2-option comparison bar with % fills (see §6.4) |
 | `WireflowMap`      | User-flow map: browser-window skeletons + 2 arrow kinds  |
 | `PhoneRow`         | 2 or 3 mobile captures (NEVER 1) — click opens fullscreen |
 | `CompareGrid`      | Table-shaped matrix (3+ columns × rows)                  |
@@ -125,6 +128,18 @@ raw divs.
 | `TechNotes`        | External docs grid — closes every case study             |
 | `TechnicalDetail`  | Deep passage; CSS-hidden in executive view               |
 | `Artifact` `Cost` `PromptLog` `Diff` | From `BlogComponents` — case studies may use |
+
+**Picking the right data-viz primitive** (resist the reflex to make everything a `FlowSchema`):
+
+| Shape of the story                                 | Primitive          |
+|----------------------------------------------------|--------------------|
+| Before/after of a decision graph (2 BPMN rows)     | `FlowSchema`       |
+| Single BPMN graph, especially 7+ nodes             | `Diagram`          |
+| Two sessions racing in wall-clock time             | `RaceTimeline`     |
+| How a project's heartbeat changed over phases      | `ActivityChart`    |
+| "Option A pays back in N; Option B in M" bar race  | `PaybackBar`       |
+| Multi-surface pipeline (agents, screens, services) | `WireflowMap`      |
+| Written contrast (not a graph), dated              | `BeforeAfter`      |
 
 Anything else: raise it in chat before shipping.
 
@@ -317,7 +332,217 @@ Use `WireflowMap` when the architecture is a sequence of discrete *surfaces*
 
 ---
 
-## 6. Pre-ship checklist
+## 6. Data-viz primitives (Diagram, RaceTimeline, ActivityChart, PaybackBar)
+
+All four live in `components/mdx/CaseStudySchemas.tsx` alongside `FlowSchema` /
+`WireflowMap`. They share three contracts: a lightbox for close-inspection, a
+figure-level reveal, and internal stagger that replays on every scroll
+(see §7). Author-facing rules are per-primitive below.
+
+### 6.1 `Diagram` — single BPMN graph
+
+Use when a flow has >6 nodes or needs two tiers (actors above, system below).
+`FlowSchema` is for a *before vs after* comparison; `Diagram` is for a single
+rich graph.
+
+- Shapes & dimensions: same table as §4.1 (`role` 76, `event` 160, `process`
+  172, `action` 188×108).
+- Canvas sizing: body column is ~695px wide, but the Diagram SVG scrolls
+  horizontally and expands in the lightbox, so budget by node count.
+  - ≤ 6 nodes: `width=900, height=320`, single row.
+  - 7–10 nodes: `width=1500, height=620`, 2 lanes (actors y≈100, system y≈310,
+    outcomes y≈200/420/540). The 10-node Noble booking flow at
+    `content/case-studies/noble-saas.mdx:273` is the reference layout.
+- `color: "success" | "danger" | "faint"` tints terminal/alt-path nodes.
+  Use `outcome: "approved" | "denied"` on the single most important terminal
+  node — not on every success/failure leaf, or the badge noise swallows the
+  signal.
+- Horizontal scroll: inside the body column the `<figure>` lets the SVG
+  overflow horizontally so a 1500-wide canvas doesn't shrink to illegibility.
+
+### 6.2 `RaceTimeline` — concurrent sessions on wall-clock time
+
+Shape of the story: *same slot, same moment, two outcomes*. The two Noble
+RaceTimelines at `noble-saas.mdx` are the reference.
+
+- Each `row` is a dated panel with its own `tone` (`before` = red tint,
+  `after` = green tint, default = neutral). Keep the two-row before/after
+  pattern unless you have a genuine third variant.
+- Each `session` has `label` + `events[]`. Event `t` is 0–100 (percent of the
+  row's time axis). Event `kind`:
+  - `"commit" | "ok"` → black diamond (DB write landed)
+  - `"fail"` → white circle with black cross (409 / rejected)
+  - anything else → black dot (pick / signal)
+- `window: { from, to, label }` paints the vulnerability band (hatched +
+  dashed border). Only use when the story is "this window is the bug".
+- `marker: { t, label }` drops a captioned vertical dashed line (e.g.
+  "atomic insert · UNIQUE constraint"). Max 184px label width → ~26 chars.
+- `outcome: { kind, label }` adds the right-side pill ("Double-book",
+  "One booking"). Required when the row concludes a decision — the pill is
+  the punchline.
+- Keep `axisTicks` sparse (3–5 ticks) and label with units (`+30s`, `+2m`).
+
+### 6.3 `ActivityChart` — phase-based activity rate
+
+Shape of the story: *how the project's heartbeat changed across named
+phases*. Each phase has a `duration` (relative — days, weeks, same unit
+across phases) and a `count` (total events). Bar **width** scales to
+duration, bar **height** scales to rate (`count / duration`).
+
+- `tone: "peak" | "high" | "normal" | "low"` tints bars from solid ink to
+  28% ink. Use `peak` sparingly — one phase per chart max.
+- `markers[]` pin events to the right edge of a phase by `afterPhase: id`.
+  Use for commit hashes or named pivots. Keep labels ≤ 24 chars.
+- Narrow phases (duration < ~5% of total) produce bars under 70px wide and
+  their labels collide with the next phase's. The component already
+  staggers alternate narrow-bar labels down by 32px and adds a leader line.
+  Don't fight it — if the stagger still collides, the story probably wants
+  two charts, not one.
+- Padding is tuned once (`AC_PAD_B=108`) so the stacked labels + leader have
+  room. Don't shrink it to "save space".
+
+### 6.4 `PaybackBar` — 2-option horizontal comparison
+
+Shape of the story: *Option A costs $X and recoups by month M; Option B
+costs $Y and never recoups*. Pure 2-row horizontal bar race with %-fill.
+
+- Give both rows the same denominator (e.g. "monthly loss cap") so the
+  percentages are comparable.
+- Rows render ink-black bar fills on paper-neutral tracks. The *lower* bar
+  reads as the better outcome by convention (shorter bar = less bad).
+- Caption carries the units ("USD / month"); the bar values are %-of-max
+  internally, so the caption is doing the semantic work.
+
+### 6.5 Lightbox on every rich schema
+
+`Diagram`, `FlowSchema`, `RaceTimeline`, `ActivityChart`, `PaybackBar`,
+`WireflowMap` all ship with an `ExpandButton` top-right (opacity 0.7 →
+hover 1.0) that opens `components/ui/Lightbox.tsx` — a portal modal with
+ESC-close, backdrop-click dismiss, `max-w: min(1400px, 96vw)`.
+
+**Non-negotiable rule for authoring new chart primitives**:
+
+- Extract the rendered body into a `rowsBlock` / `chartSvg()` const inside
+  the component. Render it once in the inline `<figure>` and again inside
+  `<Lightbox>…</Lightbox>`.
+- The lightbox version MUST pass `minWidth={0}` (or omit the width-forcing
+  prop) so the SVG scales to the modal frame instead of forcing its native
+  width — otherwise wide canvases (Diagram 1500, WireflowMap 920) overflow
+  past the modal and clip on the right.
+- Wrap the `ExpandButton` in a `group relative` container so the opacity
+  hover-reveal works.
+
+---
+
+## 7. Animation contract (figure reveal + internal stagger)
+
+Every data-viz primitive in §6 (and `FlowSchema`, `WireflowMap`) follows the
+same two-layer animation pattern. **Replay-on-every-scroll is intentional** —
+Ruslan asked for it explicitly on 2026-10-10 after a "I don't see animations"
+pass, and the whole file now uses `once: false`. Do not revert to `once:true`
+without a fresh ask.
+
+### 7.1 EASE constant
+
+```ts
+import { EASE } from "./CaseStudySchemas"; // [0.22, 1, 0.36, 1]
+```
+
+All timing uses this ease. Different eases across primitives read as drift.
+
+### 7.2 Layer A — figure-level reveal
+
+Wrap the top-level `<figure>` in `motion.figure` with the standard reveal:
+
+```tsx
+<motion.figure
+  className="not-prose my-10"
+  initial={{ opacity: 0, y: 28, scale: 0.985 }}
+  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+  viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+  transition={{ duration: 0.7, ease: EASE }}
+>
+```
+
+Numbers are tuned: `y: 28` (not 12 — needs to read as motion past the fold),
+`scale: 0.985 → 1` (subtle), `duration: 0.7` (long enough to feel composed).
+
+### 7.3 Layer B — internal stagger
+
+The figure reveal brings the frame in; internal elements then animate in
+*order of narrative importance* with a stagger. Pattern:
+
+- Parent SVG becomes `motion.svg` with `initial="hidden" whileInView="shown"
+  variants={{…}} viewport={{ once: false, margin: "0px 0px -40px 0px" }}`.
+- Each sub-element becomes `motion.g` / `motion.rect` / `motion.line` with
+  shared `variants={{ hidden: {…}, shown: {…} }}` + per-element `transition`
+  carrying the stagger `delay`.
+- Compute `delay` from the data position so the sequence reads like the
+  story: left-to-right by time (`RaceTimeline`, `ActivityChart`), by node
+  index (`Diagram`), or by row index (`PaybackBar`).
+
+**SVG scale-pivots**: a `motion.g` that scales needs an explicit pivot or it
+scales from `(0,0)` of the SVG and flies off:
+
+```tsx
+style={{ transformOrigin: `${cx}px ${cy}px`, transformBox: "fill-box" as const }}
+```
+
+(Reference: `RaceTimelineRowSvg` event markers at
+`components/mdx/CaseStudySchemas.tsx:1468`.)
+
+### 7.4 Current per-primitive animation inventory
+
+| Primitive       | What animates                                                      |
+|-----------------|--------------------------------------------------------------------|
+| `FlowSchema`    | Figure reveal + per-node `motion.g` stagger + edge `pathLength`    |
+| `Diagram`       | Same as FlowSchema                                                 |
+| `RaceTimeline`  | Window hatch fade → lane `pathLength` → event markers pop by `t` → marker/outcome last |
+| `ActivityChart` | Bars grow from baseline (`y+h → y`, height `0 → h`), stagger by phase index |
+| `PaybackBar`    | Bar widths grow `0% → N%`, stagger by row index                    |
+| `WireflowMap`   | Windows fade+rise by node index → edges `pathLength` after both endpoints → callouts fade last |
+
+If you add a new chart primitive, follow this inventory — figure reveal is
+non-optional, internal stagger is the difference between "shown" and "told".
+
+### 7.5 `prefers-reduced-motion`
+
+`SmoothScroll` wraps the tree in `<MotionConfig reducedMotion="user">`, so
+Framer strips transforms/opacity shifts when the OS has Reduce Motion on.
+Do not add CSS-level animations that bypass this (e.g. raw `@keyframes` on
+chart bars) — they'd ignore the user's preference.
+
+### 7.6 Verification — the Lenis + Playwright trap
+
+**`page.evaluate(() => window.scrollTo({behavior:"instant"}))` DOES NOT
+trigger IntersectionObserver when Lenis is active.** The animations will
+appear broken in Playwright but work in a real browser. To verify
+replay-on-scroll:
+
+```js
+// IN Playwright, test real wheel events, NOT scrollTo:
+await page.mouse.move(640, 450);
+for (let i = 0; i < 20; i++) {
+  await page.mouse.wheel(0, -400);   // scroll up
+  await page.waitForTimeout(30);
+}
+// …sample element state (op/transform)…
+for (let i = 0; i < 20; i++) {
+  await page.mouse.wheel(0, 400);    // scroll back down
+  await page.waitForTimeout(30);
+}
+```
+
+Reference scripts: `/tmp/portfolio-screens/replay-test5.mjs` (wheel-based,
+works), `/tmp/portfolio-screens/replay-test4.mjs` (`scrollTo`-based, false
+negative — kept as a cautionary example).
+
+Context for the Playwright context: `reducedMotion: "no-preference"` is
+required or `MotionConfig` strips the animations before you can see them.
+
+---
+
+## 8. Pre-ship checklist
 
 Copy-paste this to the session that ships the edit. Every box must be
 checked before committing.
@@ -333,6 +558,18 @@ checked before committing.
     [ ] no decorative edge labels
     [ ] Playwright screenshot at 1512px, no clipping
     [ ] visual check at 1024px and 1280px in real browser
+[ ] Chart / Diagram / Lightbox-wearing primitive (if touched):
+    [ ] ExpandButton present inside a `group relative` wrapper
+    [ ] Lightbox child renders body with `minWidth={0}` (not native width)
+    [ ] Both inline AND lightbox versions tested at 1024/1280/1512
+    [ ] Right-edge badges/labels not clipped at any of the three widths
+[ ] Animation (if a new primitive or body-level `motion.*` added):
+    [ ] figure wrapped in `motion.figure` with the §7.2 reveal
+    [ ] internal elements use shared variants + per-element delay (§7.3)
+    [ ] `viewport.once: false` (replay on every scroll)
+    [ ] EASE constant used — no ad-hoc cubic-beziers
+    [ ] SVG-scale pivots set via `transformOrigin` + `transformBox:"fill-box"`
+    [ ] replay verified via wheel-based Playwright test (NOT `scrollTo`)
 [ ] PhoneRow (if touched):
     [ ] 2 or 3 items (never 1)
     [ ] alt text describes what's on screen, not "screenshot of X"
@@ -347,7 +584,7 @@ checked before committing.
 
 ---
 
-## 7. When to break these rules
+## 9. When to break these rules
 
 Only `hrekov-dev.mdx` and `noble-saas.mdx` deviate from §1 — both are
 long-form features (10 numbered sections, inline figures, deep technical

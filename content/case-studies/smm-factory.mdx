@@ -75,15 +75,15 @@ Model stratification wasn't premature optimization. First month running Opus for
       tone: "neutral",
       meta: "Mon 09:00 Kyiv · 1×/week",
       diagram: {
-        width: 1044,
+        width: 1180,
         height: 240,
         nodes: [
-          { id: "strategy", shape: "process", icon: "doc", label: "Strategy", sub: "Sonnet · per-client voice", x: 102, y: 120 },
-          { id: "plan", shape: "process", icon: "box", label: "Weekly plan", sub: "Opus · 7 posts", x: 282, y: 120 },
-          { id: "generate", shape: "process", icon: "bolt", label: "Generate", sub: "Haiku + Playwright + FFmpeg", x: 482, y: 120 },
-          { id: "approve", shape: "action", icon: "user", label: "Slack approval", sub: "3 taps · ~2 min", x: 702, y: 120 },
-          { id: "post", shape: "event", icon: "cloud", label: "Post to IG", sub: "Orchestrator state machine", x: 922, y: 70, color: "success", outcome: "approved" },
-          { id: "revise", shape: "event", icon: "sync", label: "Revise", sub: "regen with notes", x: 922, y: 170, color: "faint" },
+          { id: "strategy", shape: "process", icon: "doc", label: "Strategy", sub: "Sonnet · per-client", x: 102, y: 120 },
+          { id: "plan", shape: "process", icon: "box", label: "Weekly plan", sub: "Opus · 7 posts", x: 312, y: 120 },
+          { id: "generate", shape: "process", icon: "bolt", label: "Generate", sub: "Haiku · PW · FFmpeg", x: 522, y: 120 },
+          { id: "approve", shape: "action", icon: "user", label: "Slack approval", sub: "3 taps · ~2 min", x: 732, y: 120 },
+          { id: "post", shape: "event", icon: "cloud", label: "Post to IG", sub: "Orchestrator FSM", x: 1072, y: 70, color: "success", outcome: "approved" },
+          { id: "revise", shape: "event", icon: "sync", label: "Revise", sub: "regen with notes", x: 1072, y: 170, color: "faint" },
         ],
         edges: [
           { from: "strategy", to: "plan" },
@@ -99,15 +99,15 @@ Model stratification wasn't premature optimization. First month running Opus for
       tone: "neutral",
       meta: "weekly + monthly cadence",
       diagram: {
-        width: 1044,
+        width: 1180,
         height: 240,
         nodes: [
-          { id: "analytics", shape: "process", icon: "database", label: "Analytics", sub: "weekly · per-post signals", x: 102, y: 120 },
-          { id: "self", shape: "process", icon: "code", label: "Self-Improvement", sub: "monthly · new strategy draft", x: 312, y: 120 },
-          { id: "proposal", shape: "event", icon: "doc", label: "Strategy v+1", sub: "archived vs current", x: 532, y: 120 },
+          { id: "analytics", shape: "process", icon: "database", label: "Analytics", sub: "weekly · signals", x: 102, y: 120 },
+          { id: "self", shape: "process", icon: "code", label: "Self-Improvement", sub: "monthly · draft", x: 312, y: 120 },
+          { id: "proposal", shape: "event", icon: "doc", label: "Strategy v+1", sub: "archived vs current", x: 522, y: 120 },
           { id: "humangate", shape: "action", icon: "user", label: "I approve", sub: "Slack summary", x: 732, y: 120 },
-          { id: "apply", shape: "event", icon: "check", label: "Promote", sub: "new strategy becomes active", x: 942, y: 70, color: "success", outcome: "approved" },
-          { id: "discard", shape: "event", icon: "warning", label: "Discard", sub: "stays in archive", x: 942, y: 170, color: "faint" },
+          { id: "apply", shape: "event", icon: "check", label: "Promote", sub: "strategy active", x: 1072, y: 70, color: "success", outcome: "approved" },
+          { id: "discard", shape: "event", icon: "warning", label: "Discard", sub: "stays in archive", x: 1072, y: 170, color: "faint" },
         ],
         edges: [
           { from: "analytics", to: "self" },
@@ -349,6 +349,16 @@ Ship, test, kill in 21 minutes.
 
 ## Results — 2-month pilot (2026-07 → 2026-08)
 
+<PaybackBar
+  title="What a solo barbershop would otherwise pay for the same output"
+  headline={{ value: "~1,440×", label: "cheaper than hiring an SMM specialist" }}
+  rows={[
+    { label: "SMM specialist", value: 577, display: "$577 / wk", sub: "$2 500 / mo salary spread weekly — the typical mid-market hire" },
+    { label: "smm-factory", value: 0.40, display: "$0.40 / wk", sub: "Opus plan · Sonnet distill · Haiku write · Slack approve" },
+  ]}
+  caption="Same output pipeline, three orders of magnitude cheaper, no payroll. The lower bar is a sliver on purpose — the whole business case fits in the ratio between the two numbers."
+/>
+
 <MetricGrid
   columns={4}
   items={[
@@ -357,6 +367,20 @@ Ship, test, kill in 21 minutes.
     { value: "0–200", label: "views per post", hint: "per-post range" },
     { value: "0", label: "IG violations", hint: "safety pauses worked" },
   ]}
+/>
+
+<ActivityChart
+  title="Commit cadence · 16-day build, 60-day hands-off pilot"
+  yAxisLabel="commits per day"
+  phases={[
+    { id: "dev", label: "Dev sprint", duration: 16, count: 36, tone: "peak", sub: "06-08 → 06-23" },
+    { id: "polish", label: "Polish wrap", duration: 11, count: 2, tone: "low", sub: "06-24 → 07-04" },
+    { id: "pilot", label: "Pilot run", duration: 60, count: 0, tone: "low", sub: "Jul → Aug 2026" },
+  ]}
+  markers={[
+    { afterPhase: "polish", label: "hands-off · pilot starts" },
+  ]}
+  caption="Thirty-six commits in sixteen days built the pipeline; the pilot ran untouched for two months. The zero-height final bar isn't abandonment — it's the autonomy claim validated against calendar time."
 />
 
 <div className="not-prose my-6 flex flex-wrap gap-3">

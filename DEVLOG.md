@@ -5,6 +5,27 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-10-10 · Case-study schemas — edge-label composition + diamond anchor + per-diagram spacing
+
+**Problem.** Across every case study, edge-label pills on `Diagram` / `FlowSchema` were reading as *touching* their arrows at the user's zoom level. First fix (perpendicular offset = 16px) was insufficient — the geometry held but the gap read as "glued on" at 1:1 zoom. Second fix (dynamic bbox-projected perp-offset) kept the gap but moved pills off the arrow axis, so they looked like floating labels unrelated to the edges they annotated. Separately, `action` (diamond) nodes had visible notches between arrow endpoints and the shape's slanted edges because `diagramEdgeAnchor` was intersecting the bounding box, not the actual rhombus perimeter. Finally, several per-case-study layouts (`lexora` pipeline, `smm-factory` loops) had horizontal gaps between nodes that fit the pill width with 1–8px of breathing — reads as pills touching adjacent nodes.
+
+**Decision.** Three edits, all surgical.
+
+1. **Pill on midpoint, bg-page masks the line** (`DiagramEdgeEl` at `components/mdx/CaseStudySchemas.tsx:1044`). Removed perp-offset entirely. Pill rect's `fill="var(--bg-page)"` + rendering order (line first, pill after) means the pill cleanly masks the segment of arrow it covers — arrow visually enters pill from one side, exits to arrowhead on the other. This is the BPMN convention; the previous perp-offset was overcorrection.
+2. **Diamond anchor uses rhombus edge, not bbox** (`diagramEdgeAnchor` at `components/mdx/CaseStudySchemas.tsx:893`). For `shape === "action"`, intersection parameter `s = 1 / (|dx|/hw + |dy|/hh)` places the anchor on the diamond's actual slanted edge instead of its bounding corner. Eliminates visible notches on all diamond↔anything edges.
+3. **Per-diagram node spacing**:
+    - `lexora.mdx` Build-15 Diagram: stride 260 → 320 across all 10 nodes. Right edge now 1456 inside width=1500. Pills `8 pairs · JSON` + `per-word render` + `MP3 per track` + `offline-first` gain ~30px breathing on each side.
+    - `smm-factory.mdx` both FlowSchema rows: intermediate stride → 210, terminal nodes pushed to x=1072 (gap 340 from approval diamond), shared `width=1180`. `approve`/`edit`/`ignore` pills now have ~45px clearance to Post/Revise/Promote/Discard terminals; both rows share identical rhythm 102 → 312 → 522 → 732 → 1072.
+
+**Result.**
+- 17 schema figures across `hrekov-dev`, `noble-saas`, `lexora`, `smm-factory`, `fieldmark` verified via Playwright at 1800×1200 @2x DPI — no pill-touches-line, no diamond notches, no pill-touches-neighbour.
+- Pre-ship `verify:numbers` passes (same hashes as last green: devlog 52, sprints 14, noble totalCommits 234, lexora unitTests 76).
+- Both `smm-factory` loops read with identical rhythm; `lexora` pipeline reads as evenly-spaced U.
+
+**Lesson.** Verify schema fixes at the user's zoom, not thumbnail Playwright shots — a 7px gap looks fine at 697px wide and touches at native resolution. Also: for pill-on-line labels, the BPMN convention (pill on midpoint, line masked by bg-fill) is cleaner than any perpendicular-offset formula, because the eye follows the arrow continuously through the label. Don't fight that convention with geometry.
+
+---
+
 ## 2026-10-07 · `no-company-no-api` — Meta Business API skeptic post + PhoneRow in blog + render fixes
 
 **Problem.** smm-factory's engagement agent (autonomous comment-on-feed + DM-reply) was invisible in the case study — the DoL table said "Autonomous" and the orbit tile had a Slack mock, but no prose explained *how* it worked, and the Meta Business API dead-end that forced the Playwright-cookie fallback wasn't mentioned anywhere. Separately: this story stood alone well enough to deserve a dedicated blog post, but the distribution pipeline had never shipped a post with `<PhoneRow>` and the LinkedIn plain-text renderer italicized `_` across word boundaries (so `instagram_manage_comments` would publish as `instagrammanagecomments` on LinkedIn).

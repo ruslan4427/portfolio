@@ -177,6 +177,43 @@ _feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ —
 
 ## Results (honest)
 
+<Diagram
+  title="PDF → pin → task card · the Build 21 steady state"
+  width={1500}
+  height={620}
+  legend={[
+    { shape: "role", label: "People" },
+    { shape: "event", label: "Signal / data" },
+    { shape: "process", label: "Server work" },
+    { shape: "action", label: "Gate" },
+  ]}
+  nodes={[
+    { id: "foreman", shape: "role", icon: "user", label: "Foreman", x: 90, y: 100 },
+    { id: "pdf", shape: "event", icon: "doc", label: "Floor plan PDF", sub: "uploaded once per site", x: 330, y: 100 },
+    { id: "pin", shape: "event", icon: "bolt", label: "Pin placed", sub: "type · status · note", x: 580, y: 100 },
+    { id: "crew", shape: "role", icon: "user", label: "Crew", x: 1380, y: 100 },
+    { id: "rpod", shape: "process", icon: "sync", label: "Riverpod notifier", sub: "codegen state · optimistic", x: 580, y: 310 },
+    { id: "supabase", shape: "process", icon: "database", label: "Supabase + RLS", sub: "crew-scoped rows", x: 870, y: 310 },
+    { id: "fcm", shape: "process", icon: "cloud", label: "Firebase FCM", sub: "push to crew device", x: 1160, y: 310 },
+    { id: "online", shape: "action", icon: "warning", label: "Online?", sub: "connectivity+", x: 580, y: 540 },
+    { id: "queue", shape: "event", icon: "database", label: "Offline queue", sub: "retry on reconnect", x: 870, y: 540 },
+    { id: "task", shape: "event", icon: "check", label: "Task card", sub: "picked up in the field", x: 1160, y: 540, color: "success", outcome: "approved" },
+  ]}
+  edges={[
+    { from: "foreman", to: "pdf", label: "upload" },
+    { from: "pdf", to: "pin", label: "tap place" },
+    { from: "pin", to: "rpod" },
+    { from: "rpod", to: "online" },
+    { from: "online", to: "supabase", color: "success", label: "yes" },
+    { from: "online", to: "queue", color: "faint", label: "no", style: "dashed" },
+    { from: "queue", to: "supabase", color: "faint", label: "reconnect", style: "dashed" },
+    { from: "supabase", to: "fcm", label: "notify" },
+    { from: "fcm", to: "crew", color: "success" },
+    { from: "supabase", to: "task", label: "sync" },
+  ]}
+  caption="The pin is the unit of truth — placed on top of the PDF, stored under crew-scoped RLS, pushed through FCM, and surfaced as a task card that works offline. The dashed path is where mechanical-room signal loss gets absorbed."
+/>
+
 <ImpactStats
   columns={3}
   items={[
@@ -184,6 +221,20 @@ _feat(auth): switch Sign in with Apple to native ASAuthorization (build 21)_ —
     { value: "7 commits", label: "Five of them in the final 24h auth sprint" },
     { value: "3 crews", label: "Live across 3 projects after approval" },
   ]}
+/>
+
+<ActivityChart
+  title="Commit cadence · 9 days from first file to Build 21 live"
+  yAxisLabel="commits per day"
+  phases={[
+    { id: "init", label: "Initial build", duration: 7, count: 1, tone: "normal", sub: "09-12 → 09-17" },
+    { id: "auth", label: "Auth sprint", duration: 1, count: 5, tone: "peak", sub: "09-18 · 24h" },
+    { id: "resubmit", label: "Resubmit", duration: 1, count: 1, tone: "high", sub: "09-19 AM" },
+  ]}
+  markers={[
+    { afterPhase: "auth", label: "8b18221 · ASAuthorization" },
+  ]}
+  caption="One commit per week was the baseline until the rejection email landed. Five commits dropped in the 24 hours it took to swap Supabase web OAuth for native ASAuthorization — the peak bar is the auth sprint rendered as rate, not count."
 />
 
 Build 20 rejected → Build 21 submitted 2026-09-19 → approved and live on the App Store. Three post-launch bugs surfaced on real signups within days (OTP delivery, Delete Account, invitation idempotency across deletion) — all diagnosed root-cause and fixed, documented in `DEVLOG.md` so the next session doesn't re-litigate them.

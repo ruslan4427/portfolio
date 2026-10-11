@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import * as simpleIcons from "simple-icons";
 import type { SimpleIcon } from "simple-icons";
-import { ExpandButton, Lightbox } from "@/components/ui/Lightbox";
+import { Lightbox } from "@/components/ui/Lightbox";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -73,7 +73,7 @@ export function StackRow({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: false, margin: "-60px" }}
       transition={{ duration: 0.4, ease: EASE }}
       className="not-prose my-6"
     >
@@ -83,7 +83,7 @@ export function StackRow({
             key={item.name + i}
             initial={{ opacity: 0, y: 6 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
+            viewport={{ once: false, margin: "-40px" }}
             transition={{ duration: 0.3, delay: i * 0.04, ease: EASE }}
             className="flex min-h-[104px] flex-col justify-between rounded-[12px] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-3.5"
           >
@@ -107,7 +107,7 @@ export function StackRow({
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 6 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
+            viewport={{ once: false, margin: "-40px" }}
             transition={{
               duration: 0.3,
               delay: items.length * 0.04,
@@ -232,7 +232,7 @@ export function PhoneRow({
             key={item.src}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
+            viewport={{ once: false, margin: "-60px" }}
             transition={{ duration: 0.45, delay: i * 0.08, ease: EASE }}
             className="flex flex-col items-center"
           >
@@ -326,7 +326,7 @@ export function CompareGrid({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
+        viewport={{ once: false, margin: "-60px" }}
         transition={{ duration: 0.45, ease: EASE }}
         className="overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]"
       >
@@ -553,7 +553,7 @@ function FlowConnector({
         strokeWidth={1.4}
         initial="hidden"
         whileInView="shown"
-        viewport={{ once: true, margin: "-40px" }}
+        viewport={{ once: false, margin: "-40px" }}
       >
         <motion.circle
           cx="4"
@@ -591,7 +591,7 @@ function FlowConnector({
       strokeWidth={1.4}
       initial="hidden"
       whileInView="shown"
-      viewport={{ once: true, margin: "-30px" }}
+      viewport={{ once: false, margin: "-30px" }}
     >
       <motion.circle
         cx="12"
@@ -632,7 +632,7 @@ function FlowNodeCard({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: false, margin: "-50px" }}
       transition={{ duration: 0.35, delay, ease: EASE }}
       className={`relative flex w-full max-w-[460px] shrink-0 flex-col rounded-[12px] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-3.5 ${
         pulse ? "ring-1 ring-[color:var(--ink-primary)]/15" : ""
@@ -700,10 +700,9 @@ function FlowNodeCard({
 
 function FlowDiagramBody({ row }: { row: FlowRow }) {
   const d = row.diagram!;
-  const [open, setOpen] = useState(false);
   return (
     <div className="relative -mx-2">
-      <div className="group relative overflow-x-auto rounded-[var(--radius-tile)] bg-[color:var(--bg-page)]/60 p-2">
+      <div className="relative overflow-x-auto rounded-[var(--radius-tile)] bg-[color:var(--bg-page)]/60 p-2">
         <DiagramCanvas
           nodes={d.nodes}
           edges={d.edges}
@@ -712,28 +711,11 @@ function FlowDiagramBody({ row }: { row: FlowRow }) {
           ariaLabel={row.label}
           minWidth={560}
         />
-        <ExpandButton
-          onClick={() => setOpen(true)}
-          label={`Expand ${row.label}`}
-          className="absolute right-3 top-3 opacity-70 transition group-hover:opacity-100"
-        />
       </div>
       <div
         aria-hidden
         className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 rounded-r-[var(--radius-tile)] bg-gradient-to-l from-[color:var(--bg-elevated)] to-transparent md:hidden"
       />
-      <Lightbox open={open} onClose={() => setOpen(false)} label={row.label}>
-        <div className="w-full">
-          <DiagramCanvas
-            nodes={d.nodes}
-            edges={d.edges}
-            width={d.width ?? 900}
-            height={d.height ?? 260}
-            ariaLabel={row.label}
-            minWidth={d.width ?? 900}
-          />
-        </div>
-      </Lightbox>
     </div>
   );
 }
@@ -747,66 +729,91 @@ export function FlowSchema({
   rows: FlowRow[];
   caption?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const rowsBlock = (
+    <div className="space-y-5">
+      {rows.map((row, rIdx) => {
+        const tone = row.tone ?? "neutral";
+        return (
+          <div
+            key={row.label + rIdx}
+            className={`relative overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-5 pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] ${rowAccent[tone]}`}
+          >
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+              <div className="min-w-0 font-sans text-[10px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+                <span className="mr-2 font-serif text-[color:var(--ink-primary)]">
+                  {tone === "before" ? "◴" : tone === "after" ? "●" : "○"}
+                </span>
+                {row.label}
+              </div>
+              {row.meta && (
+                <div className="shrink-0 font-sans text-[10px] tabular-nums text-[color:var(--ink-muted)]">
+                  {row.meta}
+                </div>
+              )}
+            </div>
+            {row.diagram ? (
+              <FlowDiagramBody row={row} />
+            ) : (
+              <div className="flex flex-col items-center">
+                {(row.nodes ?? []).map((node, nIdx) => {
+                  const nodeDelay = rIdx * 0.2 + nIdx * 0.15;
+                  const nodeList = row.nodes ?? [];
+                  const isLast = nIdx === nodeList.length - 1;
+                  return (
+                    <Fragment key={node.label + nIdx}>
+                      <FlowNodeCard node={node} delay={nodeDelay} />
+                      {!isLast && (
+                        <FlowConnector
+                          orientation="vertical"
+                          delay={nodeDelay + 0.15}
+                        />
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
   return (
-    <figure className="not-prose my-10">
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
       {title && (
         <div className="mb-4 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
-      <div className="space-y-5">
-        {rows.map((row, rIdx) => {
-          const tone = row.tone ?? "neutral";
-          return (
-            <div
-              key={row.label + rIdx}
-              className={`relative overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-5 pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] ${rowAccent[tone]}`}
-            >
-              <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                <div className="font-sans text-[10px] uppercase tracking-wide text-[color:var(--ink-muted)] whitespace-nowrap">
-                  <span className="mr-2 font-serif text-[color:var(--ink-primary)]">
-                    {tone === "before" ? "◴" : tone === "after" ? "●" : "○"}
-                  </span>
-                  {row.label}
-                </div>
-                {row.meta && (
-                  <div className="font-sans text-[10px] tabular-nums text-[color:var(--ink-muted)] whitespace-nowrap">
-                    {row.meta}
-                  </div>
-                )}
-              </div>
-              {row.diagram ? (
-                <FlowDiagramBody row={row} />
-              ) : (
-                <div className="flex flex-col items-center">
-                  {(row.nodes ?? []).map((node, nIdx) => {
-                    const nodeDelay = rIdx * 0.2 + nIdx * 0.15;
-                    const nodeList = row.nodes ?? [];
-                    const isLast = nIdx === nodeList.length - 1;
-                    return (
-                      <Fragment key={node.label + nIdx}>
-                        <FlowNodeCard node={node} delay={nodeDelay} />
-                        {!isLast && (
-                          <FlowConnector
-                            orientation="vertical"
-                            delay={nodeDelay + 0.15}
-                          />
-                        )}
-                      </Fragment>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={title ? `Expand ${title}` : "Expand flow"}
+        className="block w-full cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+      >
+        {rowsBlock}
+      </button>
       {caption && (
         <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
-    </figure>
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        label={title}
+        caption={caption}
+      >
+        <div className="w-full">{rowsBlock}</div>
+      </Lightbox>
+    </motion.figure>
   );
 }
 
@@ -884,6 +891,10 @@ function diagramEdgeAnchor(
   const hh = h / 2;
   const absDx = Math.abs(dx) || 0.0001;
   const absDy = Math.abs(dy) || 0.0001;
+  if (node.shape === "action") {
+    const s = 1 / (absDx / hw + absDy / hh);
+    return { x: node.x + dx * s, y: node.y + dy * s };
+  }
   const sx = hw / absDx;
   const sy = hh / absDy;
   const s = Math.min(sx, sy);
@@ -1030,14 +1041,8 @@ function DiagramEdgeEl({
   const style = edge.style ?? "solid";
   const a = diagramEdgeAnchor(src, dst.x, dst.y);
   const b = diagramEdgeAnchor(dst, src.x, src.y);
-  const mx = (a.x + b.x) / 2;
-  const my = (a.y + b.y) / 2;
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const isHorizontalDominant = Math.abs(dx) >= Math.abs(dy);
-  const perpOffset = 14;
-  const lx = isHorizontalDominant ? mx : mx + perpOffset;
-  const ly = isHorizontalDominant ? my - perpOffset : my;
+  const lx = (a.x + b.x) / 2;
+  const ly = (a.y + b.y) / 2;
   return (
     <g>
       <motion.line
@@ -1051,7 +1056,7 @@ function DiagramEdgeEl({
         markerEnd={`url(#${markerIds[color]})`}
         initial={{ pathLength: 0, opacity: 0 }}
         whileInView={{ pathLength: 1, opacity: 1 }}
-        viewport={{ once: true, margin: "-40px" }}
+        viewport={{ once: false, margin: "-40px" }}
         transition={{ duration: 0.5, ease: EASE }}
       />
       {edge.label && (
@@ -1200,7 +1205,7 @@ function DiagramCanvas({
             key={n.id}
             initial={{ opacity: 0, y: 4 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
+            viewport={{ once: false, margin: "-40px" }}
             transition={{ duration: 0.35, delay: i * 0.05, ease: EASE }}
           >
             <DiagramShapeEl node={n} />
@@ -1232,7 +1237,13 @@ export function Diagram({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <figure className="not-prose my-10">
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
       {title && (
         <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
           {title}
@@ -1257,7 +1268,12 @@ export function Diagram({
           ))}
         </div>
       )}
-      <div className="group relative overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4">
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={title ? `Expand ${title}` : "Expand diagram"}
+        className="block w-full cursor-zoom-in overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+      >
         <DiagramCanvas
           nodes={nodes}
           edges={edges}
@@ -1265,12 +1281,7 @@ export function Diagram({
           height={height}
           ariaLabel={title}
         />
-        <ExpandButton
-          onClick={() => setOpen(true)}
-          label={title ? `Expand ${title}` : "Expand diagram"}
-          className="absolute right-3 top-3 opacity-70 transition group-hover:opacity-100"
-        />
-      </div>
+      </button>
       {caption && (
         <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
           {caption}
@@ -1289,11 +1300,11 @@ export function Diagram({
             width={width}
             height={height}
             ariaLabel={title}
-            minWidth={width}
+            minWidth={0}
           />
         </div>
       </Lightbox>
-    </figure>
+    </motion.figure>
   );
 }
 
@@ -1360,13 +1371,19 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
   const laneY = (i: number) => RT_PAD_T + i * RT_LANE_H + RT_LANE_H / 2;
   const xAt = (t: number) => RT_PAD_L + (Math.max(0, Math.min(100, t)) / 100) * innerW;
   const axisY = RT_PAD_T + row.sessions.length * RT_LANE_H + 8;
+  const eventDelay = (t: number) => 0.35 + (Math.max(0, Math.min(100, t)) / 100) * 0.55;
+  const maxEventT = Math.max(0, ...row.sessions.flatMap((s) => s.events.map((e) => e.t)));
+  const markerDelay = eventDelay(maxEventT) + 0.1;
 
   return (
-    <svg
+    <motion.svg
       viewBox={`0 0 ${RT_WIDTH} ${h}`}
       role="img"
       aria-label={row.label}
       className="block w-full"
+      initial="hidden"
+      whileInView="shown"
+      viewport={{ once: false, margin: "0px 0px -40px 0px" }}
     >
       <defs>
         <pattern id={`rt-hatch-${row.label.replace(/\W+/g, "-")}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -1375,7 +1392,10 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
       </defs>
 
       {row.window && (
-        <g>
+        <motion.g
+          variants={{ hidden: { opacity: 0 }, shown: { opacity: 1 } }}
+          transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+        >
           <rect
             x={xAt(row.window.from)}
             y={RT_PAD_T - 10}
@@ -1405,7 +1425,7 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
               {row.window.label}
             </text>
           )}
-        </g>
+        </motion.g>
       )}
 
       {row.sessions.map((s, i) => {
@@ -1422,20 +1442,30 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
             >
               {s.label}
             </text>
-            <line
+            <motion.line
               x1={RT_PAD_L}
               y1={y}
               x2={RT_WIDTH - RT_PAD_R}
               y2={y}
               stroke="rgba(17,17,17,0.22)"
               strokeWidth="1.2"
+              variants={{ hidden: { pathLength: 0, opacity: 0 }, shown: { pathLength: 1, opacity: 1 } }}
+              transition={{ duration: 0.55, delay: 0.15 + i * 0.08, ease: EASE }}
             />
             {s.events.map((e, ei) => {
               const cx = xAt(e.t);
               const isCommit = e.kind === "commit" || e.kind === "ok";
               const isFail = e.kind === "fail";
               return (
-                <g key={ei}>
+                <motion.g
+                  key={ei}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.3 },
+                    shown: { opacity: 1, scale: 1 },
+                  }}
+                  transition={{ duration: 0.4, delay: eventDelay(e.t), ease: EASE }}
+                  style={{ transformOrigin: `${cx}px ${y}px`, transformBox: "fill-box" as const }}
+                >
                   {isCommit ? (
                     <rect
                       x={cx - 5}
@@ -1463,11 +1493,14 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
                       textAnchor="middle"
                       className="fill-[color:var(--ink-body)] font-sans"
                       fontSize="10.5"
+                      stroke="#F5F4EF"
+                      strokeWidth="3.5"
+                      style={{ paintOrder: "stroke" }}
                     >
                       {e.label}
                     </text>
                   )}
-                </g>
+                </motion.g>
               );
             })}
           </g>
@@ -1475,7 +1508,10 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
       })}
 
       {row.marker && (
-        <g>
+        <motion.g
+          variants={{ hidden: { opacity: 0, y: -8 }, shown: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.45, delay: markerDelay, ease: EASE }}
+        >
           <line
             x1={xAt(row.marker.t)}
             y1={RT_PAD_T - 4}
@@ -1503,7 +1539,7 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
           >
             {row.marker.label}
           </text>
-        </g>
+        </motion.g>
       )}
 
       {row.axisTicks && row.axisTicks.length > 0 && (
@@ -1541,7 +1577,17 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
       )}
 
       {row.outcome && (
-        <g>
+        <motion.g
+          variants={{
+            hidden: { opacity: 0, scale: 0.85 },
+            shown: { opacity: 1, scale: 1 },
+          }}
+          transition={{ duration: 0.45, delay: markerDelay + 0.15, ease: EASE }}
+          style={{
+            transformOrigin: `${RT_WIDTH - RT_PAD_R / 2}px ${RT_PAD_T + (row.sessions.length * RT_LANE_H) / 2}px`,
+            transformBox: "fill-box" as const,
+          }}
+        >
           <rect
             x={RT_WIDTH - RT_PAD_R + 10}
             y={RT_PAD_T + (row.sessions.length * RT_LANE_H) / 2 - 24}
@@ -1565,9 +1611,9 @@ function RaceTimelineRowSvg({ row }: { row: RaceTimelineRow }) {
               </tspan>
             ))}
           </text>
-        </g>
+        </motion.g>
       )}
-    </svg>
+    </motion.svg>
   );
 }
 
@@ -1582,8 +1628,39 @@ export function RaceTimeline({
   caption?: string;
   legend?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const rowsBlock = (
+    <div className="space-y-4">
+      {rows.map((row, i) => (
+        <div
+          key={i}
+          className={`rounded-[var(--radius-tile)] border overflow-hidden ${rtToneClasses(row.tone)}`}
+        >
+          <div className="flex items-center justify-between gap-4 border-b border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/70 px-4 py-2">
+            <div className="font-sans text-[12px] font-medium text-[color:var(--ink-primary)]">
+              {row.label}
+            </div>
+            {row.meta && (
+              <div className="font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
+                {row.meta}
+              </div>
+            )}
+          </div>
+          <div className="overflow-x-auto px-2 py-2">
+            <RaceTimelineRowSvg row={row} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
   return (
-    <figure className="not-prose my-10">
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
       {title && (
         <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
           {title}
@@ -1613,34 +1690,28 @@ export function RaceTimeline({
           </span>
         </div>
       )}
-      <div className="space-y-4">
-        {rows.map((row, i) => (
-          <div
-            key={i}
-            className={`rounded-[var(--radius-tile)] border overflow-hidden ${rtToneClasses(row.tone)}`}
-          >
-            <div className="flex items-center justify-between gap-4 border-b border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/70 px-4 py-2">
-              <div className="font-sans text-[12px] font-medium text-[color:var(--ink-primary)]">
-                {row.label}
-              </div>
-              {row.meta && (
-                <div className="font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
-                  {row.meta}
-                </div>
-              )}
-            </div>
-            <div className="overflow-x-auto px-2 py-2">
-              <RaceTimelineRowSvg row={row} />
-            </div>
-          </div>
-        ))}
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={title ? `Expand ${title}` : "Expand timeline"}
+        className="block w-full cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+      >
+        {rowsBlock}
+      </button>
       {caption && (
         <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
-    </figure>
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        label={title}
+        caption={caption}
+      >
+        <div className="w-full">{rowsBlock}</div>
+      </Lightbox>
+    </motion.figure>
   );
 }
 
@@ -1671,7 +1742,7 @@ const AC_HEIGHT = 320;
 const AC_PAD_L = 72;
 const AC_PAD_R = 24;
 const AC_PAD_T = 48;
-const AC_PAD_B = 76;
+const AC_PAD_B = 108;
 
 function acToneFill(tone?: ActivityPhase["tone"]) {
   if (tone === "peak") return "#111";
@@ -1685,6 +1756,7 @@ export function ActivityChart({
   phases,
   markers,
   unit = "per day",
+  metric = "commits",
   yAxisLabel,
   caption,
 }: {
@@ -1692,6 +1764,7 @@ export function ActivityChart({
   phases: ActivityPhase[];
   markers?: ActivityMarker[];
   unit?: string;
+  metric?: string;
   yAxisLabel?: string;
   caption?: string;
 }) {
@@ -1718,180 +1791,336 @@ export function ActivityChart({
 
   const yAt = (rate: number) => AC_PAD_T + innerH - (rate / niceYMax) * innerH;
   const baselineY = AC_PAD_T + innerH;
+  const [open, setOpen] = useState(false);
+
+  const svgInner = (
+    <>
+      {yTicks.map((v, i) => (
+        <g key={i}>
+          <line
+            x1={AC_PAD_L}
+            y1={yAt(v)}
+            x2={AC_WIDTH - AC_PAD_R}
+            y2={yAt(v)}
+            stroke="rgba(17,17,17,0.08)"
+            strokeWidth="1"
+          />
+          <text
+            x={AC_PAD_L - 8}
+            y={yAt(v) + 3}
+            textAnchor="end"
+            className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
+            fontSize="10"
+          >
+            {v % 1 === 0 ? v.toString() : v.toFixed(1)}
+          </text>
+        </g>
+      ))}
+
+      {yAxisLabel && (
+        <text
+          x={14}
+          y={AC_PAD_T + innerH / 2}
+          textAnchor="middle"
+          transform={`rotate(-90 14 ${AC_PAD_T + innerH / 2})`}
+          className="fill-[color:var(--ink-muted)] font-sans"
+          fontSize="10"
+        >
+          {yAxisLabel}
+        </text>
+      )}
+
+      <line
+        x1={AC_PAD_L}
+        y1={baselineY}
+        x2={AC_WIDTH - AC_PAD_R}
+        y2={baselineY}
+        stroke="rgba(17,17,17,0.3)"
+        strokeWidth="1"
+      />
+
+      {phases.map((p, i) => {
+        const x = barX[i];
+        const w = (p.duration / totalDuration) * innerW;
+        const rate = rates[i];
+        const h = (rate / niceYMax) * innerH;
+        const barW = Math.max(2, w - 6);
+        const narrow = w < 70;
+        const stagger = narrow && i % 2 === 1 ? 32 : 0;
+        return (
+          <g key={p.id}>
+            <motion.rect
+              x={x + 3}
+              width={barW}
+              fill={acToneFill(p.tone)}
+              initial={{ y: baselineY, height: 0 }}
+              whileInView={{ y: baselineY - h, height: h }}
+              viewport={{ once: false, margin: "-40px" }}
+              transition={{ duration: 0.9, delay: 0.1 + i * 0.1, ease: EASE }}
+            />
+            <text
+              x={x + w / 2}
+              y={baselineY - h - 6}
+              textAnchor="middle"
+              className="fill-[color:var(--ink-primary)] font-sans tabular-nums"
+              fontSize="11"
+              fontWeight="600"
+            >
+              {rate < 1 ? rate.toFixed(2) : rate < 10 ? rate.toFixed(1) : Math.round(rate)}
+            </text>
+            {narrow && stagger > 0 && (
+              <line
+                x1={x + w / 2}
+                y1={baselineY + 4}
+                x2={x + w / 2}
+                y2={baselineY + 14 + stagger - 6}
+                stroke="rgba(17,17,17,0.25)"
+                strokeWidth="1"
+              />
+            )}
+            <text
+              x={x + w / 2}
+              y={baselineY + 18 + stagger}
+              textAnchor="middle"
+              className="fill-[color:var(--ink-primary)] font-sans"
+              fontSize="11"
+              fontWeight="500"
+            >
+              {p.label}
+            </text>
+            {p.sub && (
+              <text
+                x={x + w / 2}
+                y={baselineY + 32 + stagger}
+                textAnchor="middle"
+                className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
+                fontSize="10"
+              >
+                {p.sub}
+              </text>
+            )}
+          </g>
+        );
+      })}
+
+      {markers?.map((m, mi) => {
+        const phaseIdx = phases.findIndex((p) => p.id === m.afterPhase);
+        if (phaseIdx < 0) return null;
+        const x = barX[phaseIdx] + (phases[phaseIdx].duration / totalDuration) * innerW;
+        return (
+          <g key={mi}>
+            <line
+              x1={x}
+              y1={AC_PAD_T - 12}
+              x2={x}
+              y2={baselineY}
+              stroke="#111"
+              strokeWidth="1.2"
+              strokeDasharray="3 3"
+            />
+            <rect
+              x={x - 76}
+              y={AC_PAD_T - 40}
+              width={152}
+              height={22}
+              rx={6}
+              fill="#111"
+            />
+            <text
+              x={x}
+              y={AC_PAD_T - 25}
+              textAnchor="middle"
+              className="fill-[#F5F4EF] font-sans"
+              fontSize="10.5"
+              fontWeight="600"
+            >
+              {m.label}
+            </text>
+            {m.sub && (
+              <text
+                x={x}
+                y={AC_PAD_T - 4}
+                textAnchor="middle"
+                className="fill-[color:var(--ink-muted)] font-sans"
+                fontSize="9.5"
+              >
+                {m.sub}
+              </text>
+            )}
+          </g>
+        );
+      })}
+
+      <text
+        x={AC_PAD_L}
+        y={AC_HEIGHT - 10}
+        textAnchor="start"
+        className="fill-[color:var(--ink-muted)] font-sans"
+        fontSize="10"
+      >
+        {metric} {unit}
+      </text>
+    </>
+  );
+
+  const chartSvg = (minWidth?: number) => (
+    <svg
+      viewBox={`0 0 ${AC_WIDTH} ${AC_HEIGHT}`}
+      role="img"
+      aria-label={title ?? "Activity chart"}
+      className="block w-full"
+      style={minWidth ? { minWidth } : undefined}
+    >
+      {svgInner}
+    </svg>
+  );
 
   return (
-    <figure className="not-prose my-10">
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
       {title && (
         <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
-      <div className="overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4">
-        <svg
-          viewBox={`0 0 ${AC_WIDTH} ${AC_HEIGHT}`}
-          role="img"
-          aria-label={title ?? "Activity chart"}
-          className="block w-full"
-        >
-          {yTicks.map((v, i) => (
-            <g key={i}>
-              <line
-                x1={AC_PAD_L}
-                y1={yAt(v)}
-                x2={AC_WIDTH - AC_PAD_R}
-                y2={yAt(v)}
-                stroke="rgba(17,17,17,0.08)"
-                strokeWidth="1"
-              />
-              <text
-                x={AC_PAD_L - 8}
-                y={yAt(v) + 3}
-                textAnchor="end"
-                className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
-                fontSize="10"
-              >
-                {v % 1 === 0 ? v.toString() : v.toFixed(1)}
-              </text>
-            </g>
-          ))}
-
-          {yAxisLabel && (
-            <text
-              x={14}
-              y={AC_PAD_T + innerH / 2}
-              textAnchor="middle"
-              transform={`rotate(-90 14 ${AC_PAD_T + innerH / 2})`}
-              className="fill-[color:var(--ink-muted)] font-sans"
-              fontSize="10"
-            >
-              {yAxisLabel}
-            </text>
-          )}
-
-          <line
-            x1={AC_PAD_L}
-            y1={baselineY}
-            x2={AC_WIDTH - AC_PAD_R}
-            y2={baselineY}
-            stroke="rgba(17,17,17,0.3)"
-            strokeWidth="1"
-          />
-
-          {phases.map((p, i) => {
-            const x = barX[i];
-            const w = (p.duration / totalDuration) * innerW;
-            const rate = rates[i];
-            const h = (rate / niceYMax) * innerH;
-            const barW = Math.max(2, w - 6);
-            return (
-              <g key={p.id}>
-                <rect
-                  x={x + 3}
-                  y={baselineY - h}
-                  width={barW}
-                  height={h}
-                  fill={acToneFill(p.tone)}
-                />
-                <text
-                  x={x + w / 2}
-                  y={baselineY - h - 6}
-                  textAnchor="middle"
-                  className="fill-[color:var(--ink-primary)] font-sans tabular-nums"
-                  fontSize="11"
-                  fontWeight="600"
-                >
-                  {rate < 1 ? rate.toFixed(2) : rate < 10 ? rate.toFixed(1) : Math.round(rate)}
-                </text>
-                <text
-                  x={x + w / 2}
-                  y={baselineY + 18}
-                  textAnchor="middle"
-                  className="fill-[color:var(--ink-primary)] font-sans"
-                  fontSize="11"
-                  fontWeight="500"
-                >
-                  {p.label}
-                </text>
-                {p.sub && (
-                  <text
-                    x={x + w / 2}
-                    y={baselineY + 32}
-                    textAnchor="middle"
-                    className="fill-[color:var(--ink-muted)] font-sans tabular-nums"
-                    fontSize="10"
-                  >
-                    {p.sub}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          {markers?.map((m, mi) => {
-            const phaseIdx = phases.findIndex((p) => p.id === m.afterPhase);
-            if (phaseIdx < 0) return null;
-            const x = barX[phaseIdx] + (phases[phaseIdx].duration / totalDuration) * innerW;
-            return (
-              <g key={mi}>
-                <line
-                  x1={x}
-                  y1={AC_PAD_T - 8}
-                  x2={x}
-                  y2={baselineY}
-                  stroke="#111"
-                  strokeWidth="1.2"
-                  strokeDasharray="3 3"
-                />
-                <rect
-                  x={x - 76}
-                  y={AC_PAD_T - 32}
-                  width={152}
-                  height={22}
-                  rx={6}
-                  fill="#111"
-                />
-                <text
-                  x={x}
-                  y={AC_PAD_T - 17}
-                  textAnchor="middle"
-                  className="fill-[#F5F4EF] font-sans"
-                  fontSize="10.5"
-                  fontWeight="600"
-                >
-                  {m.label}
-                </text>
-                {m.sub && (
-                  <text
-                    x={x}
-                    y={AC_PAD_T + 4}
-                    textAnchor="middle"
-                    className="fill-[color:var(--ink-muted)] font-sans"
-                    fontSize="9.5"
-                  >
-                    {m.sub}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          <text
-            x={AC_PAD_L}
-            y={AC_HEIGHT - 10}
-            textAnchor="start"
-            className="fill-[color:var(--ink-muted)] font-sans"
-            fontSize="10"
-          >
-            commits {unit}
-          </text>
-        </svg>
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={title ? `Expand ${title}` : "Expand chart"}
+        className="block w-full cursor-zoom-in overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+      >
+        {chartSvg()}
+      </button>
       {caption && (
         <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
-    </figure>
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        label={title}
+        caption={caption}
+      >
+        <div className="w-full">{chartSvg()}</div>
+      </Lightbox>
+    </motion.figure>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * PaybackBar — ratio visualization for ROI / payback / cost-vs-loss framing.
+ * Two or more horizontal bars share one scale (largest = full width). Headline
+ * multiplier reads at left. Point: show absurd pricing/loss contrast where
+ * the smaller bar is a visible sliver and the larger bar fills the track.
+ * -------------------------------------------------------------------------- */
+
+type PaybackBarRow = {
+  label: string;
+  value: number;
+  display: string;
+  sub?: string;
+};
+
+export function PaybackBar({
+  title,
+  headline,
+  rows,
+  caption,
+}: {
+  title?: string;
+  headline: { value: string; label: string };
+  rows: PaybackBarRow[];
+  caption?: string;
+}) {
+  const max = Math.max(...rows.map((r) => r.value));
+  const [open, setOpen] = useState(false);
+  const chartBlock = (
+    <div className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-6 md:p-8">
+      <div className="grid gap-8 md:grid-cols-[max-content_minmax(0,1fr)] md:items-center">
+        <div className="min-w-0">
+          <div className="whitespace-nowrap font-serif text-6xl leading-[0.95] tabular-nums text-[color:var(--ink-primary)] md:text-7xl">
+            {headline.value}
+          </div>
+          <div className="mt-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+            {headline.label}
+          </div>
+        </div>
+        <div className="space-y-5">
+          {rows.map((row, i) => {
+            const pct = (row.value / max) * 100;
+            return (
+              <div key={row.label}>
+                <div className="mb-2 flex items-baseline justify-between gap-3">
+                  <span className="font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+                    {row.label}
+                  </span>
+                  <span className="font-sans text-sm font-medium tabular-nums text-[color:var(--ink-primary)]">
+                    {row.display}
+                  </span>
+                </div>
+                <div className="relative h-5 w-full overflow-hidden rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+                  <motion.div
+                    className="h-full rounded-full bg-[color:var(--ink-primary)]"
+                    style={{ minWidth: "3px" }}
+                    initial={{ width: "0%" }}
+                    whileInView={{ width: `${pct}%` }}
+                    viewport={{ once: false, margin: "0px 0px -40px 0px" }}
+                    transition={{ duration: 1.1, delay: 0.15 + i * 0.12, ease: EASE }}
+                  />
+                </div>
+                {row.sub && (
+                  <div className="mt-1.5 font-sans text-[11px] text-[color:var(--ink-muted)]">
+                    {row.sub}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+  return (
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
+      {title && (
+        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          {title}
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={title ? `Expand ${title}` : "Expand chart"}
+        className="block w-full cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+      >
+        {chartBlock}
+      </button>
+      {caption && (
+        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+          {caption}
+        </figcaption>
+      )}
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        label={title}
+        caption={caption}
+      >
+        <div className="w-full">{chartBlock}</div>
+      </Lightbox>
+    </motion.figure>
   );
 }
 
@@ -1952,7 +2181,7 @@ export function TechNotes({
     <motion.aside
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
+      viewport={{ once: false, margin: "-80px" }}
       transition={{ duration: 0.5, ease: EASE }}
       className="not-prose my-12 overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6 sm:p-8"
       aria-labelledby="tech-notes-heading"
@@ -2452,11 +2681,13 @@ function WireflowEdgeEl({
   fromNode,
   toNode,
   markerIds,
+  delay = 0,
 }: {
   edge: WireflowEdge;
   fromNode: WireflowNode;
   toNode: WireflowNode;
   markerIds: Record<WireflowEdgeKind, string>;
+  delay?: number;
 }) {
   const pts = routeWireflowEdge(fromNode, toNode, edge);
   const d = pts
@@ -2465,7 +2696,7 @@ function WireflowEdgeEl({
   const stroke =
     edge.kind === "primary" ? "var(--ink-primary)" : "var(--ink-muted)";
   return (
-    <path
+    <motion.path
       d={d}
       fill="none"
       stroke={stroke}
@@ -2474,18 +2705,36 @@ function WireflowEdgeEl({
       strokeLinecap="round"
       strokeLinejoin="round"
       markerEnd={`url(#${markerIds[edge.kind]})`}
+      initial={{ pathLength: 0, opacity: 0 }}
+      whileInView={{ pathLength: 1, opacity: 1 }}
+      viewport={{ once: false, margin: "-40px" }}
+      transition={{
+        pathLength: { duration: 0.6, delay, ease: EASE },
+        opacity: { duration: 0.25, delay, ease: EASE },
+      }}
     />
   );
 }
 
-function WireflowCalloutEl({ callout }: { callout: WireflowCallout }) {
+function WireflowCalloutEl({
+  callout,
+  delay = 0,
+}: {
+  callout: WireflowCallout;
+  delay?: number;
+}) {
   const w = callout.w ?? 220;
   const h = callout.h ?? 180;
   const titleH = callout.title ? 22 : 0;
   const availH = h - titleH - 20;
   const rowH = availH / Math.max(callout.items.length, 1);
   return (
-    <g>
+    <motion.g
+      initial={{ opacity: 0, y: 6 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: false, margin: "-40px" }}
+      transition={{ duration: 0.4, delay, ease: EASE }}
+    >
       <rect
         x={callout.x}
         y={callout.y}
@@ -2541,7 +2790,7 @@ function WireflowCalloutEl({ callout }: { callout: WireflowCallout }) {
           </g>
         );
       })}
-    </g>
+    </motion.g>
   );
 }
 
@@ -2600,6 +2849,9 @@ function WireflowCanvas({
           const from = nodeMap[e.from];
           const to = nodeMap[e.to];
           if (!from || !to) return null;
+          const fromIdx = nodes.findIndex((n) => n.id === e.from);
+          const toIdx = nodes.findIndex((n) => n.id === e.to);
+          const edgeDelay = Math.max(fromIdx, toIdx) * 0.04 + 0.15;
           return (
             <WireflowEdgeEl
               key={`${e.from}->${e.to}-${i}`}
@@ -2607,6 +2859,7 @@ function WireflowCanvas({
               fromNode={from}
               toNode={to}
               markerIds={markerIds}
+              delay={edgeDelay}
             />
           );
         })}
@@ -2617,7 +2870,7 @@ function WireflowCanvas({
             key={n.id}
             initial={{ opacity: 0, y: 4 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
+            viewport={{ once: false, margin: "-40px" }}
             transition={{ duration: 0.35, delay: i * 0.04, ease: EASE }}
           >
             <WireflowWindow node={n} />
@@ -2626,9 +2879,12 @@ function WireflowCanvas({
       </g>
       {callouts && callouts.length > 0 && (
         <g>
-          {callouts.map((c, i) => (
-            <WireflowCalloutEl key={i} callout={c} />
-          ))}
+          {callouts.map((c, i) => {
+            const calloutDelay = nodes.length * 0.04 + 0.25 + i * 0.1;
+            return (
+              <WireflowCalloutEl key={i} callout={c} delay={calloutDelay} />
+            );
+          })}
         </g>
       )}
     </svg>
@@ -2656,7 +2912,13 @@ export function WireflowMap({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <figure className="not-prose my-10">
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
       {title && (
         <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
           {title}
@@ -2705,7 +2967,12 @@ export function WireflowMap({
           ))}
         </div>
       )}
-      <div className="group relative overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4">
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={title ? `Expand ${title}` : "Expand wireflow"}
+        className="block w-full cursor-zoom-in overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+      >
         <WireflowCanvas
           nodes={nodes}
           edges={edges}
@@ -2714,12 +2981,7 @@ export function WireflowMap({
           height={height}
           ariaLabel={title}
         />
-        <ExpandButton
-          onClick={() => setOpen(true)}
-          label={title ? `Expand ${title}` : "Expand wireflow"}
-          className="absolute right-3 top-3 opacity-70 transition group-hover:opacity-100"
-        />
-      </div>
+      </button>
       {caption && (
         <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
           {caption}
@@ -2739,11 +3001,11 @@ export function WireflowMap({
             width={width}
             height={height}
             ariaLabel={title}
-            minWidth={width}
+            minWidth={0}
           />
         </div>
       </Lightbox>
-    </figure>
+    </motion.figure>
   );
 }
 

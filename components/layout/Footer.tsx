@@ -56,13 +56,6 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-            <a
-              href="#top"
-              aria-label="Back to top"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] font-sans text-xs text-[color:var(--ink-primary)] transition-transform duration-200 hover:-translate-y-0.5"
-            >
-              <span aria-hidden>↑</span>
-            </a>
           </div>
         </div>
       </div>
