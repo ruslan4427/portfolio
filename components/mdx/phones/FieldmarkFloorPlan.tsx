@@ -5,6 +5,41 @@ import { useEffect, useRef } from "react";
 const IOS_FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif";
 
+// Pin positions extracted from floor-plan-pins.png via image analysis (24 pins, 21 green + 3 red).
+// Sorted by Y so the stagger reads top-to-bottom like a wave.
+type PinSpec = { x: number; y: number; color: "green" | "red" };
+const PINS: PinSpec[] = [
+  { x: 211.2, y: 337.1, color: "green" },
+  { x: 269.1, y: 405.5, color: "green" },
+  { x: 316.6, y: 408.4, color: "green" },
+  { x: 97.5,  y: 408.7, color: "green" },
+  { x: 205.8, y: 416.9, color: "green" },
+  { x: 237.1, y: 425.0, color: "green" },
+  { x: 144.2, y: 484.8, color: "green" },
+  { x: 261.8, y: 490.7, color: "green" },
+  { x: 343.1, y: 502.3, color: "green" },
+  { x: 322.3, y: 503.3, color: "green" },
+  { x: 68.3,  y: 531.7, color: "green" },
+  { x: 134.1, y: 549.3, color: "green" },
+  { x: 100.9, y: 553.1, color: "green" },
+  { x: 153.0, y: 564.4, color: "green" },
+  { x: 245.9, y: 581.5, color: "green" },
+  { x: 146.2, y: 586.6, color: "green" },
+  { x: 81.8,  y: 605.9, color: "green" },
+  { x: 50.2,  y: 615.5, color: "green" },
+  { x: 100.0, y: 650.6, color: "green" },
+  { x: 255.5, y: 666.0, color: "red"   },
+  { x: 136.0, y: 658.4, color: "green" },
+  { x: 98.9,  y: 680.8, color: "green" },
+  { x: 136.9, y: 737.7, color: "red"   },
+  { x: 199.7, y: 756.8, color: "red"   },
+];
+
+// COLORS — pin visuals copied from the Fieldmark app.
+const PIN_HALO = "#FFC107";   // yellow halo ring behind each pin
+const PIN_GREEN = "#3B9C3F";   // "done" fill
+const PIN_RED = "#D23F31";     // "needs review / blocked" fill
+
 const CSS = `
   .ff-root .m {
     opacity: 0;
@@ -31,13 +66,18 @@ const CSS = `
     from { opacity: 0; transform: scale(0.4); }
     to   { opacity: 1; transform: scale(1); }
   }
+  @keyframes ff-pin-drop {
+    0%   { opacity: 0; transform: scale(0.1); }
+    60%  { opacity: 1; transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
   @keyframes ff-fade {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
   @keyframes ff-plan-in {
-    from { opacity: 0; transform: scale(0.985); }
-    to   { opacity: 1; transform: scale(1); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   /* Status bar */
@@ -56,19 +96,25 @@ const CSS = `
   .ff-root.ff-play .ff-cnt3 { animation-name: ff-scale-in; animation-delay: 0.48s; animation-duration: 0.4s; }
   .ff-root.ff-play .ff-cnt4 { animation-name: ff-scale-in; animation-delay: 0.56s; animation-duration: 0.4s; }
 
-  /* Floor plan image (center-pivot subtle scale + fade) */
+  /* Floor plan PDF fades in (pin positions get erased by white discs) */
   .ff-root.ff-play .ff-plan {
     animation-name: ff-plan-in;
-    animation-delay: 0.64s;
-    animation-duration: 0.8s;
-    transform-origin: 215px 500px;
+    animation-delay: 0.56s;
+    animation-duration: 0.6s;
+  }
+
+  /* Pin drops — each one gets a staggered delay via inline style */
+  .ff-root.ff-play .ff-pin {
+    animation-name: ff-pin-drop;
+    animation-duration: 0.45s;
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Page pill slides up */
-  .ff-root.ff-play .ff-pager { animation-name: ff-slide-up; animation-delay: 1.30s; animation-duration: 0.55s; }
+  .ff-root.ff-play .ff-pager { animation-name: ff-slide-up; animation-delay: 2.00s; animation-duration: 0.55s; }
 
   /* Home indicator */
-  .ff-root.ff-play .ff-home { animation-name: ff-fade; animation-delay: 1.50s; }
+  .ff-root.ff-play .ff-home { animation-name: ff-fade; animation-delay: 2.20s; }
 
   @media (prefers-reduced-motion: reduce) {
     .ff-root .m {
@@ -92,7 +138,6 @@ function BackChevron() {
   );
 }
 
-/** Sparkles / AI glyph. */
 function SparklesIcon() {
   return (
     <g stroke="#1C1C1E" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -102,7 +147,6 @@ function SparklesIcon() {
   );
 }
 
-/** Filter glyph — three descending horizontal lines. */
 function FilterIcon() {
   return (
     <g stroke="#1C1C1E" strokeWidth="1.8" fill="none" strokeLinecap="round">
@@ -113,7 +157,6 @@ function FilterIcon() {
   );
 }
 
-/** PDF toggle glyph — small outlined rectangle with "PDF" hint. */
 function PdfToggleIcon() {
   return (
     <g stroke="#1C1C1E" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -134,7 +177,6 @@ function PdfToggleIcon() {
   );
 }
 
-/** Dot + count pair for the status counter row. */
 function DotCount({
   x,
   y,
@@ -163,12 +205,7 @@ function DotCount({
   );
 }
 
-type Counter = {
-  cls: string;
-  color: string;
-  count: number;
-};
-
+type Counter = { cls: string; color: string; count: number };
 const COUNTERS: Counter[] = [
   { cls: "ff-cnt1", color: "#34C759", count: 21 },
   { cls: "ff-cnt2", color: "#007AFF", count: 0 },
@@ -184,7 +221,6 @@ export function FieldmarkFloorPlan() {
     const el = wrapperRef.current;
     if (!el) return;
     el.classList.remove("ff-play");
-    // Force reflow — restarts every @keyframes.
     void el.offsetWidth;
     el.classList.add("ff-play");
   };
@@ -209,9 +245,16 @@ export function FieldmarkFloorPlan() {
     if (triggered.current) play();
   };
 
-  // Counter row baseline
+  // Counter row
   const CNT_Y = 162;
   let cursor = 24;
+
+  // Pin stagger: 25ms per pin, starting at 1.10s so PDF is settled
+  const PIN_START = 1.10;
+  const PIN_STEP = 0.025;
+  const ERASE_R = 26; // radius of the white disc that hides the baked pin + F badge
+  const HALO_R = 17;  // outer yellow ring
+  const PIN_R = 13;   // inner colored circle
 
   return (
     <div
@@ -235,7 +278,7 @@ export function FieldmarkFloorPlan() {
         {/* --- lavender page bg --- */}
         <rect x="0" y="0" width="430" height="934" fill="#FAFAFF" />
 
-        {/* --- floor plan PDF (fades in behind chrome) --- */}
+        {/* --- floor plan PDF (fades in; pins get erased by white discs below) --- */}
         <g className="m ff-plan">
           <image
             href="/case-studies/fieldmark/floor-plan-pins.png"
@@ -245,7 +288,62 @@ export function FieldmarkFloorPlan() {
             height="934"
             preserveAspectRatio="xMidYMid meet"
           />
+          {/* paper-white erase discs cover baked pins — the SVG pins land in these holes */}
+          {PINS.map((p, i) => (
+            <circle
+              key={`erase-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r={ERASE_R}
+              fill="#FFFFFF"
+            />
+          ))}
         </g>
+
+        {/* --- animated SVG pins (drop in with top-to-bottom stagger) --- */}
+        {PINS.map((p, i) => (
+          <g
+            key={`pin-${i}`}
+            transform={`translate(${p.x}, ${p.y})`}
+          >
+            <g
+              className="m ff-pin"
+              style={{ animationDelay: `${(PIN_START + i * PIN_STEP).toFixed(3)}s` }}
+            >
+              <circle cx="0" cy="0" r={HALO_R} fill={PIN_HALO} />
+              <circle
+                cx="0"
+                cy="0"
+                r={PIN_R}
+                fill={p.color === "green" ? PIN_GREEN : PIN_RED}
+              />
+              <text
+                x="0"
+                y="4"
+                fontSize="12"
+                fontWeight="700"
+                fill="#FFFFFF"
+                textAnchor="middle"
+                style={{ fontFamily: IOS_FONT }}
+              >
+                C
+              </text>
+              {/* F badge (top-right offset) — "Face plate" layer tag from the app */}
+              <circle cx="11" cy="-11" r="7" fill={PIN_HALO} />
+              <text
+                x="11"
+                y="-8"
+                fontSize="8"
+                fontWeight="700"
+                fill="#1C1C1E"
+                textAnchor="middle"
+                style={{ fontFamily: IOS_FONT }}
+              >
+                F
+              </text>
+            </g>
+          </g>
+        ))}
 
         {/* --- opaque bands cover baked chrome so our animated chrome owns the top & bottom --- */}
         <rect x="0" y="0" width="430" height="180" fill="#FAFAFF" />
@@ -265,20 +363,17 @@ export function FieldmarkFloorPlan() {
               21:21
             </text>
             <rect x="153" y="14" width="124" height="32" rx="16" fill="#000000" />
-            {/* signal dots */}
             <g transform="translate(338, 28)" fill="#1C1C1E">
               <circle cx="0"  cy="4" r="1.4" />
               <circle cx="5"  cy="4" r="1.4" />
               <circle cx="10" cy="4" r="1.4" />
               <circle cx="15" cy="4" r="1.4" />
             </g>
-            {/* wifi */}
             <g transform="translate(360, 22)" fill="#1C1C1E">
               <path d="M8 14 L5.8 11.6 a3.2 3.2 0 0 1 4.4 0 z" />
               <path d="M3.6 9.4 a6 6 0 0 1 8.8 0 l-1.3 1.3 a4.2 4.2 0 0 0 -6.2 0 z" />
               <path d="M1.6 7.4 a9 9 0 0 1 12.8 0 l-1.3 1.3 a7.2 7.2 0 0 0 -10.2 0 z" />
             </g>
-            {/* battery */}
             <g transform="translate(384, 22)">
               <rect x="0.6" y="0.6" width="22" height="11" rx="3.2" stroke="#1C1C1E" strokeWidth="1.2" fill="none" />
               <rect x="2.4" y="2.4" width="18.4" height="7.4" rx="1.6" fill="#1C1C1E" />
@@ -327,7 +422,7 @@ export function FieldmarkFloorPlan() {
           </g>
         </g>
 
-        {/* --- counter row (dots + counts, inline) --- */}
+        {/* --- counter row --- */}
         {COUNTERS.map((c) => {
           const el = (
             <g key={c.cls} className={`m ${c.cls}`}>
@@ -343,7 +438,6 @@ export function FieldmarkFloorPlan() {
         <g transform="translate(132, 846)">
           <g className="m ff-pager">
             <rect x="0" y="0" width="166" height="40" rx="20" fill="#8E8E93" />
-            {/* left chevron */}
             <path
               d="M22 14 L16 20 L22 26"
               stroke="#FFFFFF"
@@ -352,7 +446,6 @@ export function FieldmarkFloorPlan() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* label */}
             <text
               x="83"
               y="25"
@@ -364,7 +457,6 @@ export function FieldmarkFloorPlan() {
             >
               Page 3 / 13
             </text>
-            {/* right chevron */}
             <path
               d="M144 14 L150 20 L144 26"
               stroke="#FFFFFF"
