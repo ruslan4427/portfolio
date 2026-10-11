@@ -209,8 +209,8 @@ type Counter = { cls: string; color: string; count: number };
 const COUNTERS: Counter[] = [
   { cls: "ff-cnt1", color: "#34C759", count: 21 },
   { cls: "ff-cnt2", color: "#007AFF", count: 0 },
-  { cls: "ff-cnt3", color: "#FF9500", count: 0 },
-  { cls: "ff-cnt4", color: "#FF3B30", count: 3 },
+  { cls: "ff-cnt3", color: "#FF3B30", count: 0 },
+  { cls: "ff-cnt4", color: "#FF9500", count: 3 },
 ];
 
 export function FieldmarkFloorPlan() {
@@ -421,6 +421,9 @@ export function FieldmarkFloorPlan() {
             <PdfToggleIcon />
           </g>
         </g>
+
+        {/* --- counter row plate (muted lavender-gray band behind the dots) --- */}
+        <rect x="0" y="134" width="430" height="50" fill="#E2E2E9" />
 
         {/* --- counter row --- */}
         {COUNTERS.map((c) => {
