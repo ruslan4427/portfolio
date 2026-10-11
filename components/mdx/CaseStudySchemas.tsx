@@ -6,6 +6,16 @@ import { motion } from "framer-motion";
 import * as simpleIcons from "simple-icons";
 import type { SimpleIcon } from "simple-icons";
 import { Lightbox } from "@/components/ui/Lightbox";
+import { FieldmarkPlaceMarker } from "@/components/mdx/phones/FieldmarkPlaceMarker";
+import { FieldmarkPlansList } from "@/components/mdx/phones/FieldmarkPlansList";
+import { LexoraLogin } from "@/components/mdx/phones/LexoraLogin";
+import { LexoraPlayer } from "@/components/mdx/phones/LexoraPlayer";
+import { LexoraPlaylists } from "@/components/mdx/phones/LexoraPlaylists";
+import { LexoraProfile } from "@/components/mdx/phones/LexoraProfile";
+import { LexoraWords } from "@/components/mdx/phones/LexoraWords";
+import { NobleDashboard } from "@/components/mdx/phones/NobleDashboard";
+import { NobleMarketing } from "@/components/mdx/phones/NobleMarketing";
+import { NoblePricing } from "@/components/mdx/phones/NoblePricing";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -206,6 +216,31 @@ type PhoneRowItem = {
   width: number;
   height: number;
   label?: string;
+  kind?:
+    | "image"
+    | "fieldmark-place-marker"
+    | "fieldmark-plans-list"
+    | "lexora-login"
+    | "lexora-player"
+    | "lexora-playlists"
+    | "lexora-profile"
+    | "lexora-words"
+    | "noble-dashboard"
+    | "noble-marketing"
+    | "noble-pricing";
+};
+
+const PHONE_COMPONENTS: Record<string, () => React.ReactNode> = {
+  "fieldmark-place-marker": () => <FieldmarkPlaceMarker />,
+  "fieldmark-plans-list": () => <FieldmarkPlansList />,
+  "lexora-login": () => <LexoraLogin />,
+  "lexora-player": () => <LexoraPlayer />,
+  "lexora-playlists": () => <LexoraPlaylists />,
+  "lexora-profile": () => <LexoraProfile />,
+  "lexora-words": () => <LexoraWords />,
+  "noble-dashboard": () => <NobleDashboard />,
+  "noble-marketing": () => <NobleMarketing />,
+  "noble-pricing": () => <NoblePricing />,
 };
 
 export function PhoneRow({
@@ -225,15 +260,21 @@ export function PhoneRow({
         : "grid-cols-1";
   const current = openIdx !== null ? items[openIdx] : null;
   return (
-    <figure className="not-prose my-10">
+    <motion.figure
+      className="not-prose my-10"
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.7, ease: EASE }}
+    >
       <div className={`grid ${gridClass} gap-3 sm:gap-4`}>
         {items.map((item, i) => (
           <motion.div
-            key={item.src}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, margin: "-60px" }}
-            transition={{ duration: 0.45, delay: i * 0.08, ease: EASE }}
+            key={item.src || item.kind || i}
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: false, margin: "-40px" }}
+            transition={{ duration: 0.55, delay: 0.15 + i * 0.18, ease: EASE }}
             className="flex flex-col items-center"
           >
             <button
@@ -242,14 +283,18 @@ export function PhoneRow({
               aria-label={`Expand ${item.alt}`}
               className="group relative block w-full overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] transition hover:-translate-y-0.5 hover:border-[color:var(--outline)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
             >
-              <Image
-                src={item.src}
-                alt={item.alt}
-                width={item.width}
-                height={item.height}
-                sizes="(min-width: 768px) 220px, 33vw"
-                className="block h-auto w-full"
-              />
+              {item.kind && PHONE_COMPONENTS[item.kind] ? (
+                PHONE_COMPONENTS[item.kind]()
+              ) : (
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  width={item.width}
+                  height={item.height}
+                  sizes="(min-width: 768px) 220px, 33vw"
+                  className="block h-auto w-full"
+                />
+              )}
               <span
                 aria-hidden
                 className="pointer-events-none absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/90 text-[color:var(--ink-primary)] opacity-0 backdrop-blur-sm transition group-hover:opacity-100 group-focus-visible:opacity-100"
@@ -286,17 +331,23 @@ export function PhoneRow({
         label={current?.label ?? current?.alt}
       >
         {current && (
-          <Image
-            src={current.src}
-            alt={current.alt}
-            width={current.width}
-            height={current.height}
-            sizes="(min-width: 1024px) 80vw, 92vw"
-            className="block h-auto max-h-[86vh] w-auto max-w-full rounded-[var(--radius-tile)] border border-[color:var(--hairline)] object-contain"
-          />
+          current.kind && PHONE_COMPONENTS[current.kind] ? (
+            <div className="w-[min(430px,92vw)] max-h-[86vh] overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)]">
+              {PHONE_COMPONENTS[current.kind]()}
+            </div>
+          ) : (
+            <Image
+              src={current.src}
+              alt={current.alt}
+              width={current.width}
+              height={current.height}
+              sizes="(min-width: 1024px) 80vw, 92vw"
+              className="block h-auto max-h-[86vh] w-auto max-w-full rounded-[var(--radius-tile)] border border-[color:var(--hairline)] object-contain"
+            />
+          )
         )}
       </Lightbox>
-    </figure>
+    </motion.figure>
   );
 }
 

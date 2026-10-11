@@ -254,6 +254,15 @@ A single tall-narrow phone capture in prose looks accidental. If you have
 one screenshot, use `<Figure>`. If you have 2 or 3 that belong together,
 `<PhoneRow>` groups them side-by-side with click-to-fullscreen.
 
+**Prefer SVG-reconstructed screens over raw PNGs** when the UI is clean enough
+to rebuild (status bar + chrome + typed content, no photos / dense charts).
+Reconstructed screens get a progressive stagger that reads as "the app
+assembling itself", which beats a static PNG every time. The reference
+primitive is `components/mdx/phones/LexoraPlayer.tsx`; the format rules live
+in §10 below. Author-side: add `kind: "<component-key>"` to the PhoneRow item
+and register the component in `PHONE_COMPONENTS` inside
+`components/mdx/CaseStudySchemas.tsx`.
+
 ### 5.2 `ImpactStats` — single-line values
 
 Any numeric value that wraps across two lines kills the composition. The
@@ -597,3 +606,245 @@ reflex. If you want to deviate again:
 
 If the ask is "just this one case", push back — the whole value of this
 rulebook is that five case studies read as one voice.
+
+---
+
+## 10. SVG-reconstructed phone screens (`components/mdx/phones/*`)
+
+Approved pattern (Lexora Now Playing pilot, 2026-10-11). When a phone screen's
+UI is clean enough to redraw — status bar + typographic chrome + labelled
+controls, no photos or dense data viz — rebuild it as an SVG with per-element
+CSS keyframe stagger instead of shipping the PNG. The screen *assembles
+itself* on first view and replays on hover, which carries the "AI-shaped
+system" voice through the UI shots the way `motion.*` carries it through the
+diagrams.
+
+Reference implementation: `components/mdx/phones/LexoraPlayer.tsx`.
+Reference format file: `/Users/ruslan/Downloads/Business English 101 — screen
+motion-html/Vocab.dc.html` (the Figma / Framer export whose cadence this
+pattern copies).
+
+### 10.1 When to reconstruct vs ship the PNG
+
+Reconstruct:
+- Pure iOS/Android chrome + text + simple icons + solid colour fills.
+- Progress bars, counters, toggles, large buttons, modal sheets.
+- Anything whose aesthetic *is* the typography (title + subhead + CTA).
+
+Ship the PNG via a normal PhoneRow item (no `kind`):
+- Screenshots that include real photos (Instagram feed posts, floor plans,
+  camera previews, map tiles, user-generated media).
+- Dense data viz where redrawing would double the maintenance surface
+  (full dashboards, long tables, chart grids).
+- One-off marketing shots that we are unlikely to touch again.
+
+Rule of thumb: if redrawing takes more than ~90 min for one screen, ship the
+PNG. The animation payoff isn't worth the pixel-chase.
+
+**Visual-language audit — do this BEFORE writing any SVG.** The reconstructed
+screen must match the *real app's* design identity verbatim, not inherit the
+portfolio's own tokens. Open the reference PNG first and copy from it:
+
+- **Colour palette.** iOS-native lavender / Material blue / brand green —
+  whatever the app actually uses. Do NOT substitute `#F5F4EF` warm paper,
+  `#111` ink, or any other portfolio token. The screens live on the warm
+  paper page but should read as the real app, not as another portfolio
+  surface.
+- **Typography.** If the app uses SF Pro / Roboto / system sans, your SVG
+  uses `font-family: -apple-system, …` — never Playfair Display or any
+  portfolio serif. Portfolio tokens stop at the phone frame.
+- **Component shapes.** iOS pill with `✕` icon inside ≠ a rounded rect with
+  a thin × after the label. Match the native component language — chip
+  styling, selected-state fills, button radii, divider weights.
+- **Data verbatim.** Copy the actual labels, counts, titles from the PNG
+  ("SST Willow Creek P2_TS_R1.7 2", "90 markers", "Comment (optional)"),
+  not plausible-sounding substitutes ("First Floor Plan", "24 markers",
+  "Add a note…"). Inventing data breaks the "this is their real app" trust.
+
+If the real app's visual language fights with the portfolio page too hard,
+ship the PNG — the point of §10 is animation, not a style retcon. The
+Fieldmark reconstruction (2026-10-11) got reverted because the SVG swapped
+the app's lavender + SF Pro + iOS pills for the portfolio's paper + Playfair +
+ink chips. Don't repeat that.
+
+### 10.2 File layout
+
+```
+components/mdx/phones/
+  LexoraPlayer.tsx       # one file per animated screen, PascalCase
+  <YourScreen>.tsx
+```
+
+Each file exports a single named component (`export function <YourScreen>()`).
+Register the key in `PHONE_COMPONENTS` in
+`components/mdx/CaseStudySchemas.tsx`:
+
+```tsx
+import { YourScreen } from "@/components/mdx/phones/YourScreen";
+
+const PHONE_COMPONENTS: Record<string, () => React.ReactNode> = {
+  "lexora-player": () => <LexoraPlayer />,
+  "<your-key>":    () => <YourScreen />,
+};
+```
+
+Author side (MDX): add `kind: "<your-key>"` to the PhoneRow item. The `src`
+PNG stays — it's the fallback for the lightbox and for reduced-motion.
+
+### 10.3 Component skeleton (copy this, adjust the SVG)
+
+```tsx
+"use client";
+import { useEffect, useRef } from "react";
+
+const CSS = `
+  .yr-root .m {
+    opacity: 0;
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @keyframes yr-slide-down  { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes yr-slide-right { from { opacity:0; transform: translateX(-10px); } to { opacity:1; transform: translateX(0); } }
+  @keyframes yr-scale-in    { from { opacity:0; transform: scale(0.4); }       to { opacity:1; transform: scale(1); } }
+  @keyframes yr-rise        { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes yr-scale-x     { from { opacity:0; transform: scaleX(0); }        to { opacity:1; transform: scaleX(1); } }
+  @keyframes yr-hero        { from { opacity:0; transform: scale(0.3) rotate(-45deg); } to { opacity:1; transform: scale(1) rotate(0deg); } }
+
+  /* Animation names are GATED behind .yr-play so classList toggle restarts them. */
+  .yr-root.yr-play .status { animation-name: yr-slide-down;  animation-delay: 0.00s; }
+  .yr-root.yr-play .title  { animation-name: yr-slide-right; animation-delay: 0.10s; transform-origin: 0% 50%; }
+  /* …etc. Stagger by narrative order, not DOM order. */
+
+  @media (prefers-reduced-motion: reduce) {
+    .yr-root .m { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+`;
+
+export function YourScreen() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggered = useRef(false);
+
+  const play = () => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    el.classList.remove("yr-play");
+    void el.offsetWidth;              // reflow — resets @keyframes
+    el.classList.add("yr-play");
+  };
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !triggered.current) {
+          triggered.current = true;
+          play();
+        }
+      },
+      { threshold: 0.35 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleEnter = () => { if (triggered.current) play(); };
+
+  return (
+    <div
+      ref={wrapperRef}
+      onMouseEnter={handleEnter}
+      className="yr-root relative w-full overflow-hidden"
+    >
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <svg viewBox="0 0 430 934" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="…">
+        {/* status bar · header · body · controls · home indicator */}
+      </svg>
+    </div>
+  );
+}
+```
+
+### 10.4 Non-negotiables (every one of these comes from a bug)
+
+1. **CSS `transform` overrides the SVG `transform=""` attribute.** Anything
+   that both needs positioning (`<g transform="translate(x,y)">`) *and* an
+   animated CSS transform must use the wrapper + inner-group pattern:
+
+   ```svg
+   <g transform="translate(24, 88)">            <!-- position only -->
+     <g className="m hbk">                      <!-- animation only -->
+       <path d="…" />
+     </g>
+   </g>
+   ```
+
+   Collapse these two groups and the element teleports to `(0,0)` the moment
+   the keyframe fires.
+
+2. **Gate animation names behind the play class, not `animation-play-state`.**
+   Toggling `paused → running` *resumes* at the paused time, which looks
+   broken on hover. Default state is `opacity: 0` + no `animation-name`. The
+   `.yr-play` class is what *supplies* `animation-name` + `animation-delay`,
+   and `classList.remove/offsetWidth/add` genuinely restarts every keyframe.
+
+3. **IntersectionObserver fires once; hover replays.** First-paint trigger uses
+   `threshold: 0.35` + a `triggered` ref to make it fire exactly once. Hover
+   gates on the same ref so hovering before the IO fires doesn't double-play.
+
+4. **`prefers-reduced-motion` always wins.** The media query at the bottom of
+   the CSS block pins every `.m` to `opacity: 1` + no transform + no
+   animation. Non-negotiable per CLAUDE.md §7.5 — your reconstruction must
+   render as a static settled frame when the OS asks for it.
+
+5. **Keep the local CSS prefix unique per component.** `.lx-*` for the
+   Lexora player, `.<2-letter>-*` for the next one. Collisions across
+   mounted screens on the same page will reset each other's animations.
+
+6. **One EASE across all your @keyframes.** `cubic-bezier(0.22, 1, 0.36, 1)`
+   (matches `EASE` in `CaseStudySchemas.tsx`). Different eases between
+   elements inside one screen read as drift.
+
+7. **Pivot every scale.** `transform-box: fill-box` on `.m` is set globally,
+   but anything scaling horizontally (progress bar, divider) needs
+   `transform-origin: 0% 50%` per-selector, not the default center.
+
+### 10.5 Timing budget
+
+- Total play-once sequence ≤ 2.0s. Lexora player uses 0.00s → 1.84s, hero
+  button lands at 1.24s + 0.6s.
+- Per-element `animation-duration: 0.5s` default; hero elements can take
+  0.6s. Nothing above 0.7s — slower reads as laggy, not composed.
+- Delays stagger in 40–120ms steps, grouped by *narrative beat* (status bar
+  first, then header chrome, then body, then controls, then the hero CTA).
+
+### 10.6 Verification (same Playwright trap as §7.6)
+
+Capture both phases to confirm hover actually restarts:
+
+```js
+// Phase A — first-appearance via IntersectionObserver
+await player.scrollIntoViewIfNeeded();
+for (let i = 0; i < 12; i++) {
+  await page.screenshot({ path: `lxA-${i}.png`, clip });
+  await page.waitForTimeout(180);
+}
+
+// Phase B — hover replay
+await page.mouse.move(10, 10);          // leave first
+await page.waitForTimeout(400);
+await player.hover();                   // mouseenter re-fires
+for (let i = 0; i < 12; i++) {
+  await page.screenshot({ path: `lxB-${i}.png`, clip });
+  await page.waitForTimeout(180);
+}
+```
+
+Both lxA-00 and lxB-00 must show the near-empty opening frame, both
+settle by frame ~06. If lxB stays settled across all 12 frames, you forgot
+rule §10.4(2) — animation-name is not being cleared.
+
