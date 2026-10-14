@@ -71,7 +71,7 @@ export function Hero() {
         </motion.div>
         <StatusPill
           status="available"
-          label="Available for new Project"
+          label="Available for new projects"
           revealDelay={D.chrome}
         />
       </div>
@@ -166,10 +166,10 @@ export function Hero() {
             {...fade(D.tagline)}
             className="max-w-md text-base leading-relaxed text-[color:var(--ink-body)]"
           >
-            I&rsquo;m Ruslan Hrekov, a solo builder based in Kharkiv → Maryland →
-            Houston. I collaborate with Claude to ship production software
-            that&rsquo;s honest about how it was made — commit hashes, DEVLOGs,
-            locked files.
+            I&rsquo;m Ruslan Hrekov, a solo builder based in the US. I
+            collaborate with Claude to ship production software that&rsquo;s
+            honest about how it was made — commit hashes, DEVLOGs, locked
+            files. The usual.
           </motion.p>
           <motion.a
             {...fade(D.cta)}
