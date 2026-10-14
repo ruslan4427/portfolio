@@ -163,6 +163,37 @@ export default async function BlogPostPage({
           <BlogReadTracker slug={frontmatter.slug} />
         </div>
 
+        {(frontmatter.distribution?.linkedin?.publishedUrl ||
+          frontmatter.distribution?.devto?.publishedUrl) && (
+          <aside className="px-[var(--gutter)] pb-10">
+            <div className="mx-auto flex max-w-[65ch] flex-wrap items-center gap-x-5 gap-y-2 font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+              <span>Also on</span>
+              {frontmatter.distribution?.linkedin?.publishedUrl && (
+                <a
+                  href={frontmatter.distribution.linkedin.publishedUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[color:var(--ink-primary)] underline underline-offset-4 decoration-[color:var(--outline)] hover:decoration-[color:var(--ink-primary)]"
+                >
+                  LinkedIn
+                  <span aria-hidden>↗</span>
+                </a>
+              )}
+              {frontmatter.distribution?.devto?.publishedUrl && (
+                <a
+                  href={frontmatter.distribution.devto.publishedUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[color:var(--ink-primary)] underline underline-offset-4 decoration-[color:var(--outline)] hover:decoration-[color:var(--ink-primary)]"
+                >
+                  Dev.to
+                  <span aria-hidden>↗</span>
+                </a>
+              )}
+            </div>
+          </aside>
+        )}
+
         {frontmatter.artifacts && frontmatter.artifacts.length > 0 && (
           <aside className="px-[var(--gutter)] pb-16">
             <div className="mx-auto max-w-[65ch] rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8">

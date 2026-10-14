@@ -12,6 +12,7 @@ const socials = [
   { label: "GitHub", href: "https://github.com/ruslan4427", short: "GH" },
   { label: "X", href: "https://x.com/ruslan4427", short: "X" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/", short: "IN" },
+  { label: "Dev.to", href: "https://dev.to/ruslan_hrekov_d296523b326", short: "DEV" },
   { label: "Email", href: "mailto:rusgrekovua@gmail.com", short: "@" },
 ] as const;
 
