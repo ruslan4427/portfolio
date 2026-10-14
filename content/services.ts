@@ -15,7 +15,7 @@ export const services: Service[] = [
     name: "Discovery Sprint",
     format: "2 weeks · fixed",
     outcome:
-      "Technical + product assessment, a prioritized roadmap, and one working spike on the highest-risk unknown.",
+      "Technical + product assessment, a prioritized roadmap, and one working spike aimed at whatever scares you most.",
     scope: [
       "Codebase + product review, async and live",
       "30/60/90-day roadmap with sequenced bets",
@@ -45,7 +45,7 @@ export const services: Service[] = [
     name: "Build Partner (AI-first)",
     format: "1–3 months · milestone",
     outcome:
-      "A concrete deliverable shipped together — MVP, migration, or rewrite — with AI collaboration baked in.",
+      "A concrete deliverable shipped together — MVP, migration, or rewrite — with AI collaboration baked in, not bolted on.",
     scope: [
       "Spec + plan + tasks before any code",
       "Full-stack build alongside your team",
