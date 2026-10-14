@@ -335,7 +335,10 @@ export function PhoneRow({
       >
         {current && (
           current.kind && PHONE_COMPONENTS[current.kind] ? (
-            <div className="w-[min(430px,92vw)] max-h-[86vh] overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)]">
+            <div
+              className="aspect-[430/934] overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)]"
+              style={{ width: "min(430px, 92vw, calc(78vh * 430 / 934))" }}
+            >
               {PHONE_COMPONENTS[current.kind]()}
             </div>
           ) : (
