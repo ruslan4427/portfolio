@@ -13,19 +13,19 @@ const benefits: Benefit[] = [
   {
     title: "Spec-first, always",
     description:
-      "Every feature lands in specs/<slug>/ as spec + plan + tasks before a single production line. No guessing, no rewrites — the disagreement happens on paper.",
+      "Every feature lands in specs/<slug>/ as spec + plan + tasks before any production code. Disagreements happen on paper, where they're cheaper.",
     icon: <Sparkle />,
   },
   {
     title: "Honest metrics, not vibes",
     description:
-      "Case studies come with commit hashes, DEVLOG entries, and named bugs. If a number is not verifiable, it doesn't get shipped in the copy.",
+      "Case studies come with commit hashes, DEVLOG entries, and named bugs. If a number isn't verifiable, it doesn't go in the copy.",
     icon: <Handshake />,
   },
   {
     title: "Lock what works, keep the taste",
     description:
-      "Claude does the typing. The pivots, the calls on what to lock down, and the moment we stop and think — those stay mine. That's why the code feels considered.",
+      "Claude does the typing. The pivots, the calls on what to lock down, and the moment to stop and think — those stay mine. That's where the taste shows up in the diff.",
     icon: <Clap />,
   },
 ];

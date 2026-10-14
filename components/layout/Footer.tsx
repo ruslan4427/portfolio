@@ -32,7 +32,7 @@ export function Footer() {
             </h2>
             <CTALink href="/contact">Let&rsquo;s spec your next project</CTALink>
             <p className="font-sans text-sm text-[color:var(--ink-muted)]">
-              Based in Ohio — available for synchronous collaboration in EST/CST.
+              Based in Ohio. EST/CST sync hours, by default.
             </p>
           </div>
         </div>

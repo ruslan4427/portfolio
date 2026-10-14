@@ -36,7 +36,7 @@ const steps: Step[] = [
     n: "4",
     title: "Build",
     description:
-      "Opus for architecture, Sonnet for features, Haiku for volume. DEVLOG appended after every work block.",
+      "Opus for architecture, Sonnet for features, Haiku for volume. DEVLOG goes in after every work block — not at the end, when memory lies.",
     icon: <IconDots />,
   },
   {
