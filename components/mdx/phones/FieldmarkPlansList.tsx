@@ -87,7 +87,7 @@ function PdfGlyph() {
       <path d="M0 6 h12 l4 4 v16 a1.5 1.5 0 0 1 -1.5 1.5 h-14.5 a1.5 1.5 0 0 1 -1.5 -1.5 v-18.5 a1.5 1.5 0 0 1 1.5 -1.5 Z" fill="#CFD4E3" />
       <path d="M12 6 v4 h4" />
       {/* "PDF" letters hint */}
-      <text x="2" y="22" fontSize="5.5" fontWeight="700" fill="#4A5570" stroke="none" style={{ fontFamily: IOS_FONT }}>PDF</text>
+      <text x="2" y="22" fontSize="7" fontWeight="700" fill="#4A5570" stroke="none" style={{ fontFamily: IOS_FONT }}>PDF</text>
     </g>
   );
 }
@@ -170,7 +170,7 @@ function DotCount({ x, y, color, count }: { x: number; y: number; color: string;
       <text
         x={x + 12}
         y={y}
-        fontSize="13"
+        fontSize="17"
         fontWeight="600"
         fill="#1C1C1E"
         style={{ fontFamily: IOS_FONT }}
@@ -306,7 +306,7 @@ export function FieldmarkPlansList() {
             <text
               x="24"
               y="36"
-              fontSize="15"
+              fontSize="20"
               fontWeight="600"
               fill="#1C1C1E"
               style={{ fontFamily: IOS_FONT }}
@@ -350,7 +350,7 @@ export function FieldmarkPlansList() {
             <text
               x="0"
               y="0"
-              fontSize="17"
+              fontSize="22"
               fontWeight="600"
               fill="#1C1C1E"
               style={{ fontFamily: IOS_FONT }}
@@ -376,10 +376,10 @@ export function FieldmarkPlansList() {
           const markerY = row.titleLines.length === 1 ? 70 : 76;
           // "N markers" text
           const markerText = `${row.markers} markers`;
-          // Approx width of "N markers" at 13px semibold-ish — reserve 72px then dots start.
-          // Use a measured spacing: text ends ~ at titleX + estimated_px, start dots after +16px gap.
-          const markerTextApproxW = markerText.length * 7; // rough per-char at 13px
-          let dotCursor = titleX + markerTextApproxW + 16;
+          // Approx width of "N markers" at 17px semibold-ish — reserve ~95px then dots start.
+          // Use a measured spacing: text ends ~ at titleX + estimated_px, start dots after +18px gap.
+          const markerTextApproxW = markerText.length * 9; // rough per-char at 17px
+          let dotCursor = titleX + markerTextApproxW + 18;
 
           return (
             <g key={row.cls} transform={`translate(${CARD_X}, ${row.y})`}>
@@ -403,7 +403,7 @@ export function FieldmarkPlansList() {
                     key={i}
                     x={titleX}
                     y={titleY + i * lineHeight}
-                    fontSize="16"
+                    fontSize="21"
                     fontWeight="600"
                     fill="#1C1C1E"
                     style={{ fontFamily: IOS_FONT }}
@@ -416,7 +416,7 @@ export function FieldmarkPlansList() {
                 <text
                   x={titleX}
                   y={markerY}
-                  fontSize="13"
+                  fontSize="17"
                   fontWeight="400"
                   fill="#6E6E73"
                   style={{ fontFamily: IOS_FONT }}
@@ -436,9 +436,9 @@ export function FieldmarkPlansList() {
                         count={d.count}
                       />
                     );
-                    // Advance cursor: dot (8) + gap (6) + count digits (roughly 8 per digit) + inter-pair gap (12)
+                    // Advance cursor: dot (8) + gap (6) + count digits (roughly 10 per digit at 17px) + inter-pair gap (14)
                     const digitCount = String(d.count).length;
-                    dotCursor += 8 + 6 + digitCount * 8 + 12;
+                    dotCursor += 8 + 6 + digitCount * 10 + 14;
                     return el;
                   })}
                 </g>
@@ -474,7 +474,7 @@ export function FieldmarkPlansList() {
             <text
               x="72"
               y="54"
-              fontSize="11"
+              fontSize="14"
               fontWeight="500"
               fill="#1C1C1E"
               textAnchor="middle"
@@ -490,7 +490,7 @@ export function FieldmarkPlansList() {
             <text
               x="215"
               y="54"
-              fontSize="11"
+              fontSize="14"
               fontWeight="500"
               fill="#6E6E73"
               textAnchor="middle"
@@ -506,7 +506,7 @@ export function FieldmarkPlansList() {
             <text
               x="358"
               y="54"
-              fontSize="11"
+              fontSize="14"
               fontWeight="500"
               fill="#6E6E73"
               textAnchor="middle"

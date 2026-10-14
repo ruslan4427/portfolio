@@ -164,7 +164,7 @@ function PdfToggleIcon() {
       <text
         x="12"
         y="15.4"
-        fontSize="7"
+        fontSize="9"
         fontWeight="700"
         fill="#1C1C1E"
         stroke="none"
@@ -194,7 +194,7 @@ function DotCount({
       <text
         x={x + 12}
         y={y}
-        fontSize="13"
+        fontSize="17"
         fontWeight="600"
         fill="#1C1C1E"
         style={{ fontFamily: IOS_FONT }}
@@ -320,7 +320,7 @@ export function FieldmarkFloorPlan() {
               <text
                 x="0"
                 y="4"
-                fontSize="12"
+                fontSize="16"
                 fontWeight="700"
                 fill="#FFFFFF"
                 textAnchor="middle"
@@ -333,7 +333,7 @@ export function FieldmarkFloorPlan() {
               <text
                 x="11"
                 y="-8"
-                fontSize="8"
+                fontSize="10"
                 fontWeight="700"
                 fill="#1C1C1E"
                 textAnchor="middle"
@@ -355,7 +355,7 @@ export function FieldmarkFloorPlan() {
             <text
               x="24"
               y="36"
-              fontSize="15"
+              fontSize="20"
               fontWeight="600"
               fill="#1C1C1E"
               style={{ fontFamily: IOS_FONT }}
@@ -395,7 +395,7 @@ export function FieldmarkFloorPlan() {
             <text
               x="0"
               y="0"
-              fontSize="17"
+              fontSize="22"
               fontWeight="600"
               fill="#1C1C1E"
               style={{ fontFamily: IOS_FONT }}
@@ -452,7 +452,7 @@ export function FieldmarkFloorPlan() {
             <text
               x="83"
               y="25"
-              fontSize="14"
+              fontSize="18"
               fontWeight="500"
               fill="#FFFFFF"
               textAnchor="middle"

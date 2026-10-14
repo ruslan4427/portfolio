@@ -98,7 +98,7 @@ function UnselectedPill({ x, y, w, label, className }: UnselPillProps) {
       <text
         x={x + 14}
         y={y + PILL_H / 2 + 5}
-        fontSize={15}
+        fontSize={20}
         fontWeight={400}
         fill="#1C1C1E"
       >
@@ -153,7 +153,7 @@ function SelectedPill({ x, y, w, label, className, withRemove = false }: SelPill
       <text
         x={x + 28}
         y={y + PILL_H / 2 + 5}
-        fontSize={15}
+        fontSize={20}
         fontWeight={400}
         fill="#1C1C1E"
       >
@@ -217,37 +217,37 @@ export function FieldmarkPlaceMarker() {
   const G = 10;
   const LEFT = 24;
 
-  // Row 1: Face Plate (115), Data Cable (115)  → 115 + 10 + 115 = 240
-  const w_face = 115;
-  const w_data = 115;
+  // Row 1: Face Plate (140), Data Cable (140)  → 140 + 10 + 140 = 290
+  const w_face = 140;
+  const w_data = 140;
   const row1y = 360;
 
-  // Row 2: Other (80), Speaker (95), Cable Exit (108) → 80+10+95+10+108 = 303
-  const w_other = 80;
-  const w_speaker = 95;
-  const w_cableexit = 108;
-  const row2y = row1y + PILL_H + G; // 406
+  // Row 2: Other (90), Speaker (112), Cable Exit (142) → 90+10+112+10+142 = 364
+  const w_other = 90;
+  const w_speaker = 112;
+  const w_cableexit = 142;
+  const row2y = row1y + PILL_H + G;
 
-  // Row 3: Keystone (100), ✓ Camera ✕ (110)
-  const w_keystone = 100;
-  const w_camera = 110;
-  const row3y = row2y + PILL_H + G; // 452
+  // Row 3: Keystone (120), ✓ Camera ✕ (122)
+  const w_keystone = 120;
+  const w_camera = 122;
+  const row3y = row2y + PILL_H + G;
 
-  // Row 4: + Custom (100) dashed
-  const w_custom = 100;
-  const row4y = row3y + PILL_H + G; // 498
+  // Row 4: + Custom (112) dashed
+  const w_custom = 112;
+  const row4y = row3y + PILL_H + G;
 
   // Status subhead
   const statusHeadY = 548;
   // Status pills — two rows
-  // Row A: ✓ In Progress (128), Done (72), Blocked (92) → 128+10+72+10+92 = 312
-  const w_progress = 128;
-  const w_done = 72;
-  const w_blocked = 92;
+  // Row A: ✓ In Progress (150), Done (86), Blocked (110) → 150+10+86+10+110 = 366
+  const w_progress = 150;
+  const w_done = 86;
+  const w_blocked = 110;
   const statusRowAy = 568;
 
-  // Row B: Needs Review (128)
-  const w_needs = 128;
+  // Row B: Needs Review (165)
+  const w_needs = 165;
   const statusRowBy = statusRowAy + PILL_H + G; // 614
 
   // Comment field
@@ -290,7 +290,7 @@ export function FieldmarkPlaceMarker() {
         <text
           x="42"
           y="40"
-          fontSize={16}
+          fontSize={21}
           fontWeight={600}
           fill="#1C1C1E"
           opacity={0.75}
@@ -313,7 +313,7 @@ export function FieldmarkPlaceMarker() {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <text x="46" y="99" fontSize={17} fontWeight={600} fill="#1C1C1E">
+          <text x="46" y="99" fontSize={22} fontWeight={600} fill="#1C1C1E">
             SST Willow Cree…
           </text>
           {/* sparkle icon */}
@@ -329,21 +329,21 @@ export function FieldmarkPlaceMarker() {
           {/* PDF icon */}
           <g transform="translate(356, 80)">
             <rect x="0" y="0" width="24" height="26" rx="3" fill="none" stroke="#1C1C1E" strokeWidth={1.6} />
-            <text x="12" y="18" fontSize={8} fontWeight={700} fill="#1C1C1E" textAnchor="middle">PDF</text>
+            <text x="12" y="18" fontSize={10} fontWeight={700} fill="#1C1C1E" textAnchor="middle">PDF</text>
           </g>
         </g>
 
         {/* Status strip — "0 / 24 • 21 • 0 • 0 • 3" with coloured dots */}
         <g transform="translate(16, 128)" opacity={0.9}>
-          <text x="0" y="0" fontSize={13} fontWeight={400} fill="#1C1C1E">0 / 24</text>
+          <text x="0" y="0" fontSize={17} fontWeight={400} fill="#1C1C1E">0 / 24</text>
           <circle cx="56" cy="-4" r="4" fill="#34C759" />
-          <text x="64" y="0" fontSize={13} fontWeight={500} fill="#1C1C1E">21</text>
+          <text x="64" y="0" fontSize={17} fontWeight={500} fill="#1C1C1E">21</text>
           <circle cx="92" cy="-4" r="4" fill="#FF3B30" />
-          <text x="100" y="0" fontSize={13} fontWeight={500} fill="#1C1C1E">0</text>
+          <text x="100" y="0" fontSize={17} fontWeight={500} fill="#1C1C1E">0</text>
           <circle cx="118" cy="-4" r="4" fill="#007AFF" />
-          <text x="126" y="0" fontSize={13} fontWeight={500} fill="#1C1C1E">0</text>
+          <text x="126" y="0" fontSize={17} fontWeight={500} fill="#1C1C1E">0</text>
           <circle cx="144" cy="-4" r="4" fill="#FF9500" />
-          <text x="152" y="0" fontSize={13} fontWeight={500} fill="#1C1C1E">3</text>
+          <text x="152" y="0" fontSize={17} fontWeight={500} fill="#1C1C1E">3</text>
         </g>
 
         {/* Faint backdrop room rectangles — "floor plan" hint behind dim */}
@@ -375,7 +375,7 @@ export function FieldmarkPlaceMarker() {
           {/* Title */}
           <g transform="translate(24, 300)">
             <g className="m fm-title">
-              <text x="0" y="0" fontSize={22} fontWeight={600} fill="#1C1C1E">
+              <text x="0" y="0" fontSize={29} fontWeight={600} fill="#1C1C1E">
                 Place Marker
               </text>
             </g>
@@ -384,7 +384,7 @@ export function FieldmarkPlaceMarker() {
           {/* "Type" subhead */}
           <g transform="translate(24, 340)">
             <g className="m fm-type-head">
-              <text x="0" y="0" fontSize={15} fontWeight={600} fill="#1C1C1E">
+              <text x="0" y="0" fontSize={20} fontWeight={600} fill="#1C1C1E">
                 Type
               </text>
             </g>
@@ -431,7 +431,7 @@ export function FieldmarkPlaceMarker() {
             <text
               x={LEFT + 32}
               y={row4y + PILL_H / 2 + 5}
-              fontSize={15}
+              fontSize={20}
               fontWeight={400}
               fill="#6E6E73"
             >
@@ -442,7 +442,7 @@ export function FieldmarkPlaceMarker() {
           {/* "Status" subhead */}
           <g transform={`translate(24, ${statusHeadY})`}>
             <g className="m fm-status-head">
-              <text x="0" y="0" fontSize={15} fontWeight={600} fill="#1C1C1E">
+              <text x="0" y="0" fontSize={20} fontWeight={600} fill="#1C1C1E">
                 Status
               </text>
             </g>
@@ -472,7 +472,7 @@ export function FieldmarkPlaceMarker() {
             <text
               x={LEFT + 16}
               y={commentY + 24}
-              fontSize={15}
+              fontSize={20}
               fontWeight={400}
               fill="#6E6E73"
             >
@@ -501,7 +501,7 @@ export function FieldmarkPlaceMarker() {
             <text
               x={LEFT + btnW / 2}
               y={btnY + btnH / 2 + 6}
-              fontSize={17}
+              fontSize={22}
               fontWeight={600}
               fill="#1C1C1E"
               textAnchor="middle"
@@ -524,7 +524,7 @@ export function FieldmarkPlaceMarker() {
             <text
               x={226 + btnW / 2}
               y={btnY + btnH / 2 + 6}
-              fontSize={17}
+              fontSize={22}
               fontWeight={600}
               fill="#FFFFFF"
               textAnchor="middle"
