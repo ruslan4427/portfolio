@@ -244,7 +244,7 @@ export function FieldmarkPlaceMarker() {
   const w_progress = 150;
   const w_done = 86;
   const w_blocked = 110;
-  const statusRowAy = 568;
+  const statusRowAy = 580;
 
   // Row B: Needs Review (165)
   const w_needs = 165;
