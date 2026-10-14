@@ -14,7 +14,7 @@ const stack: StackRow[] = [
   {
     tier: "Opus",
     use: "Strategy, architecture, review",
-    ex: "Angel five-stage pipeline · Noble frozen-logic authoring",
+    ex: "Angel five-stage pipeline · Noble locked-file authoring",
   },
   {
     tier: "Sonnet",

@@ -77,7 +77,7 @@ const SCENE_HTML = `
               <span class="hd-s2 hd-m" style="width:29px;height:29px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08), 0 0 0 .5px rgba(0,0,0,.04);display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:500;color:#111">IN</span>
               <span class="hd-s3 hd-m" style="width:29px;height:29px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08), 0 0 0 .5px rgba(0,0,0,.04);display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:500;color:#111">@</span>
             </div>
-            <div class="hd-pg hd-m" style="position:absolute;left:622px;top:516px;width:314px;font-size:11px;line-height:18px;color:#3b3b3b">I&rsquo;m Ruslan Hrekov, a solo builder based in Kharkiv &rarr; Maryland &rarr; Houston. I collaborate with Claude to ship production software that&rsquo;s honest about how it was made &mdash; commit hashes, DEVLOGs, frozen logic.</div>
+            <div class="hd-pg hd-m" style="position:absolute;left:622px;top:516px;width:314px;font-size:11px;line-height:18px;color:#3b3b3b">I&rsquo;m Ruslan Hrekov, a solo builder based in Kharkiv &rarr; Maryland &rarr; Houston. I collaborate with Claude to ship production software that&rsquo;s honest about how it was made &mdash; commit hashes, DEVLOGs, locked files.</div>
             <div class="hd-ds hd-m" style="position:absolute;left:622px;top:604px;display:flex;align-items:center;gap:6px;font-size:9.5px;color:#6b6b6b">Discover <span class="hd-disc hd-m" style="display:inline-block">&darr;</span></div>
           </div>
         </div>
@@ -113,7 +113,7 @@ const SCENE_HTML = `
       <div style="display:flex;flex-wrap:wrap;gap:6px">
         <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:13px;background:#f1eee7;color:#141414;font-size:13px;font-weight:600">commit hashes</span>
         <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:13px;background:#f1eee7;color:#141414;font-size:13px;font-weight:600">DEVLOGs</span>
-        <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:13px;background:#f1eee7;color:#141414;font-size:13px;font-weight:600">frozen logic</span>
+        <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:13px;background:#f1eee7;color:#141414;font-size:13px;font-weight:600">locked files</span>
       </div>
     </div>
   </div>

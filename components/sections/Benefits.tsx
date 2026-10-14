@@ -23,9 +23,9 @@ const benefits: Benefit[] = [
     icon: <Handshake />,
   },
   {
-    title: "Frozen logic, held-line taste",
+    title: "Lock what works, keep the taste",
     description:
-      "Claude does the typing. The pivots, the frozen-logic calls, and the moment we stop and think — those stay mine. That's why the code feels considered.",
+      "Claude does the typing. The pivots, the calls on what to lock down, and the moment we stop and think — those stay mine. That's why the code feels considered.",
     icon: <Clap />,
   },
 ];

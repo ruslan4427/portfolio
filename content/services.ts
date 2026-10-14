@@ -49,7 +49,7 @@ export const services: Service[] = [
     scope: [
       "Spec + plan + tasks before any code",
       "Full-stack build alongside your team",
-      "AI-collaboration patterns (frozen logic, model tiering)",
+      "AI-collaboration patterns (knowing what to lock, picking the right model for each task)",
       "Playbook so your team keeps shipping after I leave",
     ],
     investment: "TBD",

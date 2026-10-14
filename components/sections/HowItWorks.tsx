@@ -15,7 +15,7 @@ const steps: Step[] = [
     n: "1",
     title: "Discovery",
     description:
-      "One paragraph in. Constraints, users, stakes. If we can’t name the frozen-logic call, we’re not ready to spec.",
+      "One paragraph in. Constraints, users, stakes. If we can’t name what should stay locked, we’re not ready to spec.",
     icon: <IconClipboard />,
   },
   {

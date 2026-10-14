@@ -169,7 +169,7 @@ export function Hero() {
             I&rsquo;m Ruslan Hrekov, a solo builder based in Kharkiv → Maryland →
             Houston. I collaborate with Claude to ship production software
             that&rsquo;s honest about how it was made — commit hashes, DEVLOGs,
-            frozen logic.
+            locked files.
           </motion.p>
           <motion.a
             {...fade(D.cta)}

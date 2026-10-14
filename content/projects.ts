@@ -121,7 +121,7 @@ export const projects: Project[] = [
     slug: "noble-saas",
     index: "05",
     name: "Noble",
-    tagline: "Booking SaaS for solo barbershops — 234 commits, one frozen file.",
+    tagline: "Booking SaaS for solo barbershops — 234 commits, one locked file.",
     role: "Full build · solo",
     stack: ["Next.js 16", "Supabase", "Stripe", "Twilio", "GitHub Actions"],
     year: "2026",

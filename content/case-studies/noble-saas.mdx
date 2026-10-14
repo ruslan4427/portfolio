@@ -1,7 +1,7 @@
 ---
 slug: noble-saas
 title: Noble
-tagline: Booking SaaS for solo barbershops — 234 commits, one frozen file.
+tagline: Booking SaaS for solo barbershops — 234 commits, one locked file.
 role: Full build · solo
 stack:
   - Next.js 16
@@ -19,7 +19,7 @@ readingTime: 7
 recruiterSummary: |
   Multi-tenant booking SaaS for solo barbershops — full build, solo, 234 commits since April. Stripe subscriptions, Twilio A2P 10DLC SMS (passing US carrier compliance), Supabase row-level security for tenant isolation, and an autonomous weekly marketing pipeline running on GitHub Actions.
 
-  74 of those commits landed in the first ten days — empty repo to live multi-tenant bookings. 152 by April's end, hardened against the 16 named QA bugs that production surfaced. All 16 were fixed in commit 6b29244 and frozen in a 170-line docs/STABLE_LOGIC.md that forbids future refactor of the surviving edge cases.
+  74 of those commits landed in the first ten days — empty repo to live multi-tenant bookings. 152 by April's end, hardened against the 16 named QA bugs that production surfaced. All 16 were fixed in commit 6b29244 and locked in a 170-line docs/STABLE_LOGIC.md that forbids future refactor of the surviving edge cases.
 
   Steady-state now runs 6–11 commits/month. The interesting work migrated from "build the app" to "build the machine that grows the app" — Claude authors marketing content, not code.
 supportingArtifacts:
@@ -64,7 +64,7 @@ supportingArtifacts:
 />
 
 <ValueStatement eyebrow="The number that mattered">
-Seventy-four commits in ten days got Noble to live bookings. Sixteen named bugs got it to production. One frozen file keeps it there.
+Seventy-four commits in ten days got Noble to live bookings. Sixteen named bugs got it to production. One locked file keeps it there.
 </ValueStatement>
 
 ## Context
@@ -152,9 +152,9 @@ Three real options exist for a solo shop. Noble sits below all three — same co
 | Weekly content approval | Me — 1 hour on Mondays |
 | Deployment | Vercel autopilot (git push to main) |
 
-## Prompt Architecture — Frozen Stable Logic
+## Prompt Architecture — Lock what works
 
-The single pattern that made this scale past week two: **once code is verified, it becomes frozen and named.**
+The single pattern that made this scale past week two: **once code is verified, it gets locked and named.**
 
 The booking-page slot calculation lives in `src/lib/slots.ts` and `SalonClient.tsx`. It went through 16 rounds of QA in April. Each bug got a name — `BUG-01` through `BUG-15` — and a commit hash. All 16 are documented in `docs/STABLE_LOGIC.md`, which opens with the rule that anchors every Claude session on this repo:
 
