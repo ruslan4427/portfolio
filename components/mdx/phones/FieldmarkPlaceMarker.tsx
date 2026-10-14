@@ -238,26 +238,26 @@ export function FieldmarkPlaceMarker() {
   const row4y = row3y + PILL_H + G;
 
   // Status subhead
-  const statusHeadY = 548;
+  const statusHeadY = 564;
   // Status pills — two rows
   // Row A: ✓ In Progress (150), Done (86), Blocked (110) → 150+10+86+10+110 = 366
   const w_progress = 150;
   const w_done = 86;
   const w_blocked = 110;
-  const statusRowAy = 580;
+  const statusRowAy = 596;
 
   // Row B: Needs Review (165)
   const w_needs = 165;
-  const statusRowBy = statusRowAy + PILL_H + G; // 614
+  const statusRowBy = statusRowAy + PILL_H + G;
 
   // Comment field
-  const commentHeadY = 666;
-  const commentY = 686;
+  const commentHeadY = 682;
+  const commentY = 702;
   const commentW = 430 - LEFT * 2; // 382
   const commentH = 100;
 
   // Buttons
-  const btnY = 820;
+  const btnY = 836;
   const btnH = 52;
   const btnR = btnH / 2;
   const btnW = 180;
