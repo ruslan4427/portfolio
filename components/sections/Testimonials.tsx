@@ -9,6 +9,7 @@ type Testimonial = {
   date: string;
   quote: string;
   initials: string;
+  linkedinUrl?: string;
 };
 
 // TODO(ruslan): swap remaining placeholder quotes for real stakeholder ones.
@@ -20,6 +21,7 @@ const testimonials: Testimonial[] = [
     role: "Product Practice Lead · ex-PIMU Services",
     date: "MAY 2023",
     initials: "YH",
+    linkedinUrl: "https://www.linkedin.com/in/yuriihoncharuk/",
     quote:
       "Ruslan owned the arc from requirements to shipped design — creative, responsible, and someone every stakeholder wanted in the room.",
   },
@@ -60,6 +62,7 @@ const testimonials: Testimonial[] = [
     role: "Project Owner · ex-PIMU Services",
     date: "MAY 2023",
     initials: "SK",
+    linkedinUrl: "https://www.linkedin.com/in/svetlana-kostenko1/",
     quote:
       "Ruslan is the collaborator you keep. Fresh, high-quality work, and the discipline to stay late when a client date needed defending.",
   },
@@ -80,8 +83,27 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         </span>
       </div>
       <div className="mt-5">
-        <div className="font-sans text-base font-semibold text-[color:var(--ink-primary)]">
-          {t.name}
+        <div className="flex items-center gap-2 font-sans text-base font-semibold text-[color:var(--ink-primary)]">
+          <span>{t.name}</span>
+          {t.linkedinUrl ? (
+            <a
+              href={t.linkedinUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Verify ${t.name} on LinkedIn`}
+              className="inline-flex h-5 w-5 items-center justify-center rounded-[4px] border border-[color:var(--hairline)] text-[color:var(--ink-muted)] transition-colors duration-200 hover:border-[color:var(--ink-primary)] hover:text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
+            >
+              <svg
+                aria-hidden
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.86-3.04-1.86 0-2.15 1.45-2.15 2.95v5.66H9.33V9h3.42v1.56h.05c.48-.9 1.64-1.86 3.37-1.86 3.6 0 4.27 2.37 4.27 5.46v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z" />
+              </svg>
+            </a>
+          ) : null}
         </div>
         <div className="mt-1 font-sans text-sm text-[color:var(--ink-muted)]">
           {t.role}
