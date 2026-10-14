@@ -33,29 +33,29 @@ artifacts:
     href: /rss.xml
 ---
 
-The site had five case studies and no place to put anything shorter. Everything I wanted to write about — a debugging trace, a pattern that keeps paying off, a skeptical read on a tool the timeline is excited about — needed the same weight as a full case study or it got dropped. That's the wrong shape.
+Five case studies, and anything shorter had nowhere to go. A debugging trace, a pattern that kept paying rent, a skeptical read on whatever tool the timeline was annoyed about that week — all of it had to grow into a full case study or quietly die in Notes. Most of it died. This is the fix.
 
 ## What this is
 
-`/blog` supports four formats:
+`/blog` runs four formats:
 
-- **Case Study** — long-form, receipts attached, commit hashes referenced.
-- **Build Log** — chronological, dated, mid-work. This post is one.
-- **Field Note** — skeptical take on something popular. Short, arguable.
-- **Pattern** — a rule I keep applying, why, and when it breaks.
+- **Case Study** — long form, receipts attached, commit hashes within reach.
+- **Build Log** — dated, mid-work, written before I know how it ends. This post qualifies.
+- **Field Note** — skeptical take on something the timeline likes. Short enough to be arguable.
+- **Pattern** — a rule I keep applying, why it works, and the day it won't.
 
-Each post lands with reading time, tags, and (where relevant) a **Receipts** aside — links to the actual commits, prompts, or artifacts behind the claims. If I can't cite it, I don't write it.
+Each post lands with reading time, tags, and (where relevant) a **Receipts** aside — the actual commits, prompts, or artifacts behind the claims. If the receipt doesn't exist, neither does the post.
 
 ## Under the hood
 
-- MDX with frontmatter validated at build time (invalid frontmatter throws).
-- `/rss.xml` is generated from the same source with CDATA descriptions.
-- Google Search Console meta tag ships via env var, so the feed shows up.
-- Analytics: GA4 with IP anonymisation, off by default for EU visitors until you click accept. `proxy.ts` (Next.js 16's edge middleware convention) reads Vercel's `x-vercel-ip-country` header and sets a `geo-eu` cookie so the client knows which path to render.
-- No third-party tracking beyond that. No newsletter form yet.
+- MDX with frontmatter that gets validated at build time. Type a bad date, break the build. Fair.
+- `/rss.xml` generates from the same source — CDATA descriptions, RFC-822 dates, the whole nostalgia package.
+- Google Search Console meta tag ships via env var. Committing a verification string to the repo felt petty.
+- Analytics: GA4 with IP anonymisation, off by default for EU visitors until they say otherwise. `proxy.ts` (Next.js 16's rebrand of the middleware convention) reads Vercel's `x-vercel-ip-country` header and sets a `geo-eu` cookie. The client picks a path from there.
+- No third-party tracking beyond that. No newsletter form. No "hey, got a sec?" popup.
 
 ## What's next
 
-First real posts land over the next two weeks — one Field Note on prompt patterns that stopped working when I moved from Sonnet to Opus, one Build Log on Sprint 11 itself, and a Pattern write-up of `STABLE_LOGIC.md` (the file that keeps AI collaboration from unwinding your own fixes).
+First real posts land over the next two weeks. One Field Note on prompt patterns that quietly stopped working when I moved from Sonnet to Opus. One Build Log on Sprint 11, mid-sprint. One Pattern on `STABLE_LOGIC.md` — the file whose job is to keep Claude from undoing yesterday's fix.
 
-Subscribe via [RSS](/rss.xml), or wait for the LinkedIn + dev.to cross-posts — Sprint 14 wires the schedule-driven automation that lands this very post on both platforms.
+Subscribe via [RSS](/rss.xml) if you still live that way, or let the LinkedIn + dev.to cross-posts find you — Sprint 14 wires the automation that lands this exact post on both platforms. Assuming it works, which is itself a Build Log for later.
