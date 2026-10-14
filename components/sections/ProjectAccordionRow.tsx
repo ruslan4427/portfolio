@@ -108,14 +108,14 @@ export function ProjectAccordionRow({ project, order }: Props) {
                 {project.name}
               </span>
               <span className="hidden font-sans text-[11px] uppercase tracking-[0.16em] text-[color:var(--ink-muted)] md:inline">
-                {statusLabel[project.status]} · {project.year}
+                {project.role} · {statusLabel[project.status]} · {project.year}
               </span>
             </span>
             <span
-              className="hidden font-sans text-sm text-[color:var(--ink-muted)] md:block"
+              className="font-sans text-[13px] leading-[1.45] text-[color:var(--ink-body)] md:text-sm md:leading-[1.5]"
               aria-hidden={expanded}
             >
-              {project.role}
+              {project.pitch}
             </span>
           </span>
 

@@ -15,13 +15,16 @@ export function Footer() {
     <footer className="relative px-[var(--gutter)] pb-16 pt-[var(--section-py)]">
       <div className="mx-auto max-w-[var(--content-max)]">
         <div className="relative overflow-hidden rounded-[calc(var(--radius-card)+8px)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-6 py-16 shadow-[var(--shadow-card)] md:py-24">
-          <div className="relative flex flex-col items-center gap-8 text-center">
+          <div className="relative flex flex-col items-center gap-6 text-center">
             <h2 className="font-serif text-[clamp(40px,6vw,88px)] text-[color:var(--ink-primary)]">
-              Tell me what your idea is,
+              Ready to ship
               <br />
-              and let&rsquo;s do it.
+              without rewrites?
             </h2>
-            <CTALink href="/contact">Let&rsquo;s talk</CTALink>
+            <CTALink href="/contact">Let&rsquo;s spec your next project</CTALink>
+            <p className="font-sans text-sm text-[color:var(--ink-muted)]">
+              Based in Ohio — available for synchronous collaboration in EST/CST.
+            </p>
           </div>
         </div>
 

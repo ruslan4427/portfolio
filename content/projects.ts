@@ -15,6 +15,7 @@ export type Project = {
   year: string;
   status: "shipped" | "in-review" | "in-progress" | "sprint-4";
   metric: string;
+  pitch: string;
   span: "wide" | "tall" | "square";
   featured?: boolean;
   roleTags?: ProjectRoleTag[];
@@ -44,6 +45,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "shipped",
     metric: "37 memory files · 10 promoted rules",
+    pitch: "The portfolio documents its own build — 37 memory files, 10 promoted rules, one recursive proof of AI-collab discipline.",
     span: "wide",
     featured: true,
     roleTags: ["full-stack"],
@@ -64,6 +66,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "shipped",
     metric: "12 languages · 76 unit tests · 5 silent MP3s",
+    pitch: "Cross-platform vocab app shipped solo — 12 languages, 76 unit tests, ears-only UX for drivers and parents.",
     span: "square",
     roleTags: ["full-stack"],
     stackTags: ["flutter", "ai"],
@@ -83,6 +86,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "shipped",
     metric: "7 days empty repo to App Store · live with 3 foreman crews",
+    pitch: "7 days from empty repo to App Store · live with 3 foreman crews on real construction sites.",
     span: "tall",
     roleTags: ["full-stack"],
     stackTags: ["flutter"],
@@ -102,6 +106,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "shipped",
     metric: "40 posts over 2-month pilot · 0 violations · $0.40/wk to run",
+    pitch: "8 AI agents replaced ~2 FTEs · $0.40/week to run · 40 posts, 0 violations over the 2-month pilot.",
     span: "wide",
     featured: true,
     roleTags: ["full-stack"],
@@ -122,6 +127,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "shipped",
     metric: "74 commits in 10 days to live bookings · 16 named bugs, 0 regressed",
+    pitch: "Booking SaaS MVP: 74 commits in 10 days to live bookings · 16 named bugs, 0 regressed.",
     span: "wide",
     featured: true,
     roleTags: ["full-stack"],
@@ -142,6 +148,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "sprint-4",
     metric: "3 sprints shipped, zero rewrites",
+    pitch: "5-stage AI pipeline before a single prod line of code · 3 sprints shipped, zero rewrites.",
     span: "square",
     featured: true,
     roleTags: ["cto", "consulting", "full-stack"],
