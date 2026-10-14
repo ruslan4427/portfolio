@@ -66,7 +66,11 @@ export default async function BlogIndexPage() {
                 <h2 className="mb-8 font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
                   Start here
                 </h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div
+                  className={`grid grid-cols-1 gap-6 ${
+                    featured.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"
+                  }`}
+                >
                   {featured.map((post) => (
                     <PostCard key={post.frontmatter.slug} post={post} />
                   ))}
