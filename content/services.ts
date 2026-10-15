@@ -8,7 +8,6 @@ export type Service = {
   intent: "fractional" | "advisory";
 };
 
-// TODO(ruslan): confirm investment ranges before shipping — all currently "TBD".
 export const services: Service[] = [
   {
     id: "discovery-sprint",
@@ -22,7 +21,7 @@ export const services: Service[] = [
       "Working spike so the roadmap ships against reality",
       "Written handover the team can act on next Monday",
     ],
-    investment: "TBD",
+    investment: "$10k–15k",
     intent: "fractional",
   },
   {
@@ -37,7 +36,7 @@ export const services: Service[] = [
       "Hiring loop design + technical interviewing",
       "1:1s and pairing with senior engineers as needed",
     ],
-    investment: "TBD",
+    investment: "$10k–14k / mo",
     intent: "fractional",
   },
   {
@@ -52,7 +51,7 @@ export const services: Service[] = [
       "AI-collaboration patterns (knowing what to lock, picking the right model for each task)",
       "Playbook so your team keeps shipping after I leave",
     ],
-    investment: "TBD",
+    investment: "$30k–60k",
     intent: "fractional",
   },
   {
@@ -67,7 +66,7 @@ export const services: Service[] = [
       "Sequenced patch plan with owners and dates",
       "Optional: I ship the first patch myself",
     ],
-    investment: "TBD",
+    investment: "$5k–7k",
     intent: "fractional",
   },
   {
@@ -82,7 +81,7 @@ export const services: Service[] = [
       "Warm-context introductions when I can make them",
       "Retained context — I stay warm on your project",
     ],
-    investment: "TBD",
+    investment: "$350 / hr · 10h cap",
     intent: "advisory",
   },
 ];

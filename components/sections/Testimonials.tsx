@@ -12,9 +12,6 @@ type Testimonial = {
   linkedinUrl?: string;
 };
 
-// TODO(ruslan): swap remaining placeholder quotes for real stakeholder ones.
-// Yurii + Svetlana are real LinkedIn recommendations from the PIMU era —
-// verify exact dates against LinkedIn and tighten wording if needed.
 const testimonials: Testimonial[] = [
   {
     name: "Yurii Honcharuk",
@@ -24,38 +21,6 @@ const testimonials: Testimonial[] = [
     linkedinUrl: "https://www.linkedin.com/in/yuriihoncharuk/",
     quote:
       "Ruslan owned the arc from requirements to shipped design — creative, responsible, and someone every stakeholder wanted in the room.",
-  },
-  {
-    name: "Angel P.",
-    role: "Founder, Angel Trucking",
-    date: "FEB 04, 2026",
-    initials: "AP",
-    quote:
-      "Five-stage plan before a single production line — that discipline is why we ship without rewrites. Every sprint lands on the date he gave.",
-  },
-  {
-    name: "M. Kravchuk",
-    role: "Field ops, PDF-to-checklist pilot",
-    date: "JAN 27, 2026",
-    initials: "MK",
-    quote:
-      "Rejected on Monday, resubmitted Tuesday, live Wednesday. He owned every note from Apple review and turned it into a stronger app.",
-  },
-  {
-    name: "T. Hall",
-    role: "Language coach, Lexora beta",
-    date: "JAN 08, 2026",
-    initials: "TH",
-    quote:
-      "The audio pipeline runs so cleanly that my students think there’s a person on the other end. 61 unit tests kept a small team feeling large.",
-  },
-  {
-    name: "K. Osipov",
-    role: "Community manager, smm-factory pilot",
-    date: "DEC 19, 2025",
-    initials: "KO",
-    quote:
-      "Eight agents replaced a two-person social team and cost forty cents a week. Approvals stayed in Slack — nothing shipped without a human tap.",
   },
   {
     name: "Svetlana Kostenko",
@@ -129,29 +94,21 @@ export function Testimonials() {
             <SectionBadge label="Voices" />
           </Reveal>
           <h2 className="font-serif text-[clamp(36px,4.5vw,64px)] text-[color:var(--ink-primary)]">
-            <MaskReveal delay={0.15}>Pilots and stakeholders on</MaskReveal>
+            <MaskReveal delay={0.15}>Senior stakeholders on how</MaskReveal>
             <br />
-            <MaskReveal delay={0.32}>
-              what shipping honestly looks like.
-            </MaskReveal>
+            <MaskReveal delay={0.32}>I collaborate.</MaskReveal>
           </h2>
         </header>
 
         <Stagger
-          className="grid grid-cols-1 gap-4 md:grid-cols-3"
-          stagger={0.06}
+          className="mx-auto grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-2"
+          stagger={0.08}
         >
-          <StaggerItem className="flex flex-col gap-4">
+          <StaggerItem>
             <TestimonialCard t={testimonials[0]} />
-            <TestimonialCard t={testimonials[3]} />
           </StaggerItem>
-          <StaggerItem className="flex flex-col gap-4 md:mt-16">
+          <StaggerItem>
             <TestimonialCard t={testimonials[1]} />
-            <TestimonialCard t={testimonials[4]} />
-          </StaggerItem>
-          <StaggerItem className="flex flex-col gap-4">
-            <TestimonialCard t={testimonials[2]} />
-            <TestimonialCard t={testimonials[5]} />
           </StaggerItem>
         </Stagger>
       </div>
