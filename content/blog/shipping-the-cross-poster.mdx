@@ -42,7 +42,7 @@ artifacts:
     href: /blog/launching-the-journal
 ---
 
-The previous post made a promise about cross-posts "once Sprint 14 wires the automation." Three days later Sprint 14 shipped, and you're reading the receipt — this post landed on LinkedIn and dev.to via a cron job the site runs on itself.
+The previous post made a promise about cross-posts "once Sprint 14 wires the automation." Three days later Sprint 14 shipped, and you're reading the proof — this post landed on LinkedIn and dev.to via a cron job the site runs on itself.
 
 Here's what the pipeline looked like on the way out.
 
@@ -82,7 +82,7 @@ The ledger is checked into git. Caught that one in review — my first draft had
 
 Hourly on `15 * * * *`. Twenty-one seconds end-to-end on a cold GitHub Actions runner. On ticks with nothing due, the output is a single line — `[publish-due] nothing due at <iso-timestamp>` — and the job exits clean. On ticks with a due post, you get the publish lines, the devlog entry, and a cron commit landing in `main`.
 
-The first live run shipped the previous post, [Launching the journal](/blog/launching-the-journal), to both platforms. That one went out by hand because I needed to validate the renderers against real APIs before trusting the cron. This post is the first through the fully automated path — authored, scheduled, pushed, published by the machine, with a commit back on `main` as the receipt.
+The first live run shipped the previous post, [Launching the journal](/blog/launching-the-journal), to both platforms. That one went out by hand because I needed to validate the renderers against real APIs before trusting the cron. This post is the first through the fully automated path — authored, scheduled, pushed, published by the machine, with a commit back on `main` as the record.
 
 ## What this post itself proves
 

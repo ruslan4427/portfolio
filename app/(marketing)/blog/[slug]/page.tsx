@@ -198,7 +198,7 @@ export default async function BlogPostPage({
           <aside className="px-[var(--gutter)] pb-16">
             <div className="mx-auto max-w-[65ch] rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8">
               <h2 className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-                Receipts
+                Artifacts
               </h2>
               <ul className="mt-4 space-y-2">
                 {frontmatter.artifacts.map((a, i) => (

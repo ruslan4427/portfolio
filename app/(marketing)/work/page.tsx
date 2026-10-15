@@ -27,7 +27,7 @@ export default function WorkPage() {
           <Reveal delay={0.25}>
             <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-[color:var(--ink-body)]">
               Five case studies of AI-collaboration in production. Each ships
-              with commit hashes, receipts, and the specific decisions that
+              with commit hashes, artifacts, and the specific decisions that
               made or broke the build.
             </p>
           </Reveal>

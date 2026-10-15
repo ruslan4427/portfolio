@@ -13,7 +13,7 @@ export default async function Image() {
       <OgLayout
         eyebrow="Ruslan Hrekov · Work"
         title="Selected projects."
-        subtitle="Five case studies of AI-collaboration in production. Each ships with commit hashes, receipts, and the specific decisions that made or broke the build."
+        subtitle="Five case studies of AI-collaboration in production. Each ships with commit hashes, artifacts, and the specific decisions that made or broke the build."
         footerRight="hrekov.dev/work"
       />
     ),

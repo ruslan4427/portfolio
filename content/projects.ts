@@ -66,7 +66,7 @@ export const projects: Project[] = [
     year: "2026",
     status: "shipped",
     metric: "12 languages · 76 unit tests · 5 silent MP3s",
-    pitch: "Cross-platform vocab app shipped solo — 12 languages, 76 unit tests, ears-only UX for drivers and parents.",
+    pitch: "Cross-platform vocab app shipped solo — 12 languages, 76 unit tests, audio-first UX for drivers and parents.",
     span: "square",
     roleTags: ["full-stack"],
     stackTags: ["flutter", "ai"],
