@@ -24,7 +24,7 @@ const SOCIALS = [
   },
   {
     label: "Dev.to",
-    href: "https://dev.to/ruslan_hrekov_d296523b326",
+    href: "https://dev.to/hrekov",
     short: "DEV",
   },
 ] as const;

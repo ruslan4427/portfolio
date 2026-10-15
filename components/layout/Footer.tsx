@@ -11,7 +11,7 @@ const socials = [
   },
   {
     label: "Dev.to",
-    href: "https://dev.to/ruslan_hrekov_d296523b326",
+    href: "https://dev.to/hrekov",
     short: "DEV",
   },
   { label: "Email", href: "mailto:rusgrekovua@gmail.com", short: "@" },
