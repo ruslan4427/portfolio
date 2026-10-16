@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArtifactList } from "@/components/case-study/ArtifactList";
 import { DevlogRefs } from "@/components/case-study/DevlogRefs";
+import { TokenScorecardAside } from "@/components/case-study/TokenScorecardAside";
 import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
 import { StackRow } from "@/components/mdx/CaseStudySchemas";
@@ -167,6 +168,14 @@ export default async function CaseStudyPage({
         </div>
       </div>
 
+      {frontmatter.tokenScorecard && (
+        <section className="px-[var(--gutter)] pb-12">
+          <div className="mx-auto max-w-[65ch]">
+            <TokenScorecardAside scorecard={frontmatter.tokenScorecard} />
+          </div>
+        </section>
+      )}
+
       {frontmatter.supportingArtifacts && frontmatter.supportingArtifacts.length > 0 && (
         <section className="px-[var(--gutter)] pb-12">
           <div className="mx-auto max-w-[65ch]">
@@ -183,9 +192,9 @@ export default async function CaseStudyPage({
         </section>
       )}
 
-      {!frontmatter.supportingArtifacts?.length && !frontmatter.devlogRefs?.length && (
-        <div className="pb-32" />
-      )}
+      {!frontmatter.supportingArtifacts?.length &&
+        !frontmatter.devlogRefs?.length &&
+        !frontmatter.tokenScorecard && <div className="pb-32" />}
       </article>
     </main>
   );

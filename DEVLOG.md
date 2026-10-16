@@ -5,6 +5,76 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-10-15 · Sprint 15 · Phase F — /tools page on hrekov.dev
+
+**Problem.** Spec §F commits a public `/tools` surface on the portfolio that lands the ShipLoop install one-liner above the fold, lists the seven skills in a scannable grid, and renders the measurement scorecard with every number captioned by its source tag. Recruiters landing from the meta case study (Phase G) have to be able to copy the install, see what each skill does, and inspect the raw receipts — without the page reading as a documentation dump.
+
+**Decision.** Twelve subtasks grouped into four pass-throughs:
+
+- **F1–F2 content + install.** `content/tools.ts` is hand-authored (not derived from `.claude/skills/*/SKILL.md`), so marketing copy — descriptions, `whenToUse` lines — can diverge from internal frontmatter without a sync job. One category enum (`entry | lifecycle | quality | meta`), one `INSTALL_COMMAND` export. `InstallBlock` is a client island with `navigator.clipboard.writeText` + a 2-second "Copied" state + a `document.getSelection()` fallback for insecure contexts (older Safari, non-HTTPS previews). Tracks `tools_install_copy` to GA4 so the launch funnel is measurable.
+- **F3–F5 content components.** `SkillGrid` groups by category, prints a count badge per section, 2-col at ≥768 / 1-col below, each card with Playfair name + description + monospace invocation + when-to-use. `ScorecardTable` renders two layouts: desktop `<table>` with 5 metric columns, mobile per-project cards with a 2-col metric grid. Null cells render em-dash in `ink-muted` and expose `title={project.notes}` for tooltip hover. `tokenSource` tag renders beneath the Tokens cell only (per-metric context tag), while complexity + duration tags render once at the row header (per-project context). `ScorecardMethodology` splits into three panels: formula table, tier assignment rubric, "null is honest" + raw-receipt links to `/scorecard.json` and the OSS parser.
+- **F6–F9 wiring.** `app/(marketing)/tools/page.tsx` composes hero → install → skills → scorecard → methodology. OG image mirrors `work/opengraph-image.tsx` with "Tools" eyebrow and "ShipLoop ecosystem." subtitle. Nav gets a `Tools` entry between `Journal` and `About` per spec §F8. Sitemap gets `/tools` at priority 0.9, weekly change frequency, since the scorecard refreshes on every merge.
+- **F10–F11 a11y + visual verify.** Ran `check_contrast.py` on all seven new fg/bg pairs. `ink-primary / bg-elevated` = 18.88:1, `ink-body / bg-elevated` = 14.38:1, `ink-muted / bg-elevated` = 5.36:1 (AA pass), `ink-faint / bg-elevated` = 2.39:1 (AA fail). Fix: downgraded three `ink-faint` usages — null-cell metric values, column header sub-captions, skill count badges — to `ink-muted`. Null dashes carry real information; they can't live in a token the design system labels "decorative only". Playwright pass at 1280/768/375 after scrolling the page in viewport-height increments to trigger `whileInView` IO events — fullPage screenshots were silently cropping below-fold content in the first pass because headless Chromium doesn't scroll on its own.
+
+**Result.** `/tools` returns 200 in dev. Desktop screenshot shows: hero with Playfair h1, install block with Copy button, 7-card skill grid in 4 category clusters, 7×5 scorecard with em-dash nulls + tokenSource captions ("dedicated session log", "unmeasurable"), 3-panel methodology section at the bottom. Mobile screenshot shows: same content stacked, per-project scorecard cards with 2-col metric grids, per-card `notes` prose below. Nav shows Tools pill active state in the chrome. Install one-liner points at `github.com/ruslan4427/claude-shiploop/main/install.sh` (not pushed yet — Phase H owns that). `typecheck` clean.
+
+**Lesson.**
+- **Reveal + Playwright fullPage is a false green.** `fullPage: true` captures the scrollable height but doesn't trigger IntersectionObserver events for off-screen elements. First screenshot pass showed hero + install block + first category group, then massive blank where the Reveal-wrapped scorecard + methodology should have been. Fix is to scroll in viewport-height increments *before* capturing — slow but makes the capture match a real visitor's experience. Any component library using `whileInView` for scroll-triggered motion will have the same gap in automated screenshot tests.
+- **"Decorative only" is not a safe token to default to.** `ink-faint` is spec'd in CLAUDE.md as decorative, but it was ergonomically convenient for null dashes (`—`), column captions ("fix ÷ feat"), and count badges — all of which carry information a reader needs. A linter that caught "ink-faint on bg-elevated / bg-page" could prevent this entire class of miss; manual contrast runs catch it after the fact. Noting as a potential tooling capsule for later.
+- **Hand-authored marketing content beats derived frontmatter.** First draft imported each skill's `description` directly from `SKILL.md`. The result was functional but read as an inventory list ("Structured brainstorming session at a defined lifecycle stage. Always produces: decisions, open questions, action items, and a memory entry."). Rewriting each description + whenToUse with the recruiter audience in mind — specific lanes they'd map to, specific gaps they'd notice without the skill — turned the page from a reference manual into a pitch. The sync cost (manual edits when a skill's purpose changes) is cheaper than the clarity cost of auto-derived copy.
+- **Null tooltips are a progressive enhancement, not an a11y strategy.** The scorecard uses `title={project.notes}` on null cells for hover tooltip. Keyboard-only users won't see those; mobile users won't see those. The mobile layout already shows the full `notes` string as prose beneath each card — the desktop table should probably do the same (collapsible details row?) rather than hiding it behind hover. Deferred to Phase G QA pass — out of F10 scope.
+
+---
+
+## 2026-10-15 · Sprint 15 · Phase E — OSS staging repo at ~/shiploop-publish/
+
+**Problem.** The Phase F `/tools` page and the Phase G meta case study are both pointed at an OSS repo that does not exist yet. Shipping either without `github.com/ruslan4427/claude-shiploop` resolving to a real tree makes the whole "Claude-devs can install this" claim unverifiable. Spec §5–§7 commit to a specific layout: skills/, agents/, templates/, expertise/README (never the capsules), a public scorecard parser matching the vendored portfolio one, and an install path that works via both local clone and `curl | bash`.
+
+**Decision.** Build the publish-ready tree in `~/shiploop-publish/` outside the portfolio repo so git state cannot leak. Twenty subtasks grouped:
+
+- **E1–E4 skills + sanitization.** Copied the 7 skills and `agents/expert.md` from `.claude/`. Swept for personal paths and names; two hits intentional (brainstorm template line 92 `Owner: Ruslan | Claude | TBD` → placeholders; skill-builder line 29 `~/shiploop/skills/` → `~/.claude/skills/`). Whitelist of expected hits logged at `tmp/sanitization-whitelist.txt` (gitignored).
+- **E5–E8 docs.** LICENSE (MIT), README (pitch + lifecycle + skill table + scorecard section), INSTALL (flags + manual + uninstall + speckit caveat), CONTRIBUTING (PR workflow + skill proposal + capsule privacy warning).
+- **E9–E12 installer + templates.** `install.sh` handles `--target`, `--dry-run`, `--help`, portable macOS/Linux via `stat -f` → `stat -c` fallback, TMPDIR fallback for `curl | bash` cache. Rewrote `scripts/init-project.sh` with dual-platform sed. Templates: `CLAUDE.md.template` (full lane table with Expert class), `DEVLOG.md.template` (PDRL skeleton), `spec.md.template` (8-section starter). `expertise/README.md` carries the "never commit capsules — they contain project-local info" warning.
+- **E13 scorecard parser + CI + regression fixture.** Copied `scorecard.mjs`, `snapshot-check.mjs`, 4 lib files + placeholder config with an example-project entry. Workflow `scorecard-snapshot.yml` runs shape-check + v999 regression fixture on PRs touching `scripts/scorecard-src/**` (portfolio) or `scripts/**` (OSS). Fixture at `scripts/__fixtures__/scorecard.config.v999.mjs` + smoke script expects exit 2 with "configVersion mismatch" in stderr.
+- **E13b BUG CAUGHT.** The lockstep guard between `REQUIRED_CONFIG_VERSION` (parser) and `configVersion` (config) was broken from day one: `scorecard.mjs` imported `REQUIRED_CONFIG_VERSION` from the same `scorecard.config.mjs` file as the config itself, so bumping one would silently bump the other and the check always passed trivially. Fix: hardcoded `const REQUIRED_CONFIG_VERSION = 1;` directly in `scorecard.mjs` AND `snapshot-check.mjs` (independent from config), removed the `export` from both config files. Verified: portfolio + OSS snapshots both pass, both regression smokes exit 2 as spec'd.
+- **E14–E16 GitHub metadata.** Issue templates (bug-report + skill-proposal), PR template with capsule leak-audit checkbox + REQUIRED_CONFIG_VERSION dual-edit reminder, skill-lint workflow + skill-lint.mjs validator (frontmatter name/description + model lane only — no body-section regex, no description length limit; those were false-positive factories), `.gitignore` with `expertise/*.md` + rescue for `!expertise/README.md`.
+- **E17–E18 install smoke tests.** Clean `mktemp -d` targets under both bash and zsh. Dry-run leaves target untouched (fixed one leaked `mkdir -p "$DEST"` that ran even in dry-run mode). Real install produces `.claude/{skills, agents, templates, expertise}` with 7 skill dirs + `expertise/README.md` only. Exit codes: unknown flag → 2, missing `--target` arg → 2, nonexistent target → 1, `--help` → 0.
+- **E19 git init.** `git init --initial-branch=main` in staging dir; **no remote add, no push** — launch (Phase H) owns the push + release tag. `git ls-files` after init shows 35 candidate files; `tmp/sanitization-whitelist.txt` correctly ignored; `expertise/README.md` correctly rescued from the `expertise/*.md` catch.
+
+**Result.** `~/shiploop-publish/` is 268K across 35 tracked files. Install smoke-test produces identical trees under bash and zsh. Skill-lint validates all 7 skills in <100ms. Portfolio scorecard shape-check + v999 regression + OSS scorecard shape-check + v999 regression all green. Repo ready to push; Phase H will add the GitHub remote, run the pre-ship expert consult, and cut v0.1.0.
+
+**Lesson.**
+- **Lockstep guards must come from independent sources.** A `REQUIRED_CONFIG_VERSION` imported from the same file whose `configVersion` it validates provides zero protection — both sides change in one edit and the comparison can't fail. The fix is to pin the required version in the consumer (hardcoded in the parser), not the producer. Spot-check for any `vs` check: trace both operands' provenance; if they resolve to the same source file, you don't have a check.
+- **Dry-run contracts leak at the earliest unguarded command.** The installer's `mkdir -p "$DEST"` ran before the `DRY_RUN` branches, so even `--dry-run` created `.claude/` on the target. One mkdir isn't catastrophic, but a reviewer would call this a lie. Fix every unguarded filesystem op or stop advertising `--dry-run`.
+- **Linters that fail on the author's own corpus are configured wrong.** First skill-lint pass failed all 7 shipped skills with a `description <= 120 chars` cap and a brittle "body must contain 'when to use'" regex. The right rule for a public linter is "catch structural breakage that would prevent install" (name/directory mismatch, missing field, invalid model lane) — stylistic enforcement belongs in review, not CI. Trimmed back to those three rules; green against all 7 skills.
+- **Keep OSS parser bit-identical to the vendored one.** Phase E13 initial draft diverged on fixture path because the OSS `snapshot-check.mjs` resolved `__dirname/../__fixtures__/` to repo root instead of `scripts/`. Rather than fork the script, I moved the OSS fixture to `__fixtures__/` at repo root so both snapshot-check.mjs files are byte-identical. Reduces maintenance drift to zero and lets the CI diff in Phase B8 be a strict equality check.
+
+---
+
+## 2026-10-15 · Sprint 15 · Phase D — scorecard JSON at repo root + 6 case-study frontmatters backfilled
+
+**Problem.** Phase B shipped the parser and Phase C shipped the aside component, but nothing was wired to real data yet. Spec §4.2 says `scorecard.json` lives at repo root (not the fixture path) so recruiters can `curl hrekov.dev/scorecard.json` as the receipt for the methodology aside. Separately, spec §376 commits all 5 existing case studies to a populated `tokenScorecard` block — but three of them (Lexora, SMM Factory, Angel Trucking) have `tokens: null` after the Phase A bail-out, and the Phase C validator required `tokens` to be a non-negative number.
+
+**Decision.**
+1. Split npm scripts: `scorecard` writes to repo root; new `scorecard:snapshot` writes to the fixture path; `scorecard:check` runs shape diff. Keeps live output + CI fixture in two different files so neither clobbers the other.
+2. Discovered two slug mismatches between config and case-study filenames (`angel-trucking` ↔ `angel.mdx`, `portfolio` ↔ `hrekov-dev.mdx`). Renamed CONFIG slugs rather than case-study slugs — case-study slugs are URLs with external references (OGs, memory, DEVLOG, LinkedIn posts), config slugs are internal only.
+3. Loosened validator: `tokens: number | null` with the null branch gated through a dedicated "unmeasurable" render path in `TokenScorecardAside`. Big Playfair numeral replaced with muted serif "unmeasurable" + a one-line spec §10.1 citation; context grid + mix bar still render below. Keeps the aside visible for pre-ShipLoop projects so the methodology comparison lands.
+4. Backfilled `tokenScorecard` block in all 6 case-study MDX frontmatters, right after `readingTime:` to group operational metadata.
+5. Added per-project `notes` caveats in the config: Lexora 4/4 discipline = speckit-era artifacts (not institutional ShipLoop); Noble SaaS 1.44 rework = loudest pre-ShipLoop marker; SMM Factory 4.5 rework = small n=11 directional sample; Portfolio 1-day TTS = solo-operator cadence across the owning org, not team scale.
+
+**Result.** `scorecard.json` present at `/Users/ruslan/portfolio/scorecard.json` (8.3KB, 7 projects, generated 2026-10-16T01:58Z). All 6 `/work/<slug>` routes return 200 with the aside in SSR output; Playwright screenshots at 1280px confirm clean composition:
+- Fieldmark renders `82.7M tokens`, tier `1 · self-spec`, 89/11 opus/sonnet mix bar.
+- Portfolio renders `1.50B tokens`, tier `2 · ShipLoop`, 100% opus bar.
+- Angel renders `unmeasurable` + spec §10.1 caveat, tier `0 · naked`, 100% sonnet bar.
+
+Shape fixture regenerated after slug rename; `npm run scorecard:check` passes 5/5.
+
+**Lesson.** The validator's "tokens must be a non-negative number" rule was correct for the measurable case but blocked the honest-null case the spec explicitly committed to. The temptation was to skip the aside entirely for null-token projects — which would have hidden the methodology comparison exactly where it mattered most (pre-ShipLoop projects demonstrate *why* ShipLoop's instrumentation changes what's knowable). Instead: loosen the validator by one union member, add one render branch, and the "unmeasurable" state becomes a feature of the aside, not a bug worked around.
+
+Second lesson: when config slugs and content slugs disagree, rename the config side. Config slugs are internal keys with one reference (the config file itself); content slugs are URLs with external references across OG images, memory files, DEVLOG entries, and off-site links. Changing content slugs would have required a cross-cutting audit; changing config slugs was a 2-line edit each.
+
+---
+
 ## 2026-10-10 · Case-study schemas — edge-label composition + diamond anchor + per-diagram spacing
 
 **Problem.** Across every case study, edge-label pills on `Diagram` / `FlowSchema` were reading as *touching* their arrows at the user's zoom level. First fix (perpendicular offset = 16px) was insufficient — the geometry held but the gap read as "glued on" at 1:1 zoom. Second fix (dynamic bbox-projected perp-offset) kept the gap but moved pills off the arrow axis, so they looked like floating labels unrelated to the edges they annotated. Separately, `action` (diamond) nodes had visible notches between arrow endpoints and the shape's slanted edges because `diagramEdgeAnchor` was intersecting the bounding box, not the actual rhombus perimeter. Finally, several per-case-study layouts (`lexora` pipeline, `smm-factory` loops) had horizontal gaps between nodes that fit the pill width with 1–8px of breathing — reads as pills touching adjacent nodes.
@@ -2256,5 +2326,114 @@ Playwright added as `devDependencies` (not shipped to runtime; `npm run build` i
 **Result:** `pnpm verify:numbers` passes. Lexora is now the second Flutter case study with a public store listing (Fieldmark being the first).
 
 **Lesson:** Store approval doesn't widen the dev `dateRange` — the tech-stack line stays anchored to the last code commit. Approval signals belong in (a) the FlowSchema terminal node + edge colour, (b) the ImpactStats "status card", and (c) the StackRow `live={{}}` tile. Keep approval date verbatim in all three so the next reader triangulates the same number from three independent surfaces.
+
+---
+
+## 2026-10-15 · Sprint 15 · Phase G — `/work/claude-shiploop` meta case study
+
+**Problem:** Sprint 15 produced the OSS repo (Phase E) and the `/tools` scorecard (Phase F); the meta case study at `/work/claude-shiploop` was still missing. Spec §G required an in-site slug that (a) ships before the OSS repo so the two can launch simultaneously, (b) carries both executive (recruiter) and technical (engineer) surfaces, (c) honours the "null is honest" rule by not inventing adoption metrics that don't exist yet.
+
+**Decision:** Six moves across the phase.
+
+1. **G1 · FlowSchema brief first (per `feedback_flowschema_metaphor_per_project.md`).** Rejected concentric rings (reads as layer cake, not a story), timeline (sprint log, not case study arc), ActivityChart (duplicates `/tools`), WireflowMap (right choice for a parser deep-dive, wrong for a methodology pitch). Picked two-row FlowSchema: Row 1 "naked tier" = `Dev → Prompt → Code → Did it work?` with a self-loop and `rework ×4.5` outcome badge (SMM Factory tier-0); Row 2 "ShipLoop" = `Router → Spec → Plan → Tasks → Build → QA → Ship → Retro` linear with `rework 0.38` outcome badge (hrekov-dev tier-2). The honest comparison lives in the badges; the shape just makes it skimmable. Brief saved to `tmp/flowschema-brief.md` before any code.
+2. **G2–G3 · wiring.** Added slug 07 to `content/projects.ts` with `roleTags: ["full-stack","consulting"]`, `stackTags: ["node","ai"]`, `featured: true`, hero at `cover.webp`. Reserved `public/case-studies/claude-shiploop/`.
+3. **G4 · body deviates from the 10-section rulebook to a 12-section long-form variant** (hrekov-dev / noble-saas precedent for meta case studies that need both an Attribution-procedure sidebar and a Measurement-algorithm aside without compressing the thesis). Sections: Cold open · Lifecycle contract · Context · Problem · Division of Labor · Prompt Architecture · Iteration Moment (the lockstep guard that wasn't) · Trade-Offs · Attribution procedure sidebar · Measurement algorithm (→ `/tools`) · Results (honest) · Reflection. TechNotes authored by hand with full `{kind,label,title,description,href}` schema (6 items: OSS repo, `/tools` page, specs dir, Claude Code docs, Spec-kit comparison, Conventional Commits).
+4. **G5 · hero.** Captured `/tools` scorecard via Playwright chromium at 1600×5000 / 2× DPR, scrolled in viewport-height increments to trigger `whileInView`, clipped the card bounding box via `div:has(> table)`, scaled to 2200w and bottom-cropped to 1400h via sharp, converted to webp 1100×700. Script lives at `scripts/screenshot-shiploop-hero.mjs`. Frame reads as a monochrome gradient from Tier 0 (Lexora/Noble/SMM/Angel at 0% discipline) → Fieldmark Tier 1 → Portfolio Tier 2 with `100% / 0.38 / 1d / 1.50B` headline numbers → claude-shiploop Tier 2 row at the bottom. 23 KB final.
+5. **G7 · C-fallback decision — simultaneous, not split.** Read the G4 draft critically: Results section ships with 5 ship-side metrics (skill count, agent count, 5-metric scorecard, 1-command install, hrekov-dev measured 0.38 rework) + an explicit "adoption is Phase H+" disclaimer. Splitting launch by 7 days to collect install counts would (a) undercut the "null is honest" credibility pillar the three-tier design was there to establish, (b) stall the OSS repo for a week on soft signal, (c) force a retroactive stats paragraph that duplicates what `/tools` already shows.
+6. **G8 · build gates.** Two drifts had to be closed before `next build` passed:
+   - **TechNotes schema archaeology.** Initial draft used `<TechNotes caption items={[{label,href},...]} />`, which crashed prerender with `Cannot read properties of undefined (reading 'glyph')` at `CaseStudySchemas.tsx:2288` — the lookup table `techNoteKindMeta[kind]` returned undefined because `kind` was missing. Rewrote all 6 items with full schema and renamed `caption` → `title`.
+   - **`verify:numbers` drift on hrekov-dev.mdx.** The prebuild verifier flagged 18 numeric drifts: hrekov-dev prose was pinned at Sprint 14 state (53 DEVLOG / 14 sprints / 21 days / 37 memory / 18.9%) while disk had advanced to Sprint 15 state (59 / 15 / 26 / 39 / 16.9%). Preferred bulk-sync (16 edits across the MDX, 2 across projects.ts) over disabling the verifier — the verifier is doing exactly its job and silencing it would reintroduce the same credibility hole the scorecard exists to prevent.
+
+**Result:**
+- `next build` passes; `/work/claude-shiploop` in the SSG prerender list; dynamic Playfair OG renders at the hashed URL.
+- Both reader surfaces render: executive narrative in the main column; technical surface via native `<details>` disclosures (TechnicalDetail primitive) opened inline — no ViewToggle needed because the long-form variant already stacks the technical asides directly in the body.
+- Hero (`cover.webp` 23 KB) + 12 numbered sections + two-row FlowSchema + authored TechNotes all shipping on the slug.
+- Phase G closed; Phase H (launch day, 10 subtasks) unblocks.
+
+**Lesson:**
+- **FlowSchema metaphor-first saved a redo.** Without the brief I would have reflexed to a BPMN role→action lane layout and buried the thesis. The two-row variant with outcome badges on the diamond and the Retro node makes the comparison legible in one glance; the measurement is in the badges, not the diagram shape.
+- **Hand-authored TechNotes need the full schema, not a convenient subset.** The component looks up `techNoteKindMeta[kind]` without a fallback — missing `kind` silently crashes prerender via undefined.glyph. Minimum viable item is `{kind, label, title, description, href}`; "caption" is not a prop name.
+- **The `verify:numbers` prebuild is a credibility feature, not a nuisance.** When a sprint grows the DEVLOG and memory dir, every static claim in a self-referential case study (`hrekov-dev` in particular) drifts. Bulk-reconciling is 10 minutes; silencing the verifier is unlimited damage. Keep the hook, feed it fresh truth.
+- **12-section long-form is a legitimate deviation when a case study has to carry two sidebars (procedure + algorithm) without compressing the thesis.** Rulebook §9 defaults to 10 sections; the hrekov-dev + noble-saas + claude-shiploop variant uses 12. Deviation documented so future meta case studies don't re-invent the pattern.
+- **"Null is honest" survives Phase H decision gates.** Splitting launch to collect adoption numbers would have been the easier case-study story (shiny install counts) and the wrong one (deferring the OSS ship for 7 days of soft signal). The scorecard pillar is honest ship-side metrics now, not optimistic adoption metrics later.
+
+---
+
+## 2026-10-15 · Sprint 15 · Phase C — `tokenScorecard` frontmatter + aside
+
+**Problem:** Scorecard JSON exists on disk (Phase B); case-study pages don't surface it. Spec §4.1 requires an additive `tokenScorecard` frontmatter block + a validator that fails build on bad shape, and a monochrome aside that reads next to Artifacts without introducing a new chromatic accent or breaking the max-w-65ch editorial column.
+
+**Decision:** Three edits.
+
+1. `content/case-studies.ts` — gained `TokenScorecard` type (sub-types for complexity / tier / modelMix), optional field on `CaseStudyFrontmatter`, strict `validateTokenScorecard(slug, raw)` wired into `getCaseStudy()` so an invalid block fails LOAD (not just build). Validator: `tokens` non-negative number; `complexity` ∈ `S|M|L`; `tier` ∈ `0|1|2`; `duration` non-empty string; `modelMix` only accepts opus/sonnet/haiku keys, each 0–100, summing to 100±0.1. Rejected an "additive-but-silent" validator (log-and-continue) — a frontmatter block that lies about model mix is worse than no block.
+2. `components/case-study/TokenScorecardAside.tsx` — new. Playfair numeric with humanized unit (82.7M, 1.48B), three stat rows (Complexity · Duration · Tier), horizontal `MixBar` with proportional ink/body/muted segments on a hairline track + inline legend. Monochrome throughout, no chromatic accent, `role="img"` + `aria-label` on the mix bar. Returns `null` when `scorecard` undefined — safe to mount unconditionally.
+3. `app/(marketing)/work/[slug]/page.tsx` — aside placed BEFORE `ArtifactList` in the stacked-asides column (same `max-w-[65ch]`), token stats land right after the narrative body and before external artifacts.
+
+Deviations from tasks.md: no side-by-side desktop layout for the asides. Looked at the existing page — Artifacts is a single-column aside stacked below the body, not a sidebar. Matching that pattern instead of inventing a two-column grid for one new aside.
+
+**Result:**
+- `npx tsc --noEmit` clean.
+- Dev-server smoke on `/work/fieldmark` with a temporary `tokenScorecard` block attached — aside renders at 375px (stacked rows), 768px (same stack, more breathing), 1200px (three stats inline on one row). Mix bar fills accurately (89% Opus ink + 11% Sonnet body + hairline rail). "TOKEN SCORECARD" eyebrow + Playfair 82.7 + unit caption composition reads as a sibling to the "At a glance" and "Artifacts" cards.
+- Contrast on new fg/bg pairs: ink-primary 18.88:1 · ink-body 14.38:1 · ink-muted 5.36:1 on bg-elevated (AA pass; muted at AAA-large pass, which is where it's used).
+- One typography tightening: tier value changed from `Tier 1 · self-spec` to `1 · self-spec` (field label already says TIER).
+- Temporary MDX edit reverted; scratch screenshot script deleted.
+
+**Lesson:** The spec says "sidebar next to Artifacts" but the live page has no sidebar — Artifacts is a stacked aside at the same column width. When the spec encoding diverges from the shipped layout, defer to the shipped layout and name the deviation in the DEVLOG. Half the risk in Phase C was going to be inventing a two-column grid that didn't belong, breaking Artifact's spacing in the process. Matching the existing pattern made the diff a pure addition.
+
+Second lesson: validators belong at LOAD time, not just build time. `getCaseStudy()` is called from `generateMetadata` and `generateStaticParams` paths — if a bad frontmatter block were only caught at `next build`, dev-mode editors would see a silent bad render and lose faith in the structured block. `fail(slug, msg)` throws from the loader, which turns a broken block into an obvious 500 in dev. Right incentive.
+
+---
+
+## 2026-10-15 · Sprint 15 · Phase B — scorecard parser (vendored in portfolio)
+
+**Problem:** Spec §4.2 defines `scorecard.json` with 5 metrics × 7 projects. Each metric needs an honest source: discipline from `specs/<N>/{spec,plan,tasks}.md` + `DEVLOG.md` presence, rework from conventional-commit prefixes, time-to-ship from spec date → last-commit date, tokens from `~/.claude/projects/<slug>/*.jsonl`, expert hit rate from `expert consulted` / `plan changed: yes|no` pairs. Target audience (Claude-devs) will discount any "ShipLoop reduces X" claim unless the parser is inspectable.
+
+**Decision:** Vendored parser at `scripts/scorecard-src/` — not `scripts/scorecard.ts`, because tsx isn't installed and the repo convention is `.mjs`. Four library modules (`claude-logs`, `git-log`, `devlog`, `metrics`) composed by `scorecard.mjs`; config at `scorecard.config.mjs` with a `REQUIRED_CONFIG_VERSION` lockstep guard. `modelMix` + `duration` in config are FALLBACKS — overridden by measured values when `logPath` is readable. Snapshot at `scripts/__fixtures__/scorecard.expected.json` + shape-check (`snapshot-check.mjs`) guards structural drift; value drift is expected and re-committed via `npm run scorecard`. Scripts wired: `npm run scorecard` + `npm run scorecard:check`.
+
+Metric nuances absorbed in the parser:
+- **Discipline** = 4-point binary (spec+plan+tasks across any `specs/<N>/` + DEVLOG). Lexora comes out 4/4 despite Tier 0 — speckit era had the artifacts, ShipLoop wasn't institutional. The `/tools` methodology aside will explain the gap: score is artifact presence, tier is human discipline judgment.
+- **Rework** = `fix / feat`. `conventional === 0` → null (not zero — zero would misread as "perfect project"). `feat === 0 && fix > 0` → Infinity (chaos signal).
+- **Time-to-ship** = median across `specs/<N>/spec.md` files with parseable date (`**Date.** YYYY-MM-DD` with period-in-bold OR `**Date**:` OR `date:` frontmatter), diffed against `git log -1 --format=%ad -- specs/<N>`. Portfolio: TTS=1 across n=5 specs. Lexora: TTS=13 n=1.
+- **Tokens** = `input + output + cache_read + cache_creation` summed across all `.jsonl` assistant messages, face value (not cost). Model attribution by exact ID map first, substring fallback to opus/sonnet/haiku. Streaming via `node:readline` for the 163MB mega-session.
+- **Expert hit rate** = `plan_changed_yes / (yes + no)`. Convention not yet enforced in any DEVLOG — all projects return null. Honest "no data yet".
+
+B8 (OSS canonical-vs-vendored CI diff) + B9 (regression fixture) deferred to Phase E — pointless until the OSS repo exists.
+
+**Result:** `npm run scorecard` produces `scripts/__fixtures__/scorecard.expected.json` with all 7 projects. Measured output lines up with the thesis:
+
+| Project | Tier | Discipline | Rework | TTS (med) | Tokens | Mix |
+|---|---|---|---|---|---|---|
+| Portfolio | 2 | **1.0** | **0.38** | **1 day** | 1.48B | 100% opus |
+| Fieldmark | 1 | 0.25 | 2.0 | — | 82.7M | 89/11 opus/son |
+| Lexora | 0 | 1.0 * | 0 | 13 (n=1) | — | fallback |
+| Noble SaaS | 0 | 0 | 1.44 | — | 26.4M | 98/2 son/opus |
+| SMM Factory | 0 | 0 | 4.5 | — | — | fallback |
+| Angel Trucking | 0 | 0 | — | — | — | fallback |
+
+`* ` Lexora speckit artifacts predate ShipLoop. Snapshot shape check prints 5 ok lines in ~5s and surfaces structural drift (verified via negative-path test — removing a metric key triggers `FAIL — snapshot.lexora.metrics key set drifted ...` with exit 1).
+
+**Lesson:** When computing per-project metrics across years-old repos, the pattern that reads as "a bug" is often the ground truth. Lexora 4/4 discipline isn't the parser lying — it's that speckit artifacts predate ShipLoop. Rather than paper over with a "discipline is only valid if tier > 0" clause, keep the metric honest and explain the disconnect in prose. Same for Portfolio TTS=1 — plan-to-ship happens same-day when a solo op is the whole org. Numbers are measurements; narrative does the comparative work.
+
+Second lesson: snapshot fixtures for metrics that drift every commit (rework, tokens, commit counts) must guard STRUCTURE not VALUES. A strict value-diff would force `npm run scorecard` on every merge; a shape-diff fails only when a parser regression removes/renames a metric or a project vanishes from config. Right incentive for both canonical-OSS and vendored-portfolio parsers.
+
+---
+
+## 2026-10-14 — Sprint 15 · Phase A attribution scan + bail-out
+
+**Problem:** Spec §10.1 planned to reconstruct Tier 0 (Lexora, SMM Factory, Angel Trucking) token spend by attributing sessions from `~/.claude/projects/-Users-ruslan/` (123 mixed sessions, 269MB) to projects via keyword counting, then physically moving matched sessions into per-project folders. The scorecard's "cross-tier comparison" angle depends on having at least a lower bound for Tier 0 numbers.
+
+**Decision:** Ran `scripts/attribute-sessions.mjs` across all 123 sessions. Threshold: project scores a session if its keyword set hits ≥3 total; classify as SINGLE (one project ≥3) / MIXED (≥2 projects ≥3) / UNCLASSIFIED (none ≥3). Bail-out criterion from spec: `SINGLE / total < 50%` → fall back to null tokens.
+
+Also removed four fabricated human names from the keyword fixture + spec (K. Osipov, Kirill Osipov, T. Hall, Thomas Hall, Angel P., Angela P.) — all were invented during the brainstorm with no source citation. Added `feedback_no_invented_client_names.md` to memory so future brainstorms don't repeat the pattern.
+
+**Result:** SINGLE 0 / MIXED 2 / CONTEXT_ONLY 3 / UNCLASSIFIED 118. Angel Trucking: zero hits across all 123 sessions — never ran from this home dir. Lexora + SMM Factory: present only inside two mega-sessions (97MB + 163MB) interleaved with Fieldmark + Portfolio + Noble SaaS work; not cleanly separable without time-slicing we didn't build. 118 UNCLASSIFIED sessions are overwhelmingly trivial (1-2 messages, ~300 char corpus).
+
+Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 0 tokens = null in scorecard with explanatory note "not reconstructable from mixed home-dir sessions; project pre-dates per-project session isolation." The `/tools` methodology aside (Phase F) covers this transparently — null here is honest signal that pre-ShipLoop projects lack the instrumentation.
+
+**Lesson:**
+- **Diagnostic scans before destructive filesystem ops save hours of wrong work.** The spec committed to a reorg procedure that would have produced near-zero signal; running the read-only scan first revealed that in ~2 minutes. If I'd skipped straight to the move script, the output would have been 2 MIXED folders of 97MB + 163MB and nothing else.
+- **"Null is honest" has to survive first contact.** The scorecard spec committed to null cells over fabricated numbers; bail-out executes that commitment. Softening it to "self-reported estimate" would reintroduce the exact credibility hole the three-tier design was there to avoid.
+- **Keyword maps need a source audit before anyone types them.** The brainstorm captured "k. osipov" / "t. hall" / "angel p." as apparent stakeholder names from thin air; they survived into the spec and the fixture before Ruslan asked "K. Osipov who?". New rule in memory: no human name in a project artifact without a citation to case study / DEVLOG / email / Linear.
+- **Two monster sessions dominate 85% of this folder's bytes.** 7c5fd6d6-… = 163MB (15,748 messages, Fieldmark-dominant) and 5e28002b-… = 97MB (9,586 messages, Lexora+Fieldmark+Portfolio). If anything, those are the useful source for later time-sliced extraction — but that's a different project.
 
 ---

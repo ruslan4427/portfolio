@@ -48,3 +48,9 @@ next-env.d.ts
 
 # raw production assets (portraits, screen recordings, voice seeds) — never commit
 .local-raw/
+
+# diagnostic / scratch outputs (attribution reports, dev-time scorecard runs)
+/tmp/
+
+# claude code dev scratch
+.claude/_scratch-*.mjs
