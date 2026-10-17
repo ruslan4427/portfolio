@@ -17,12 +17,11 @@ no-company-no-api:
   linkedin: 2026-10-07T02:55:00Z
   devto: 2026-10-07T02:56:00Z
 
-# shipping-claude-shiploop — originally LinkedIn was reserved for a tighter
-# hand-written post; switched to the auto-serialized version 2026-10-17 since
-# classify-before-you-code shipped auto-serialized without issue.
+# shipping-claude-shiploop — Monday drop. Auto-serialized on both channels
+# now that the multi-image LinkedIn publisher is proven.
 shipping-claude-shiploop:
-  linkedin: 2026-10-17T22:15:00Z
-  devto: 2026-10-17T22:10:00Z
+  linkedin: 2026-10-19T13:00:00Z
+  devto: 2026-10-19T13:05:00Z
 
 classify-before-you-code:
   linkedin: 2026-10-17T15:00:00Z
