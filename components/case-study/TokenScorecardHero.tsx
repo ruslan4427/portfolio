@@ -219,7 +219,6 @@ export function TokenScorecardHero({ scorecard }: { scorecard?: TokenScorecard }
           <ScorecardBody
             scorecard={scorecard}
             humanized={humanized}
-            measured={measured}
             scale={1.4}
             animKey={`lb-${open ? "1" : "0"}`}
           />
