@@ -26,6 +26,16 @@ tokenScorecard:
     haiku: 10
   duration: "27 days"
   tier: 0
+  phases:
+    - name: Build
+      from: "2026-06-08"
+      to: "2026-06-12"
+    - name: Polish
+      from: "2026-06-13"
+      to: "2026-07-04"
+    - name: Pilot
+      from: "2026-07-05"
+      to: "2026-08-31"
 ---
 
 **smm-factory is a multi-agent SMM system that ran a barbershop-SaaS Instagram for 2 months on its own — 40 posts, 13 niche followers, zero moderator violations, ~$0.40/week in AI costs. Built as Noble's in-house marketing team, minus the team.**
@@ -271,6 +281,8 @@ That flipped every Claude session from *"here's a codebase, please read it all"*
   ]}
   caption="Primary (solid): the closed weekly loop. Orchestrator cron fires Mon 09:00 → intake scrapes the brand → analysis extracts pillars → content drafts the week → approval runs the 3-tap gate → publisher ships the post. Annotation (dashed): everything that runs continuously around that loop. Publisher logs completion back to orchestrator; analytics / strategy / trends feed signals in so next Monday is smarter; orchestrator dispatches engagement for both inbound DMs and scheduled comment-on-feed batches. The right-side callout names the twelve markdown files that ground every decision."
 />
+
+<AgentReplay slug="smm-factory" />
 
 Every folder in `agents/` has a matching file in `knowledge/`. When the two drift, the knowledge file is the bug — code is ground truth, markdown is the spec that must agree with it.
 

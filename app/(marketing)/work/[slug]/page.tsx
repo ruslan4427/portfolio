@@ -3,7 +3,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArtifactList } from "@/components/case-study/ArtifactList";
 import { DevlogRefs } from "@/components/case-study/DevlogRefs";
-import { TokenScorecardAside } from "@/components/case-study/TokenScorecardAside";
+import { BuildTimeline } from "@/components/case-study/BuildTimeline";
+import { TokenScorecardHero } from "@/components/case-study/TokenScorecardHero";
 import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
 import { StackRow } from "@/components/mdx/CaseStudySchemas";
@@ -162,19 +163,27 @@ export default async function CaseStudyPage({
         </section>
       )}
 
+      {frontmatter.tokenScorecard && (
+        <section className="px-[var(--gutter)] pb-12">
+          <div className="mx-auto max-w-[65ch]">
+            <TokenScorecardHero scorecard={frontmatter.tokenScorecard} />
+          </div>
+        </section>
+      )}
+
+      {frontmatter.tokenScorecard?.phases && (
+        <section className="px-[var(--gutter)] pb-16">
+          <div className="mx-auto max-w-[65ch]">
+            <BuildTimeline slug={frontmatter.slug} phases={frontmatter.tokenScorecard.phases} />
+          </div>
+        </section>
+      )}
+
       <div className="px-[var(--gutter)] pb-16">
         <div className="mx-auto max-w-[65ch]">
           <CaseStudyBody source={source} />
         </div>
       </div>
-
-      {frontmatter.tokenScorecard && (
-        <section className="px-[var(--gutter)] pb-12">
-          <div className="mx-auto max-w-[65ch]">
-            <TokenScorecardAside scorecard={frontmatter.tokenScorecard} />
-          </div>
-        </section>
-      )}
 
       {frontmatter.supportingArtifacts && frontmatter.supportingArtifacts.length > 0 && (
         <section className="px-[var(--gutter)] pb-12">

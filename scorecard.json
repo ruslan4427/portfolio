@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-17T02:03:01.853Z",
+  "generatedAt": "2026-10-17T04:38:46.295Z",
   "configVersion": 1,
   "projects": [
     {
@@ -23,6 +23,18 @@
         "tier": 0,
         "tokenSource": "unmeasurable"
       },
+      "daily": [
+        {
+          "date": "2026-09-12",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-09-29",
+          "tokens": 0,
+          "commits": 1
+        }
+      ],
       "details": {
         "disciplineCriteria": {
           "hasSpec": true,
@@ -70,6 +82,273 @@
         "tier": 0,
         "tokenSource": "dedicated-session-log"
       },
+      "daily": [
+        {
+          "date": "2026-04-08",
+          "tokens": 0,
+          "commits": 3
+        },
+        {
+          "date": "2026-04-09",
+          "tokens": 0,
+          "commits": 17
+        },
+        {
+          "date": "2026-04-10",
+          "tokens": 0,
+          "commits": 9
+        },
+        {
+          "date": "2026-04-11",
+          "tokens": 0,
+          "commits": 7
+        },
+        {
+          "date": "2026-04-15",
+          "tokens": 0,
+          "commits": 6
+        },
+        {
+          "date": "2026-04-16",
+          "tokens": 0,
+          "commits": 10
+        },
+        {
+          "date": "2026-04-17",
+          "tokens": 0,
+          "commits": 15
+        },
+        {
+          "date": "2026-04-18",
+          "tokens": 0,
+          "commits": 7
+        },
+        {
+          "date": "2026-04-25",
+          "tokens": 0,
+          "commits": 22
+        },
+        {
+          "date": "2026-04-26",
+          "tokens": 0,
+          "commits": 23
+        },
+        {
+          "date": "2026-04-27",
+          "tokens": 0,
+          "commits": 13
+        },
+        {
+          "date": "2026-04-29",
+          "tokens": 0,
+          "commits": 13
+        },
+        {
+          "date": "2026-04-30",
+          "tokens": 0,
+          "commits": 6
+        },
+        {
+          "date": "2026-05-01",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-05-06",
+          "tokens": 0,
+          "commits": 3
+        },
+        {
+          "date": "2026-05-08",
+          "tokens": 0,
+          "commits": 5
+        },
+        {
+          "date": "2026-05-09",
+          "tokens": 0,
+          "commits": 15
+        },
+        {
+          "date": "2026-05-10",
+          "tokens": 0,
+          "commits": 6
+        },
+        {
+          "date": "2026-06-02",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-06-03",
+          "tokens": 0,
+          "commits": 9
+        },
+        {
+          "date": "2026-06-07",
+          "tokens": 0,
+          "commits": 6
+        },
+        {
+          "date": "2026-06-22",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-06-29",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-07-04",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-07-06",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-07-10",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-07-13",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-07-14",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-07-20",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-07-27",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-08-03",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-08-04",
+          "tokens": 748865,
+          "commits": 0
+        },
+        {
+          "date": "2026-08-06",
+          "tokens": 639866,
+          "commits": 0
+        },
+        {
+          "date": "2026-08-09",
+          "tokens": 68167,
+          "commits": 0
+        },
+        {
+          "date": "2026-08-10",
+          "tokens": 0,
+          "commits": 4
+        },
+        {
+          "date": "2026-08-11",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-08-17",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-08-23",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-09-04",
+          "tokens": 385514,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-05",
+          "tokens": 1575445,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-09",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-09-13",
+          "tokens": 140806,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-14",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-09-16",
+          "tokens": 129314,
+          "commits": 2
+        },
+        {
+          "date": "2026-09-19",
+          "tokens": 20035900,
+          "commits": 1
+        },
+        {
+          "date": "2026-09-20",
+          "tokens": 2183854,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-21",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-09-22",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-09-28",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-09-29",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-10-01",
+          "tokens": 111952,
+          "commits": 0
+        },
+        {
+          "date": "2026-10-03",
+          "tokens": 237604,
+          "commits": 0
+        },
+        {
+          "date": "2026-10-04",
+          "tokens": 121564,
+          "commits": 0
+        }
+      ],
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -118,6 +397,63 @@
         "tier": 0,
         "tokenSource": "unmeasurable"
       },
+      "daily": [
+        {
+          "date": "2026-06-08",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-06-09",
+          "tokens": 0,
+          "commits": 11
+        },
+        {
+          "date": "2026-06-10",
+          "tokens": 0,
+          "commits": 5
+        },
+        {
+          "date": "2026-06-11",
+          "tokens": 0,
+          "commits": 4
+        },
+        {
+          "date": "2026-06-12",
+          "tokens": 0,
+          "commits": 8
+        },
+        {
+          "date": "2026-06-15",
+          "tokens": 0,
+          "commits": 2
+        },
+        {
+          "date": "2026-06-16",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-06-17",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-06-21",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-06-23",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-07-04",
+          "tokens": 0,
+          "commits": 2
+        }
+      ],
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -160,6 +496,13 @@
         "tier": 0,
         "tokenSource": "unmeasurable"
       },
+      "daily": [
+        {
+          "date": "2026-05-12",
+          "tokens": 0,
+          "commits": 1
+        }
+      ],
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -203,6 +546,28 @@
         "tier": 1,
         "tokenSource": "dedicated-session-log"
       },
+      "daily": [
+        {
+          "date": "2026-09-12",
+          "tokens": 0,
+          "commits": 1
+        },
+        {
+          "date": "2026-09-18",
+          "tokens": 0,
+          "commits": 5
+        },
+        {
+          "date": "2026-09-19",
+          "tokens": 55248840,
+          "commits": 1
+        },
+        {
+          "date": "2026-09-23",
+          "tokens": 27450972,
+          "commits": 0
+        }
+      ],
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -240,9 +605,9 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 1,
-        "reworkRatio": 0.36,
+        "reworkRatio": 0.39,
         "timeToShipDays": 1.5,
-        "tokens": 1601695011,
+        "tokens": 1629450903,
         "expertHitRate": null
       },
       "context": {
@@ -254,6 +619,138 @@
         "tier": 2,
         "tokenSource": "dedicated-session-log"
       },
+      "daily": [
+        {
+          "date": "2026-09-20",
+          "tokens": 37883575,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-21",
+          "tokens": 2585911,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-23",
+          "tokens": 13524710,
+          "commits": 1
+        },
+        {
+          "date": "2026-09-24",
+          "tokens": 60948225,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-25",
+          "tokens": 72429848,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-26",
+          "tokens": 127553005,
+          "commits": 5
+        },
+        {
+          "date": "2026-09-27",
+          "tokens": 107070889,
+          "commits": 3
+        },
+        {
+          "date": "2026-09-28",
+          "tokens": 17052470,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-29",
+          "tokens": 19487624,
+          "commits": 0
+        },
+        {
+          "date": "2026-09-30",
+          "tokens": 40670718,
+          "commits": 5
+        },
+        {
+          "date": "2026-10-01",
+          "tokens": 54175810,
+          "commits": 1
+        },
+        {
+          "date": "2026-10-02",
+          "tokens": 16631714,
+          "commits": 4
+        },
+        {
+          "date": "2026-10-03",
+          "tokens": 49630280,
+          "commits": 6
+        },
+        {
+          "date": "2026-10-04",
+          "tokens": 227188682,
+          "commits": 24
+        },
+        {
+          "date": "2026-10-05",
+          "tokens": 70462800,
+          "commits": 1
+        },
+        {
+          "date": "2026-10-06",
+          "tokens": 53873956,
+          "commits": 3
+        },
+        {
+          "date": "2026-10-07",
+          "tokens": 63690180,
+          "commits": 4
+        },
+        {
+          "date": "2026-10-08",
+          "tokens": 39275367,
+          "commits": 3
+        },
+        {
+          "date": "2026-10-09",
+          "tokens": 26647372,
+          "commits": 0
+        },
+        {
+          "date": "2026-10-10",
+          "tokens": 94422771,
+          "commits": 26
+        },
+        {
+          "date": "2026-10-11",
+          "tokens": 199723316,
+          "commits": 5
+        },
+        {
+          "date": "2026-10-13",
+          "tokens": 0,
+          "commits": 16
+        },
+        {
+          "date": "2026-10-14",
+          "tokens": 48929482,
+          "commits": 3
+        },
+        {
+          "date": "2026-10-15",
+          "tokens": 42446350,
+          "commits": 0
+        },
+        {
+          "date": "2026-10-16",
+          "tokens": 92136741,
+          "commits": 4
+        },
+        {
+          "date": "2026-10-17",
+          "tokens": 51009107,
+          "commits": 0
+        }
+      ],
       "details": {
         "disciplineCriteria": {
           "hasSpec": true,
@@ -262,14 +759,14 @@
           "hasDevlog": true
         },
         "commitCounts": {
-          "fix": 16,
+          "fix": 17,
           "feat": 44,
-          "total": 112,
-          "conventional": 60
+          "total": 114,
+          "conventional": 61
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 1601695011,
+          "opus": 1629450903,
           "sonnet": 0,
           "haiku": 0,
           "other": 0
@@ -289,9 +786,8 @@
       "slug": "claude-shiploop",
       "name": "claude-shiploop (OSS)",
       "tier": 2,
-      "pending": true,
       "metrics": {
-        "disciplineScore": null,
+        "disciplineScore": 0,
         "reworkRatio": null,
         "timeToShipDays": null,
         "tokens": null,
@@ -303,21 +799,38 @@
           "opus": 60,
           "sonnet": 40
         },
-        "duration": "in flight",
+        "duration": "3 days",
         "tier": 2,
         "tokenSource": "unmeasurable"
       },
+      "daily": [
+        {
+          "date": "2026-10-15",
+          "tokens": 0,
+          "commits": 1
+        }
+      ],
       "details": {
-        "disciplineCriteria": null,
-        "commitCounts": null,
+        "disciplineCriteria": {
+          "hasSpec": false,
+          "hasPlan": false,
+          "hasTasks": false,
+          "hasDevlog": false
+        },
+        "commitCounts": {
+          "fix": 0,
+          "feat": 0,
+          "total": 1,
+          "conventional": 0
+        },
         "sessionCount": null,
         "tokensByModel": null,
         "specsCounted": null,
         "devlogExpertStats": null,
         "startDate": "2026-10-14",
-        "shipDate": null
+        "shipDate": "2026-10-16"
       },
-      "notes": "Repo not yet created. Metrics populate at launch (Phase H). Placeholder tier/complexity based on current plan."
+      "notes": "Shipped 2026-10-16. Repo at github.com/ruslan4427/claude-shiploop. Tokens null because the OSS work ran inside the portfolio Claude Code session, not a dedicated session; commit-level signal via repoPath."
     }
   ]
 }

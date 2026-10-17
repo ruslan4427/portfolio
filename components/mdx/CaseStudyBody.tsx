@@ -1,5 +1,6 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import { AgentReplayFor } from "@/components/case-study/AgentReplay";
 import { blogComponents } from "./BlogComponents";
 import {
   ActivityChart,
@@ -29,6 +30,7 @@ export function CaseStudyBody({ source }: { source: string }) {
       components={{
         ...mdxComponents,
         ...blogComponents,
+        AgentReplay: AgentReplayFor,
         ValueStatement,
         NumberedCards,
         Pullquote,

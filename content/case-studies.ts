@@ -24,12 +24,19 @@ export type TokenScorecardModelMix = {
   haiku?: number;
 };
 
+export type Phase = {
+  name: string;
+  from: string;
+  to: string;
+};
+
 export type TokenScorecard = {
   tokens: number | null;
   complexity: TokenScorecardComplexity;
   modelMix: TokenScorecardModelMix;
   duration: string;
   tier: TokenScorecardTier;
+  phases?: Phase[];
 };
 
 export type CaseStudyFrontmatter = {
@@ -114,13 +121,47 @@ function validateTokenScorecard(slug: string, raw: unknown): TokenScorecard {
     fail(slug, `tokenScorecard.modelMix must sum to 100 (got ${sum})`);
   }
 
+  const phases = validatePhases(slug, ts.phases);
+
   return {
     tokens: ts.tokens as number | null,
     complexity: ts.complexity as TokenScorecardComplexity,
     modelMix: cleanMix,
     duration: ts.duration as string,
     tier: ts.tier as TokenScorecardTier,
+    phases,
   };
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function validatePhases(slug: string, raw: unknown): Phase[] | undefined {
+  if (raw === undefined) return undefined;
+  if (!Array.isArray(raw)) {
+    fail(slug, "tokenScorecard.phases must be an array");
+  }
+  if (raw.length === 0) return undefined;
+  const phases: Phase[] = [];
+  for (const [i, item] of raw.entries()) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      fail(slug, `tokenScorecard.phases[${i}] must be an object`);
+    }
+    const p = item as Record<string, unknown>;
+    if (typeof p.name !== "string" || p.name.length === 0) {
+      fail(slug, `tokenScorecard.phases[${i}].name required`);
+    }
+    if (typeof p.from !== "string" || !DATE_RE.test(p.from)) {
+      fail(slug, `tokenScorecard.phases[${i}].from must be YYYY-MM-DD`);
+    }
+    if (typeof p.to !== "string" || !DATE_RE.test(p.to)) {
+      fail(slug, `tokenScorecard.phases[${i}].to must be YYYY-MM-DD`);
+    }
+    if (p.from > p.to) {
+      fail(slug, `tokenScorecard.phases[${i}] from=${p.from} > to=${p.to}`);
+    }
+    phases.push({ name: p.name, from: p.from as string, to: p.to as string });
+  }
+  return phases;
 }
 
 export type CaseStudy = {
