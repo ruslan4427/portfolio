@@ -19,9 +19,9 @@ no-company-no-api:
 
 # shipping-claude-shiploop — LinkedIn is manual (install one-liner survives
 # plain-text but tighter hand-written post performs better than auto-truncated).
-# Dev.to scheduled for Monday 2026-10-19 09:00 US-East / 13:00 UTC (peak window).
+# Dev.to fast-tracked to 2026-10-17 (originally queued for Monday 2026-10-19).
 shipping-claude-shiploop:
-  devto: 2026-10-19T13:00:00Z
+  devto: 2026-10-17T22:10:00Z
 
 classify-before-you-code:
   linkedin: 2026-10-17T15:00:00Z
