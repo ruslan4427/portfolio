@@ -22,3 +22,7 @@ no-company-no-api:
 # Dev.to scheduled for Monday 2026-10-19 09:00 US-East / 13:00 UTC (peak window).
 shipping-claude-shiploop:
   devto: 2026-10-19T13:00:00Z
+
+classify-before-you-code:
+  linkedin: 2026-10-21T13:00:00Z
+  devto: 2026-10-21T13:05:00Z

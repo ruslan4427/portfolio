@@ -40,6 +40,15 @@ const flags = Object.fromEntries(
 const model = flags.model ?? "gemini-3.1-flash-image";
 
 const STYLES = {
+  ink: [
+    "Editorial black-and-white illustration",
+    "high-contrast ink on warm paper (#F5F4EF)",
+    "minimal line art with occasional cross-hatching",
+    "abstract conceptual composition favoring generous negative space",
+    "16:7 horizontal banner",
+    "no text, no logos, no watermarks",
+    "cinematic composition in the vein of a New Yorker illustration meets Linear changelog",
+  ].join(". "),
   fabric: [
     "Cinematic photorealistic product mockup, 16:7 horizontal banner",
     "the device rests on richly draped dark fabric with dramatic soft folds and highlights — black leather or heavy matte textile — the drapes fill the entire frame",
