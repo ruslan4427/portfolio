@@ -2495,3 +2495,15 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 - **Vercel's `redeploy` without `--no-cache` can still succeed on a failed deploy ID.** It wasn't a null fix — it rebuilt against the same source tree with a fresh Turbopack graph. If this repeats on the next sprint's merge, pin the Node version or try `vercel --prod` cold.
 
 ---
+
+## 2026-10-17 — cron · cross-post batch
+
+**Problem:** 2 scheduled cross-post(s) reached publish time.
+
+**Decision:** publish-due.mjs fired via GH Actions hourly cron.
+
+**Result:** Published: classify-before-you-code/linkedin → https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7517325460234534913/; classify-before-you-code/devto → https://dev.to/hrekov/classify-before-you-code-24f7. Failures: 0.
+
+**Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
+
+---
