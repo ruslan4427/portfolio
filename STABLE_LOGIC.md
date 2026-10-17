@@ -231,9 +231,72 @@ two sessions or one full sprint.
   `issues: write` permission or dropping the `ISSUED_AT` secret
   silently breaks this — don't.
 
+## Scorecard parser (Sprint 15, 2026-10-16)
+
+- **The scorecard parser is vendored, not imported.** The canonical copy
+  lives in the OSS repo (`github.com/ruslan4427/claude-shiploop`, path
+  `lib/`); the portfolio carries its own copy under
+  `scripts/scorecard-src/` (plain `.mjs`, zero dependencies, run via
+  `node`). Both trees must emit the same metric shape; the shape — not
+  the values — is the invariant. Reason: the OSS artifact's whole
+  credibility rests on being inspectable alongside the portfolio data
+  that cites it, and a `npm`/`git submodule` dependency would make the
+  portfolio's `prebuild verify:numbers` and `npm run scorecard` hidden
+  on the install chain. Vendored keeps the parser readable in two
+  places with one shape contract between them.
+- **Structural drift is guarded by a shape-check CI; value drift is
+  not.** `.github/workflows/scorecard-snapshot.yml` runs
+  `node scripts/scorecard-src/snapshot-check.mjs` on any push/PR that
+  touches `scripts/scorecard-src/**`. The check compares the live
+  parser output against the frozen fixture at
+  `scripts/__fixtures__/scorecard.expected.json` on **key sets per
+  metric and per project**, not on numeric values. Rework and token
+  counts drift every commit; that drift is expected. A metric
+  disappearing, a project vanishing from config, or a new nullable
+  cell silently becoming non-nullable will fail CI. Value drift is
+  re-committed via `npm run scorecard:snapshot` when the author decides
+  the new numbers are the correct source of truth.
+- **The update protocol has four touchpoints, in this order.** When
+  the parser schema changes: (1) bump `CONFIG_VERSION` in
+  `scripts/scorecard-src/scorecard.config.mjs` AND
+  `REQUIRED_CONFIG_VERSION` in the main entry — the lockstep guard
+  refuses to run on mismatch; (2) regenerate the fixture with
+  `npm run scorecard:snapshot`; (3) run `npm run scorecard:check`
+  locally — must pass; (4) commit all three files in one commit so
+  the shape-check CI sees them atomically. Same four steps apply in
+  the OSS repo. There is no cross-repo commit-SHA pin yet; if the two
+  trees diverge in shape, CI will catch it on whichever side the
+  snapshot was committed from.
+- **Null is honest — the parser never fabricates.** If data is
+  absent (no DEVLOG, no spec dates, no session logs, no
+  conventional commits), the metric is `null`. The `/tools`
+  methodology aside explains null cells transparently. Softening a
+  null to "estimated 15k tokens" would reintroduce the exact
+  credibility hole the three-tier design (naked / self-spec /
+  shiploop) was there to avoid. Rule: the parser can refuse to
+  measure; it cannot invent.
+- **The three-tier assignment is a human call, not auto-detection.**
+  Discipline score (0–1, four binary artifacts) is auto. Tier (0/1/2)
+  is a per-project judgment documented in `content/case-studies/<slug>.mdx`
+  frontmatter under `tokenScorecard.tier`. The gap between
+  "artifacts present" and "institutional discipline" is real — Lexora
+  scores 4/4 discipline because speckit left the artifacts behind, but
+  tier 0 because ShipLoop didn't exist yet. The parser surfaces both;
+  the methodology aside explains the gap. Do not try to collapse the
+  two into a single derived value.
+
 ## Sprint history — locked directions
 
 - **Sprint 7 (2026-09-23)** established the current minimalist editorial
   direction, replacing a dark WebGL "Lusion-immersive" first draft. A future
   session that wants to reintroduce the dark canvas, three.js, or gsap needs
   a fresh spec + user sign-off. Reference lock: Nizar Ali Dribbble 24766210.
+- **Sprint 15 (2026-10-16)** open-sourced the ShipLoop protocol as
+  `github.com/ruslan4427/claude-shiploop` (MIT, no sign-up, no telemetry)
+  and added the `/tools` scorecard page on hrekov.dev. The install
+  one-liner (`curl -sSL https://raw.githubusercontent.com/ruslan4427/claude-shiploop/main/install.sh | bash`)
+  merges into existing `CLAUDE.md`, doesn't overwrite rules. A future
+  session that wants to retire or re-brand the OSS artifact needs a
+  fresh spec; the `/tools` page, meta case study `/work/claude-shiploop`,
+  and the blog post `/blog/shipping-claude-shiploop` all point at the
+  repo and must move in sync.

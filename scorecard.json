@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T01:58:54.781Z",
+  "generatedAt": "2026-10-17T02:03:01.853Z",
   "configVersion": 1,
   "projects": [
     {
@@ -240,9 +240,9 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 1,
-        "reworkRatio": 0.38,
-        "timeToShipDays": 1,
-        "tokens": 1498924397,
+        "reworkRatio": 0.36,
+        "timeToShipDays": 1.5,
+        "tokens": 1601695011,
         "expertHitRate": null
       },
       "context": {
@@ -250,7 +250,7 @@
         "modelMix": {
           "opus": 100
         },
-        "duration": "26 days active",
+        "duration": "27 days active",
         "tier": 2,
         "tokenSource": "dedicated-session-log"
       },
@@ -263,18 +263,18 @@
         },
         "commitCounts": {
           "fix": 16,
-          "feat": 42,
-          "total": 110,
-          "conventional": 58
+          "feat": 44,
+          "total": 112,
+          "conventional": 60
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 1498924397,
+          "opus": 1601695011,
           "sonnet": 0,
           "haiku": 0,
           "other": 0
         },
-        "specsCounted": 5,
+        "specsCounted": 6,
         "devlogExpertStats": {
           "consulted": 1,
           "planChangedYes": 0,

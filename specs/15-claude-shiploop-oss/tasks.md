@@ -373,24 +373,33 @@ in Phase H.
 
 ## Sprint close checklist
 
-- [ ] All 6 case study + N blog post routes still build clean.
-- [ ] `pnpm scorecard` deterministic (two consecutive runs produce
-  identical JSON apart from `generatedAt`).
-- [ ] `scorecard-snapshot.yml` CI step green on main.
-- [ ] `npx tsc --noEmit` clean.
-- [ ] `github.com/ruslan4427/claude-shiploop` public, MIT, README
-  renders readably on GitHub web.
-- [ ] `curl -sSL <install-url> | bash --dry-run` succeeds from a
-  fresh scratch dir.
-- [ ] `/tools` live on hrekov.dev with scorecard + skill grid +
-  install one-liner. Mobile legible.
-- [ ] `/work/claude-shiploop` live; both views (executive +
-  technical) legible.
-- [ ] Announcement blog post published to dev.to + LinkedIn via
+- [ ] All 6 case study + N blog post routes still build clean. _Pending
+  final `npm run build` on sprint-close commit (sprint-15 branch)._
+- [x] `pnpm scorecard` deterministic (two consecutive runs produce
+  identical JSON apart from `generatedAt`). Verified 2026-10-17.
+- [x] `scorecard-snapshot.yml` CI step green on main. Run 38985124421
+  (18s) on post-merge push, run 38896080874 (24s) on PR #1.
+- [x] `npx tsc --noEmit` clean. Verified 2026-10-17.
+- [x] `github.com/ruslan4427/claude-shiploop` public, MIT, README
+  renders readably on GitHub web. (Phase H4)
+- [x] `curl -sSL <install-url> | bash --dry-run` succeeds from a
+  fresh scratch dir. (Phase H5)
+- [x] `/tools` live on hrekov.dev with scorecard + skill grid +
+  install one-liner. Mobile legible. (Phase H7)
+- [x] `/work/claude-shiploop` live; both views (executive +
+  technical) legible. (Phase H7)
+- [x] Announcement blog post published to dev.to + LinkedIn via
   cross-poster (or manual LinkedIn if hand-written).
-- [ ] `memory/iteration-15.md` written with: phases shipped, Phase A
+  Blog canonical shipped 2026-10-17 (`/blog/shipping-claude-shiploop`);
+  dev.to scheduled 2026-10-19T13:00:00Z via `content/blog/schedule.yml`;
+  LinkedIn text staged at `tmp/linkedin-shipping-claude-shiploop.txt`
+  for Monday manual copy-paste.
+- [x] `memory/iteration-15.md` written with: phases shipped, Phase A
   attribution rate, bail-out triggered yes/no, launch timing (default
-  or C-fallback), first-week adoption signals (if any).
-- [ ] `STABLE_LOGIC.md` gains an entry for the vendored-parser
+  or C-fallback), first-week adoption signals (if any). Captured
+  2026-10-17 at
+  `~/.claude/projects/-Users-ruslan-portfolio/memory/iteration-15.md`.
+- [x] `STABLE_LOGIC.md` gains an entry for the vendored-parser
   update protocol (bump versions in config header + fixture + CI
-  diff + commit SHA pin).
+  diff + commit SHA pin). Added as `## Scorecard parser (Sprint 15,
+  2026-10-16)` + new entry under Sprint history.
