@@ -1,0 +1,323 @@
+{
+  "generatedAt": "2026-10-16T01:58:54.781Z",
+  "configVersion": 1,
+  "projects": [
+    {
+      "slug": "lexora",
+      "name": "Lexora",
+      "tier": 0,
+      "metrics": {
+        "disciplineScore": 1,
+        "reworkRatio": 0,
+        "timeToShipDays": 13,
+        "tokens": null,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "M",
+        "modelMix": {
+          "sonnet": 85,
+          "opus": 15
+        },
+        "duration": "17 days",
+        "tier": 0,
+        "tokenSource": "unmeasurable"
+      },
+      "details": {
+        "disciplineCriteria": {
+          "hasSpec": true,
+          "hasPlan": true,
+          "hasTasks": true,
+          "hasDevlog": true
+        },
+        "commitCounts": {
+          "fix": 0,
+          "feat": 1,
+          "total": 3,
+          "conventional": 1
+        },
+        "sessionCount": null,
+        "tokensByModel": null,
+        "specsCounted": 1,
+        "devlogExpertStats": {
+          "consulted": 0,
+          "planChangedYes": 0,
+          "planChangedNo": 0
+        },
+        "startDate": "2026-09-12",
+        "shipDate": "2026-09-29"
+      },
+      "notes": "Pre-ShipLoop. 4/4 discipline score reflects speckit-era artifacts, not institutional ShipLoop (tier reflects the latter). Rework 0 and TTS 13d both from n=1 sample. Tokens not reconstructable from mixed home-dir sessions (bail-out triggered 2026-10-14 — see spec §10.1)."
+    },
+    {
+      "slug": "noble-saas",
+      "name": "Noble SaaS",
+      "tier": 0,
+      "metrics": {
+        "disciplineScore": 0,
+        "reworkRatio": 1.44,
+        "timeToShipDays": null,
+        "tokens": 26378851,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "L",
+        "modelMix": {
+          "opus": 2,
+          "sonnet": 98
+        },
+        "duration": "61 days active",
+        "tier": 0,
+        "tokenSource": "dedicated-session-log"
+      },
+      "details": {
+        "disciplineCriteria": {
+          "hasSpec": false,
+          "hasPlan": false,
+          "hasTasks": false,
+          "hasDevlog": false
+        },
+        "commitCounts": {
+          "fix": 101,
+          "feat": 70,
+          "total": 234,
+          "conventional": 171
+        },
+        "sessionCount": 9,
+        "tokensByModel": {
+          "opus": 471120,
+          "sonnet": 25907731,
+          "haiku": 0,
+          "other": 0
+        },
+        "specsCounted": null,
+        "devlogExpertStats": null,
+        "startDate": "2026-04-08",
+        "shipDate": null
+      },
+      "notes": "Pre-ShipLoop. 1.44 rework over 171 conventional commits is the loudest pre-ShipLoop marker in the dataset. Dedicated session log exists; tokens measured from -Users-ruslan-noble-saas/."
+    },
+    {
+      "slug": "smm-factory",
+      "name": "SMM Factory",
+      "tier": 0,
+      "metrics": {
+        "disciplineScore": 0,
+        "reworkRatio": 4.5,
+        "timeToShipDays": null,
+        "tokens": null,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "M",
+        "modelMix": {
+          "sonnet": 90,
+          "haiku": 10
+        },
+        "duration": "27 days",
+        "tier": 0,
+        "tokenSource": "unmeasurable"
+      },
+      "details": {
+        "disciplineCriteria": {
+          "hasSpec": false,
+          "hasPlan": false,
+          "hasTasks": false,
+          "hasDevlog": false
+        },
+        "commitCounts": {
+          "fix": 9,
+          "feat": 2,
+          "total": 38,
+          "conventional": 11
+        },
+        "sessionCount": null,
+        "tokensByModel": null,
+        "specsCounted": null,
+        "devlogExpertStats": null,
+        "startDate": "2026-06-08",
+        "shipDate": "2026-07-04"
+      },
+      "notes": "Pre-ShipLoop. Rework 4.5 from a small n=11 conventional sample (9 fix / 2 feat) — directional, not statistically robust. Tokens not reconstructable from mixed home-dir sessions (bail-out triggered 2026-10-14 — see spec §10.1)."
+    },
+    {
+      "slug": "angel",
+      "name": "Angel Trucking",
+      "tier": 0,
+      "metrics": {
+        "disciplineScore": 0,
+        "reworkRatio": null,
+        "timeToShipDays": null,
+        "tokens": null,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "S",
+        "modelMix": {
+          "sonnet": 100
+        },
+        "duration": "scaffold only",
+        "tier": 0,
+        "tokenSource": "unmeasurable"
+      },
+      "details": {
+        "disciplineCriteria": {
+          "hasSpec": false,
+          "hasPlan": false,
+          "hasTasks": false,
+          "hasDevlog": false
+        },
+        "commitCounts": {
+          "fix": 0,
+          "feat": 0,
+          "total": 1,
+          "conventional": 0
+        },
+        "sessionCount": null,
+        "tokensByModel": null,
+        "specsCounted": null,
+        "devlogExpertStats": null,
+        "startDate": "2026-05-12",
+        "shipDate": null
+      },
+      "notes": "Pre-ShipLoop. Prototype did not progress past Next.js scaffold (1 commit). Zero session hits across home-dir scan — likely never engaged Claude Code beyond initial setup."
+    },
+    {
+      "slug": "fieldmark",
+      "name": "Fieldmark",
+      "tier": 1,
+      "metrics": {
+        "disciplineScore": 0.25,
+        "reworkRatio": 2,
+        "timeToShipDays": null,
+        "tokens": 82699812,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "M",
+        "modelMix": {
+          "opus": 89,
+          "sonnet": 11
+        },
+        "duration": "4 days active",
+        "tier": 1,
+        "tokenSource": "dedicated-session-log"
+      },
+      "details": {
+        "disciplineCriteria": {
+          "hasSpec": false,
+          "hasPlan": false,
+          "hasTasks": false,
+          "hasDevlog": true
+        },
+        "commitCounts": {
+          "fix": 2,
+          "feat": 1,
+          "total": 7,
+          "conventional": 3
+        },
+        "sessionCount": 1,
+        "tokensByModel": {
+          "opus": 73573512,
+          "sonnet": 9126300,
+          "haiku": 0,
+          "other": 0
+        },
+        "specsCounted": null,
+        "devlogExpertStats": {
+          "consulted": 0,
+          "planChangedYes": 0,
+          "planChangedNo": 0
+        },
+        "startDate": "2026-09-12",
+        "shipDate": "2026-09-19"
+      },
+      "notes": "Self-authored test_plan.md (517 lines) acted as pre-spec; no ShipLoop discipline yet."
+    },
+    {
+      "slug": "hrekov-dev",
+      "name": "Portfolio (hrekov.dev)",
+      "tier": 2,
+      "metrics": {
+        "disciplineScore": 1,
+        "reworkRatio": 0.38,
+        "timeToShipDays": 1,
+        "tokens": 1498924397,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "L",
+        "modelMix": {
+          "opus": 100
+        },
+        "duration": "26 days active",
+        "tier": 2,
+        "tokenSource": "dedicated-session-log"
+      },
+      "details": {
+        "disciplineCriteria": {
+          "hasSpec": true,
+          "hasPlan": true,
+          "hasTasks": true,
+          "hasDevlog": true
+        },
+        "commitCounts": {
+          "fix": 16,
+          "feat": 42,
+          "total": 110,
+          "conventional": 58
+        },
+        "sessionCount": 1,
+        "tokensByModel": {
+          "opus": 1498924397,
+          "sonnet": 0,
+          "haiku": 0,
+          "other": 0
+        },
+        "specsCounted": 5,
+        "devlogExpertStats": {
+          "consulted": 1,
+          "planChangedYes": 0,
+          "planChangedNo": 0
+        },
+        "startDate": "2026-09-20",
+        "shipDate": null
+      },
+      "notes": "ShipLoop active from Sprint 0 bootstrap (2026-09-20). 1-day median TTS reflects solo-operator cadence (plan → ship typically same day); n=5 specs. Reflects measurement across the owning org, not team scale."
+    },
+    {
+      "slug": "claude-shiploop",
+      "name": "claude-shiploop (OSS)",
+      "tier": 2,
+      "pending": true,
+      "metrics": {
+        "disciplineScore": null,
+        "reworkRatio": null,
+        "timeToShipDays": null,
+        "tokens": null,
+        "expertHitRate": null
+      },
+      "context": {
+        "complexity": "L",
+        "modelMix": {
+          "opus": 60,
+          "sonnet": 40
+        },
+        "duration": "in flight",
+        "tier": 2,
+        "tokenSource": "unmeasurable"
+      },
+      "details": {
+        "disciplineCriteria": null,
+        "commitCounts": null,
+        "sessionCount": null,
+        "tokensByModel": null,
+        "specsCounted": null,
+        "devlogExpertStats": null,
+        "startDate": "2026-10-14",
+        "shipDate": null
+      },
+      "notes": "Repo not yet created. Metrics populate at launch (Phase H). Placeholder tier/complexity based on current plan."
+    }
+  ]
+}
