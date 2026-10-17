@@ -2507,3 +2507,15 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
 
 ---
+
+## 2026-10-17 — cron · cross-post batch
+
+**Problem:** 1 scheduled cross-post(s) reached publish time.
+
+**Decision:** publish-due.mjs fired via GH Actions hourly cron.
+
+**Result:** Published: shipping-claude-shiploop/devto → https://dev.to/hrekov/shipping-claude-shiploop-4e5h. Failures: 0.
+
+**Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
+
+---
