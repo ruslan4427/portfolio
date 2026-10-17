@@ -2,6 +2,8 @@ export type ToolImpactRow = {
   label: string;
   value: string | null;
   caption?: string;
+  method?: string;
+  baseline?: string;
 };
 
 export type ToolBuilt = {
@@ -19,6 +21,7 @@ export type ToolBuilt = {
     systematizes: string;
     impact: ToolImpactRow[] | null;
     impactNote?: string;
+    parserSource?: { label: string; href: string };
   };
 };
 
@@ -46,19 +49,30 @@ export const TOOLS_BUILT: ToolBuilt[] = [
           label: "Discipline",
           value: "100%",
           caption: "On tier-2 (ShipLoop) runs: spec + plan + tasks + DEVLOG present.",
+          method: "4-point binary: spec/plan/tasks exist in specs/<N>/ and DEVLOG.md is present.",
+          baseline: "Tier-0 projects (pre-ShipLoop) score 0% — none of the four artifacts exist.",
         },
         {
           label: "Rework ratio",
-          value: "0.36",
+          value: "0.39",
           caption: "This portfolio (hrekov-dev) under ShipLoop vs 4.5 on a tier-0 baseline.",
+          method: "fix(…) commits ÷ feat(…) commits (conventional commits only, lifetime).",
+          baseline: "SMM Factory tier-0 = 4.5 — ten times more rework per shipped feature.",
         },
         {
           label: "Expert hit rate",
           value: "67%",
           caption:
             "First validated capsule caught 2 of 3 blind-bugs with plan-changing findings.",
+          method:
+            "(expert consulted · plan changed = yes) ÷ (total consultations). Hand-counted today; DEVLOG convention not yet wired for auto-rollup.",
+          baseline: "Random guess on a 3-bug test ≈ 33% — the capsule doubled that.",
         },
       ],
+      parserSource: {
+        label: "Inspect the parser",
+        href: "https://github.com/ruslan4427/claude-shiploop/blob/main/scripts/scorecard.mjs",
+      },
     },
   },
   {

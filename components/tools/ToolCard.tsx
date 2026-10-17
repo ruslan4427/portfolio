@@ -47,6 +47,7 @@ export function ToolCard({ tool }: { tool: ToolBuilt }) {
         systematizes={tool.effectiveness.systematizes}
         impact={tool.effectiveness.impact}
         impactNote={tool.effectiveness.impactNote}
+        parserSource={tool.effectiveness.parserSource}
       />
     </article>
   );

@@ -754,6 +754,32 @@ if (lexora !== null) {
   }
 }
 
+// 13. tools-built.ts claude-shiploop rework ratio vs scorecard.json (hrekov-dev tier-2 run).
+//     The /tools card is a hand-maintained mirror of parser output; this guard catches
+//     the Sprint 16 case where commit activity ticked the ratio and the card was not refreshed.
+{
+  const SCORECARD = join(REPO, "scorecard.json");
+  const TOOLS_BUILT = join(REPO, "content/tools-built.ts");
+  if (existsSync(SCORECARD) && existsSync(TOOLS_BUILT)) {
+    const scorecard = JSON.parse(readFileSync(SCORECARD, "utf8"));
+    const hrekovProj = scorecard.projects?.find((p) => p.slug === "hrekov-dev");
+    const diskRework = hrekovProj?.metrics?.reworkRatio;
+    if (typeof diskRework === "number") {
+      const toolsSrc = readFileSync(TOOLS_BUILT, "utf8");
+      const reworkBlock = toolsSrc.match(
+        /label:\s*"Rework ratio"[\s\S]{0,300}?value:\s*"([^"]+)"/,
+      );
+      if (reworkBlock) {
+        const claimed = parseFloat(reworkBlock[1]);
+        if (Math.abs(claimed - diskRework) > 0.005)
+          problems.push(
+            `tools-built rework ratio: card=${reworkBlock[1]}, scorecard.json=${diskRework.toFixed(2)}`,
+          );
+      }
+    }
+  }
+}
+
 if (problems.length) {
   console.error("✗ case-study number drift");
   for (const p of problems) console.error("  •", p);
