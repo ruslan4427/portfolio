@@ -1,0 +1,56 @@
+name: Unpublish one post
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Post slug (e.g. shipping-claude-shiploop)'
+        type: string
+        required: true
+      channel:
+        description: 'Which channel to take down'
+        type: choice
+        required: true
+        options:
+          - devto
+          - linkedin
+      dryRun:
+        description: 'When true, skip network calls'
+        type: boolean
+        default: true
+
+jobs:
+  unpublish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Unpublish
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_MEMBER_URN: ${{ secrets.LINKEDIN_MEMBER_URN }}
+        run: |
+          node scripts/unpublish-one.mjs \
+            --slug "${{ inputs.slug }}" \
+            --channel "${{ inputs.channel }}" \
+            ${{ inputs.dryRun && '--dry-run' || '--live' }}
+      - name: Commit updated ledger
+        if: ${{ !inputs.dryRun }}
+        run: |
+          if [[ -n "$(git status --porcelain .distribution-ledger.jsonl)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .distribution-ledger.jsonl
+            git commit -m "chore(distribution): unpublish ${{ inputs.slug }}/${{ inputs.channel }}"
+            git push
+          fi
