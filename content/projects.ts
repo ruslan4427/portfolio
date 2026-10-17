@@ -182,7 +182,7 @@ export const projects: Project[] = [
     stackTags: ["node", "ai"],
     preview: {
       src: "/case-studies/claude-shiploop/cover.webp",
-      alt: "claude-shiploop case-study cover — monochrome scorecard screenshot showing the Tier 2 row (hrekov.dev) with its measured 100% discipline score, 0.38 rework ratio, 1-day median time to ship, and 1.5B tokens total, overlaid on the warm off-white paper background used across the portfolio.",
+      alt: "claude-shiploop case-study cover — monochrome scorecard screenshot showing the Tier 2 row (hrekov.dev) with its measured 100% discipline score, 0.39 rework ratio, 1-day median time to ship, and 62M metered tokens total, overlaid on the warm off-white paper background used across the portfolio.",
       orientation: "landscape",
     },
   },

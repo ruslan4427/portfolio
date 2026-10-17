@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-17T04:38:46.295Z",
+  "generatedAt": "2026-10-17T15:24:29.237Z",
   "configVersion": 1,
   "projects": [
     {
@@ -69,14 +69,14 @@
         "disciplineScore": 0,
         "reworkRatio": 1.44,
         "timeToShipDays": null,
-        "tokens": 26378851,
+        "tokens": 1493060,
         "expertHitRate": null
       },
       "context": {
         "complexity": "L",
         "modelMix": {
-          "opus": 2,
-          "sonnet": 98
+          "opus": 9,
+          "sonnet": 91
         },
         "duration": "61 days active",
         "tier": 0,
@@ -240,12 +240,12 @@
         },
         {
           "date": "2026-08-04",
-          "tokens": 748865,
+          "tokens": 233871,
           "commits": 0
         },
         {
           "date": "2026-08-06",
-          "tokens": 639866,
+          "tokens": 86209,
           "commits": 0
         },
         {
@@ -275,12 +275,12 @@
         },
         {
           "date": "2026-09-04",
-          "tokens": 385514,
+          "tokens": 36168,
           "commits": 0
         },
         {
           "date": "2026-09-05",
-          "tokens": 1575445,
+          "tokens": 67195,
           "commits": 0
         },
         {
@@ -290,7 +290,7 @@
         },
         {
           "date": "2026-09-13",
-          "tokens": 140806,
+          "tokens": 43204,
           "commits": 0
         },
         {
@@ -300,17 +300,17 @@
         },
         {
           "date": "2026-09-16",
-          "tokens": 129314,
+          "tokens": 47472,
           "commits": 2
         },
         {
           "date": "2026-09-19",
-          "tokens": 20035900,
+          "tokens": 419808,
           "commits": 1
         },
         {
           "date": "2026-09-20",
-          "tokens": 2183854,
+          "tokens": 361904,
           "commits": 0
         },
         {
@@ -335,17 +335,17 @@
         },
         {
           "date": "2026-10-01",
-          "tokens": 111952,
+          "tokens": 42112,
           "commits": 0
         },
         {
           "date": "2026-10-03",
-          "tokens": 237604,
+          "tokens": 42492,
           "commits": 0
         },
         {
           "date": "2026-10-04",
-          "tokens": 121564,
+          "tokens": 44458,
           "commits": 0
         }
       ],
@@ -364,8 +364,8 @@
         },
         "sessionCount": 9,
         "tokensByModel": {
-          "opus": 471120,
-          "sonnet": 25907731,
+          "opus": 129062,
+          "sonnet": 1363998,
           "haiku": 0,
           "other": 0
         },
@@ -533,14 +533,14 @@
         "disciplineScore": 0.25,
         "reworkRatio": 2,
         "timeToShipDays": null,
-        "tokens": 82699812,
+        "tokens": 2631355,
         "expertHitRate": null
       },
       "context": {
         "complexity": "M",
         "modelMix": {
-          "opus": 89,
-          "sonnet": 11
+          "opus": 64,
+          "sonnet": 36
         },
         "duration": "4 days active",
         "tier": 1,
@@ -559,12 +559,12 @@
         },
         {
           "date": "2026-09-19",
-          "tokens": 55248840,
+          "tokens": 2113701,
           "commits": 1
         },
         {
           "date": "2026-09-23",
-          "tokens": 27450972,
+          "tokens": 517654,
           "commits": 0
         }
       ],
@@ -583,8 +583,8 @@
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 73573512,
-          "sonnet": 9126300,
+          "opus": 1681326,
+          "sonnet": 950029,
           "haiku": 0,
           "other": 0
         },
@@ -606,8 +606,8 @@
       "metrics": {
         "disciplineScore": 1,
         "reworkRatio": 0.39,
-        "timeToShipDays": 1.5,
-        "tokens": 1629450903,
+        "timeToShipDays": 1,
+        "tokens": 61896355,
         "expertHitRate": null
       },
       "context": {
@@ -615,114 +615,114 @@
         "modelMix": {
           "opus": 100
         },
-        "duration": "27 days active",
+        "duration": "28 days active",
         "tier": 2,
         "tokenSource": "dedicated-session-log"
       },
       "daily": [
         {
           "date": "2026-09-20",
-          "tokens": 37883575,
+          "tokens": 3236500,
           "commits": 0
         },
         {
           "date": "2026-09-21",
-          "tokens": 2585911,
+          "tokens": 780537,
           "commits": 0
         },
         {
           "date": "2026-09-23",
-          "tokens": 13524710,
+          "tokens": 1432442,
           "commits": 1
         },
         {
           "date": "2026-09-24",
-          "tokens": 60948225,
+          "tokens": 2756906,
           "commits": 0
         },
         {
           "date": "2026-09-25",
-          "tokens": 72429848,
+          "tokens": 1835606,
           "commits": 0
         },
         {
           "date": "2026-09-26",
-          "tokens": 127553005,
+          "tokens": 4153066,
           "commits": 5
         },
         {
           "date": "2026-09-27",
-          "tokens": 107070889,
+          "tokens": 4423304,
           "commits": 3
         },
         {
           "date": "2026-09-28",
-          "tokens": 17052470,
+          "tokens": 1064513,
           "commits": 0
         },
         {
           "date": "2026-09-29",
-          "tokens": 19487624,
+          "tokens": 1329051,
           "commits": 0
         },
         {
           "date": "2026-09-30",
-          "tokens": 40670718,
+          "tokens": 1537876,
           "commits": 5
         },
         {
           "date": "2026-10-01",
-          "tokens": 54175810,
+          "tokens": 1325254,
           "commits": 1
         },
         {
           "date": "2026-10-02",
-          "tokens": 16631714,
+          "tokens": 1105651,
           "commits": 4
         },
         {
           "date": "2026-10-03",
-          "tokens": 49630280,
+          "tokens": 1926487,
           "commits": 6
         },
         {
           "date": "2026-10-04",
-          "tokens": 227188682,
+          "tokens": 5321644,
           "commits": 24
         },
         {
           "date": "2026-10-05",
-          "tokens": 70462800,
+          "tokens": 2635745,
           "commits": 1
         },
         {
           "date": "2026-10-06",
-          "tokens": 53873956,
+          "tokens": 2107575,
           "commits": 3
         },
         {
           "date": "2026-10-07",
-          "tokens": 63690180,
+          "tokens": 1744701,
           "commits": 4
         },
         {
           "date": "2026-10-08",
-          "tokens": 39275367,
+          "tokens": 970135,
           "commits": 3
         },
         {
           "date": "2026-10-09",
-          "tokens": 26647372,
+          "tokens": 1121180,
           "commits": 0
         },
         {
           "date": "2026-10-10",
-          "tokens": 94422771,
+          "tokens": 3637090,
           "commits": 26
         },
         {
           "date": "2026-10-11",
-          "tokens": 199723316,
+          "tokens": 7252373,
           "commits": 5
         },
         {
@@ -732,23 +732,23 @@
         },
         {
           "date": "2026-10-14",
-          "tokens": 48929482,
+          "tokens": 1758902,
           "commits": 3
         },
         {
           "date": "2026-10-15",
-          "tokens": 42446350,
+          "tokens": 1643582,
           "commits": 0
         },
         {
           "date": "2026-10-16",
-          "tokens": 92136741,
+          "tokens": 3128711,
           "commits": 4
         },
         {
           "date": "2026-10-17",
-          "tokens": 51009107,
-          "commits": 0
+          "tokens": 3667524,
+          "commits": 3
         }
       ],
       "details": {
@@ -759,19 +759,19 @@
           "hasDevlog": true
         },
         "commitCounts": {
-          "fix": 17,
-          "feat": 44,
-          "total": 114,
-          "conventional": 61
+          "fix": 18,
+          "feat": 46,
+          "total": 117,
+          "conventional": 64
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 1629450903,
+          "opus": 61896355,
           "sonnet": 0,
           "haiku": 0,
           "other": 0
         },
-        "specsCounted": 6,
+        "specsCounted": 7,
         "devlogExpertStats": {
           "consulted": 1,
           "planChangedYes": 0,
@@ -788,7 +788,7 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 0,
-        "reworkRatio": null,
+        "reworkRatio": 0,
         "timeToShipDays": null,
         "tokens": null,
         "expertHitRate": null
@@ -808,6 +808,11 @@
           "date": "2026-10-15",
           "tokens": 0,
           "commits": 1
+        },
+        {
+          "date": "2026-10-16",
+          "tokens": 0,
+          "commits": 1
         }
       ],
       "details": {
@@ -819,9 +824,9 @@
         },
         "commitCounts": {
           "fix": 0,
-          "feat": 0,
-          "total": 1,
-          "conventional": 0
+          "feat": 1,
+          "total": 2,
+          "conventional": 1
         },
         "sessionCount": null,
         "tokensByModel": null,

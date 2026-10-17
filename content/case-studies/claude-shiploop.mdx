@@ -329,7 +329,7 @@ Short version:
   binary per criterion.
 - **Rework** = `fix_commits ÷ feat_commits`, from conventional-commit grep.
 - **Time to ship** = median of `(ship_commit_date − spec_frontmatter_date)` per feature.
-- **Tokens** = sum of `input + output + cache_read + cache_creation` across session JSONL.
+- **Tokens** = sum of `input + output + cache_creation` across session JSONL. Cache reads are excluded (10% price; dominate raw volume on long sessions).
 - **Expert hit rate** = `plan_changed_yes ÷ (yes + no)`, parsed from DEVLOG.
 
 Every number carries a `tokenSource` context tag (direct / home-dir-attribution
