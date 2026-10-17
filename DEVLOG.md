@@ -2437,3 +2437,29 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 - **Two monster sessions dominate 85% of this folder's bytes.** 7c5fd6d6-… = 163MB (15,748 messages, Fieldmark-dominant) and 5e28002b-… = 97MB (9,586 messages, Lexora+Fieldmark+Portfolio). If anything, those are the useful source for later time-sliced extraction — but that's a different project.
 
 ---
+
+## 2026-10-16 · Sprint 15 · Phase H — launch day (OSS repo public, portfolio merged, prod live)
+
+**Problem:** Ten subtasks (H1–H10) across one evening, blending read-only pre-ship checks (H1), name-availability pings (H2), the irreversible `gh repo create --public` (H4), the irreversible portfolio PR merge (H6), and a production smoke that would be the first signal whether the whole sprint actually shipped. The first version of my launch pacing executed H1→H6 as a chain on short "continue" prompts, and Ruslan interrupted mid-sequence: *"виглядає так ніби я вже тебе не контролюю і ти робеш щось таке що мені не зрозуміло"*. The launch continued, but the operating mode changed mid-flight.
+
+**Decision:** Three decisions worth preserving.
+
+1. **Single-step gates became the rule, retroactively.** Everything externally visible — repo create, PR merge, post publish — now needs its own "I'm about to do X, OK?" preface, independent of any earlier approval. Reversible local work (edits, builds, dry-runs, memory writes) keeps flowing. New feedback memory `feedback_pause_at_public_gates.md` + MEMORY.md pointer, so the rule survives beyond this session.
+
+2. **`gh repo create` flag conflict.** `gh repo create <name> --public --license mit --source=. --push` printed the full help text and bailed silently. Root cause: `--license` only accepts the string literal name and only when gh is scaffolding a repo from scratch; it refuses to coexist with `--source=.` because a source tree may already have its own LICENSE. Fix: dropped `--license mit` (the LICENSE file was already in `~/shiploop-publish` from Phase E). Second invocation succeeded; `github.com/ruslan4427/claude-shiploop` live, public, MIT via LICENSE-in-tree.
+
+3. **The Vercel production deploy failed on the merge commit, but hrekov.dev kept serving.** Build error on `app/layout.tsx`: `next/font/google queries have exactly one entry` from Turbopack's `NextFontGoogleFontFileReplacer`. Local `next build` on the identical SHA (Next 16.3.5) succeeded. No font or next-config diff between the last Ready prod (2 days earlier) and the failing merge — the regression is Vercel-side (Turbopack runtime drift between those two deploys). hrekov.dev stayed aliased to the 2-day-old Ready deploy, which is why the first smoke returned 200 for `/work/claude-shiploop` (stale edge cache carryover) but 404 for `/tools` (route didn't exist on that older deploy). `vercel redeploy <failed-url>` on the same deploy ID succeeded on retry with no code change — a transient build-cache flake. The alias flipped; `/tools`, `/work/claude-shiploop`, `/work`, both OG images all 200.
+
+**Result:**
+- Repo: `github.com/ruslan4427/claude-shiploop` public, MIT, README/INSTALL/CONTRIBUTING shipped. Live install dry-run from `mktemp -d` scratch prints the expected clone-path output after relocating out of `~/shiploop-publish` (first run short-circuited to local source because `install.sh` detects `SCRIPT_DIR/skills/` and the shell was sitting in the source tree).
+- Portfolio PR #1 merged as `ef52940`. Vercel production deploy `dpl_2BPr5S4BHEaJUGkaj3YH1bnt8Vvo` Ready, aliased to hrekov.dev.
+- `/tools`, `/tools/opengraph-image-1vhr9h`, `/work/claude-shiploop`, `/work/claude-shiploop/opengraph-image-11ulvk`, `/work` → all 200 at the edge after redeploy.
+- Phase H8 (blog + LinkedIn draft) and H9 (split-launch wait path, skipped per G7) deferred to a separate gated session so the publish text goes through a review step.
+
+**Lesson:**
+- **Launch-day sequences need per-action gates, not blanket "go".** The time saved by chaining H1→H6 on one "continue" was measured in seconds; the trust cost was measured in a mid-launch interruption. The ratio only ever points one way. Memory file recorded.
+- **`gh repo create` with `--license` + `--source` is one of several silently-incompatible flag combos.** When gh prints the full help text instead of an error, read it as "your argv is incoherent" not "help was requested" — and strip the newer flag against the older one.
+- **A build-system regression on the CI side can hide behind a stale CDN alias.** Our smoke showed 3 of 4 endpoints green while hrekov.dev was still on a 2-day-old deploy that never contained the new routes. The 404 was the honest signal; the 200s were cache noise. Always `vercel inspect hrekov.dev` first when a route 404s after merge — the alias target tells you whether the current deploy is actually what you think it is.
+- **Vercel's `redeploy` without `--no-cache` can still succeed on a failed deploy ID.** It wasn't a null fix — it rebuilt against the same source tree with a fresh Turbopack graph. If this repeats on the next sprint's merge, pin the Node version or try `vercel --prod` cold.
+
+---

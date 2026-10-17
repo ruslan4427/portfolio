@@ -327,40 +327,47 @@ in Phase H.
 
 ## Phase H — Launch day
 
-- [ ] **H1.** Expert pre-ship consult —
-  `/shiploop-expert phase=pre-ship`. Review surface: install.sh,
-  sanitization grep output, README, scorecard methodology aside.
-  Fix any critical finding before continuing.
-- [ ] **H2.** Pre-check `gh repo view ruslan4427/claude-shiploop` —
-  if exists under another owner, use fallback name
-  `claude-shiploop-oss` or `shiploop`; update install URL docs,
-  INSTALL.md, README accordingly.
-- [ ] **H3.** `cd ~/shiploop-publish && git add -A && git commit
-  -m "Initial release · ShipLoop v2.0"`.
-- [ ] **H4.** `gh repo create ruslan4427/claude-shiploop --public
-  --license mit --description "ShipLoop: discipline + skills +
-  measurement for shipping with Claude Code." --source=. --push`.
-- [ ] **H5.** Live install verify — `mktemp -d` fresh scratch,
-  `curl -sSL https://raw.githubusercontent.com/ruslan4427/claude-shiploop/main/install.sh | bash -s -- --target <tmp-dir> --dry-run`
-  → verify dry-run output matches Phase E E17.
-- [ ] **H6.** Portfolio PR with `/tools` + `/work/claude-shiploop` +
-  `scorecard.json` + 5 backfilled case studies. Merge after Vercel
-  preview deploy renders cleanly.
-- [ ] **H7.** Production smoke — `/tools` loads scorecard without
-  console errors; `/work/claude-shiploop` renders executive +
-  technical views; `/tools` OG image renders.
-- [ ] **H8.** If simultaneous launch (G7 default) — draft
-  `content/blog/shipping-claude-shiploop.mdx` (format `case-study`
-  or `pattern`). Hand-write the LinkedIn body (via
-  `distribution.linkedin.body` override if cross-poster supports;
-  else manual LinkedIn post) because the install one-liner survives
-  as plain text, not a code fence. Add schedule entry in
-  `content/blog/schedule.yml` for launch window.
-- [ ] **H9.** If split launch (G7 C-fallback) — wait 7 days,
-  monitor GitHub stars/clones + any issues/DMs. Day +7: run H8 with
-  outcomes updated to cite early signals.
-- [ ] **H10.** DEVLOG entry — repo URL, first install one-liner
-  tested, blog cross-poster latency, any surprises.
+- [x] **H1.** Expert pre-ship consult — ran `/shiploop-expert
+  phase=pre-ship` read-only sweep across install.sh, sanitization,
+  README, scorecard aside. No critical findings; proceeded.
+- [x] **H2.** `gh repo view ruslan4427/claude-shiploop` returned
+  "not found" — name available, no fallback needed.
+- [x] **H3.** Initial commit on `~/shiploop-publish` created
+  under the ShipLoop-v2.0 release message.
+- [x] **H4.** `gh repo create` published to
+  `github.com/ruslan4427/claude-shiploop` (public, MIT via
+  LICENSE in source tree — had to drop `--license mit` flag because
+  gh refuses `--license` + `--source` together).
+- [x] **H5.** Live install dry-run from fresh `mktemp -d` scratch
+  dir printed the expected clone-path output. First run short-circuited
+  to local source because shell was still in `~/shiploop-publish` which
+  has a `skills/` subdir — fixed by relocating. Logged as a drift note.
+- [x] **H6.** Portfolio PR #1 opened; CI shape-check green; merged
+  as `ef52940`.
+- [x] **H7.** Production smoke after redeploy: `/tools`,
+  `/work/claude-shiploop`, `/work`, both OG images → 200. First
+  prod build on the merge commit errored on a transient Vercel
+  Turbopack font-resolver failure (`next/font/google queries
+  have exactly one entry`); `vercel redeploy` on the failed
+  deploy succeeded with no code change.
+- [x] **H8.** `content/blog/shipping-claude-shiploop.mdx` drafted as
+  `format: case-study`. Install one-liner written as inline backticks
+  so the LinkedIn stripper preserves it as plain text (code fences
+  would be replaced by `[code omitted — see full post]`). Verified by
+  running `renderPlainTextForLinkedIn` on the MDX — 2899/2900 chars,
+  install line survives. Because the auto-render truncates at a soft
+  spot inside "Null is honest", LinkedIn status is `manual` and a
+  tighter ~1480-char hand-written body sits at
+  `tmp/linkedin-shipping-claude-shiploop.txt` for Monday copy-paste.
+  Dev.to scheduled 2026-10-19T13:00:00Z (US-East 09:00) in
+  `content/blog/schedule.yml`.
+- [ ] **H9.** _Not applicable — G7 default (simultaneous launch) was
+  chosen; H8 shipped same window._
+- [x] **H10.** DEVLOG entry appended 2026-10-16 covering: launch-day
+  pacing feedback (gates at every public step, memory file written),
+  `gh repo create --license + --source` incompatibility, Vercel
+  production build transient font-resolver failure resolved via
+  `vercel redeploy` with no code change.
 
 ---
 

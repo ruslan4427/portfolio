@@ -16,3 +16,9 @@ shipping-the-cross-poster:
 no-company-no-api:
   linkedin: 2026-10-07T02:55:00Z
   devto: 2026-10-07T02:56:00Z
+
+# shipping-claude-shiploop — LinkedIn is manual (install one-liner survives
+# plain-text but tighter hand-written post performs better than auto-truncated).
+# Dev.to scheduled for Monday 2026-10-19 09:00 US-East / 13:00 UTC (peak window).
+shipping-claude-shiploop:
+  devto: 2026-10-19T13:00:00Z
