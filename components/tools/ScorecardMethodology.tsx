@@ -59,11 +59,11 @@ export function ScorecardMethodology() {
               <dt className="font-serif text-[18px] leading-tight text-[color:var(--ink-primary)]">
                 {m.metric}
               </dt>
-              <code className="mt-1 inline-block rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] px-2 py-1 font-mono text-[12px] text-[color:var(--ink-body)]">
-                {m.formula}
-              </code>
-              <dd className="mt-2 text-[14px] leading-relaxed text-[color:var(--ink-body)]">
-                {m.source}
+              <dd className="text-[14px] leading-relaxed text-[color:var(--ink-body)]">
+                <code className="mt-1 inline-block rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] px-2 py-1 font-mono text-[12px] text-[color:var(--ink-body)]">
+                  {m.formula}
+                </code>
+                <span className="mt-2 block">{m.source}</span>
               </dd>
             </div>
           ))}

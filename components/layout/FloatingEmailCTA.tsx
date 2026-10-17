@@ -130,7 +130,7 @@ export function FloatingEmailCTA() {
             exit="exit"
             whileTap={{ scale: 0.96 }}
             style={{ transformOrigin: "bottom center" }}
-            aria-label="Open message composer"
+            aria-label="Send me a message"
             className="pointer-events-auto group flex items-center gap-3 rounded-full bg-[color:var(--cta)] py-1.5 pl-1.5 pr-5 font-sans text-sm text-[color:var(--cta-ink)] shadow-[var(--shadow-card)] will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           >
               <span

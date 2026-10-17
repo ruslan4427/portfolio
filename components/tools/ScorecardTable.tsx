@@ -205,12 +205,12 @@ export function ScorecardTable() {
                       }`}
                     >
                       {formatMetric(m.key, value)}
+                      {m.key === "tokens" && !isNull && (
+                        <span className="mt-1 block font-sans text-[9px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
+                          {p.context.tokenSource.replace(/-/g, " ")}
+                        </span>
+                      )}
                     </dd>
-                    {m.key === "tokens" && !isNull && (
-                      <div className="mt-1 font-sans text-[9px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
-                        {p.context.tokenSource.replace(/-/g, " ")}
-                      </div>
-                    )}
                   </div>
                 );
               })}
