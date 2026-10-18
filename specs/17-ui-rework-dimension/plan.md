@@ -46,13 +46,14 @@ uiRework:
     - figure: ledger
       revisions: 1
   toneFixes: 1
-  qaCatches: 3
+  qaCatches: null      # null = post pre-dates the rig; the pass didn't exist
+                       # integer ≥ 0 for posts that went through the rig
   serializerRoundTrips: 0
 ```
 
-- All fields required when `uiRework` is present (validator throws otherwise).
+- When `uiRework` is present: four fields are required integers ≥ 0 (heroRegenerations, toneFixes, serializerRoundTrips, each `figureRevisions[].revisions`).
+- `qaCatches` is required but accepts `null`. Rationale: zero QA catches on a pre-rig post is dishonest (no measurement happened). `null` is the honest answer and composes cleanly with the aggregate (null-is-honest).
 - `figureRevisions` is an array; empty array = no figures beyond hero.
-- Numbers are integers ≥ 0.
 
 ### A2. Where "QA catches" counts
 

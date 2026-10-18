@@ -49,7 +49,7 @@ export type UiRework = {
   heroRegenerations: number;
   figureRevisions: UiReworkFigure[];
   toneFixes: number;
-  qaCatches: number;
+  qaCatches: number | null;
   serializerRoundTrips: number;
 };
 
@@ -107,16 +107,14 @@ function validateUiRework(slug: string, raw: unknown): UiRework {
     fail(slug, "uiRework must be an object when present");
   }
   const u = raw as Record<string, unknown>;
-  const fields = [
-    "heroRegenerations",
-    "toneFixes",
-    "qaCatches",
-    "serializerRoundTrips",
-  ] as const;
-  for (const f of fields) {
+  const requiredInts = ["heroRegenerations", "toneFixes", "serializerRoundTrips"] as const;
+  for (const f of requiredInts) {
     if (!isNonNegativeInt(u[f])) {
       fail(slug, `uiRework.${f} must be a non-negative integer`);
     }
+  }
+  if (u.qaCatches !== null && !isNonNegativeInt(u.qaCatches)) {
+    fail(slug, "uiRework.qaCatches must be a non-negative integer or null (null = pre-rig post)");
   }
   if (!Array.isArray(u.figureRevisions)) {
     fail(slug, "uiRework.figureRevisions must be an array (empty [] if no figures)");
@@ -138,7 +136,7 @@ function validateUiRework(slug: string, raw: unknown): UiRework {
     heroRegenerations: u.heroRegenerations as number,
     figureRevisions,
     toneFixes: u.toneFixes as number,
-    qaCatches: u.qaCatches as number,
+    qaCatches: u.qaCatches as number | null,
     serializerRoundTrips: u.serializerRoundTrips as number,
   };
 }
