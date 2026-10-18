@@ -2612,3 +2612,19 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 - **Vendored-vs-canonical is a pattern, not a mandate.** Sprint 15 set up the mirror discipline for scorecard parsing. Sprint 17 skipped it because the aggregator is tied to a surface only hrekov-dev has. Scope-matched abstraction over doctrinal fidelity — the OSS consumers would have gotten dead code.
 
 ---
+
+## 2026-10-18 — /about redesign · editorial ledger variant
+
+**Problem:** `/about` was a centered stack of card sections (Experience cards, Values cards) that read like the home page repeated. Brief: one variant, strictly inside the `:root` tokens, monochrome + green status only, Playfair upright + Inter only.
+
+**Decision:**
+- Hero splits 7/5: Playfair h1 left, an elevated "At a glance" card right carrying the `StatusPill` (the only green) and a hairline `<dl>` of facts restated from `content/about.ts` + page metadata (no new claims).
+- Numbered section rails (`01 — Bio`, `02 — The path`, `03 — How I work`) sticky on `md+`, content in the right 9 columns.
+- Bio lead paragraph set in Playfair (upright, 400); remaining paragraphs Inter.
+- Timeline inlined as a hairline ledger (`content/experience.ts`) instead of the `Experience` card component; Values inlined as numbered rules with an ink top rule instead of cards.
+- `AiStack` + `Credentials` reused unchanged. Closer moved into an elevated `--radius-card` card.
+- Motion only via existing `Reveal` / `MaskReveal` / `Stagger` (all reduced-motion aware); sticky is static positioning.
+
+**Result:** Single-file change to `app/(marketing)/about/page.tsx`. No new colors, radii, fonts, or tokens. `tsc` clean for this file (only pre-existing `LayoutProps` typegen error in `app/layout.tsx`); eslint clean.
+
+**Lesson:** Page-level redesigns can stay token-pure by changing composition (rails, ledgers, rules) rather than surface treatment — the ink ramp + hairline give enough hierarchy without a second hue.
