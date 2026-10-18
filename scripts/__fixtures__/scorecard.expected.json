@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T02:17:01.864Z",
+  "generatedAt": "2026-10-18T02:46:13.407Z",
   "configVersion": 1,
   "projects": [
     {
@@ -610,9 +610,9 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 1,
-        "reworkRatio": 0.43,
+        "reworkRatio": 0.46,
         "timeToShipDays": 1,
-        "tokens": 64236901,
+        "tokens": 64543744,
         "expertHitRate": null
       },
       "context": {
@@ -753,17 +753,17 @@
         {
           "date": "2026-10-17",
           "tokens": 4584475,
-          "commits": 39
+          "commits": 35
         },
         {
           "date": "2026-10-18",
-          "tokens": 1423595,
+          "tokens": 1730438,
           "commits": 0
         }
       ],
       "uiRework": {
         "backfilledFrom": 4,
-        "totalEligible": 5,
+        "totalEligible": 4,
         "avgHeroRegenerations": 1,
         "avgQaCatches": null,
         "totalSerializerRoundTrips": 5,
@@ -784,11 +784,6 @@
             "qaCatches": null
           },
           {
-            "slug": "shipping-claude-shiploop",
-            "hasRig": false,
-            "qaCatches": "missing"
-          },
-          {
             "slug": "shipping-the-cross-poster",
             "hasRig": true,
             "qaCatches": null
@@ -804,13 +799,13 @@
         },
         "commitCounts": {
           "fix": 23,
-          "feat": 53,
-          "total": 153,
-          "conventional": 76
+          "feat": 50,
+          "total": 149,
+          "conventional": 73
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 64236901,
+          "opus": 64543744,
           "sonnet": 0,
           "haiku": 0,
           "other": 0

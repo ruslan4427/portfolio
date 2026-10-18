@@ -54,7 +54,7 @@ export const TOOLS_BUILT: ToolBuilt[] = [
         },
         {
           label: "Rework ratio",
-          value: "0.43",
+          value: "0.46",
           caption: "This portfolio (hrekov-dev) under ShipLoop vs 4.5 on a tier-0 baseline.",
           method: "fix(…) commits ÷ feat(…) commits (conventional commits only, lifetime).",
           baseline: "SMM Factory tier-0 = 4.5 — ten times more rework per shipped feature.",
@@ -96,7 +96,7 @@ export const TOOLS_BUILT: ToolBuilt[] = [
           label: "Hero regens · avg",
           value: "1.00",
           caption:
-            "Nano Banana 2 + the ink preset lands a publishable hero on the first pass. Backfilled across 4 of 5 shipped posts.",
+            "Nano Banana 2 + the ink preset lands a publishable hero on the first pass. Backfilled across 4 of 4 shipped posts.",
           method:
             "Sum of heroRegenerations frontmatter ÷ posts carrying the rig (4 posts, 4 heroes).",
           baseline:
@@ -106,7 +106,7 @@ export const TOOLS_BUILT: ToolBuilt[] = [
           label: "QA catches · avg",
           value: null,
           caption:
-            "4 of 5 shipped posts pre-date the rig — they carry null, not zero. The first rig-era post ships 2026-10-19.",
+            "All 4 shipped posts pre-date the rig — they carry null, not zero. The first rig-era post ships 2026-10-19.",
           method:
             "qaCatches is nullable: null = pre-rig (discipline wasn't operational), int = rig-era measurement.",
           baseline:
@@ -120,7 +120,7 @@ export const TOOLS_BUILT: ToolBuilt[] = [
           method:
             "Sum of serializerRoundTrips frontmatter — only counts republishes caused by a serializer issue, not cosmetic edits.",
           baseline:
-            "4 of 5 posts shipped with 0 round-trips. The outlier (classify-before-you-code) drove the whole number.",
+            "3 of 4 posts shipped with 0 round-trips. The outlier (classify-before-you-code) drove the whole number.",
         },
       ],
     },
