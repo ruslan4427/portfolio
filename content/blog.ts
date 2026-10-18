@@ -40,6 +40,19 @@ export type HeroImage = {
   alt: string;
 };
 
+export type UiReworkFigure = {
+  figure: string;
+  revisions: number;
+};
+
+export type UiRework = {
+  heroRegenerations: number;
+  figureRevisions: UiReworkFigure[];
+  toneFixes: number;
+  qaCatches: number;
+  serializerRoundTrips: number;
+};
+
 export type BlogFrontmatter = {
   title: string;
   slug: string;
@@ -55,6 +68,7 @@ export type BlogFrontmatter = {
   artifacts?: Artifact[];
   related?: string[];
   heroImage?: HeroImage;
+  uiRework?: UiRework;
 };
 
 export type BlogPost = {
@@ -82,6 +96,51 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function fail(slug: string, msg: string): never {
   throw new Error(`[content/blog] ${slug}: ${msg}`);
+}
+
+function isNonNegativeInt(x: unknown): x is number {
+  return typeof x === "number" && Number.isInteger(x) && x >= 0;
+}
+
+function validateUiRework(slug: string, raw: unknown): UiRework {
+  if (!raw || typeof raw !== "object") {
+    fail(slug, "uiRework must be an object when present");
+  }
+  const u = raw as Record<string, unknown>;
+  const fields = [
+    "heroRegenerations",
+    "toneFixes",
+    "qaCatches",
+    "serializerRoundTrips",
+  ] as const;
+  for (const f of fields) {
+    if (!isNonNegativeInt(u[f])) {
+      fail(slug, `uiRework.${f} must be a non-negative integer`);
+    }
+  }
+  if (!Array.isArray(u.figureRevisions)) {
+    fail(slug, "uiRework.figureRevisions must be an array (empty [] if no figures)");
+  }
+  const figureRevisions: UiReworkFigure[] = u.figureRevisions.map((entry, i) => {
+    if (!entry || typeof entry !== "object") {
+      fail(slug, `uiRework.figureRevisions[${i}] must be an object`);
+    }
+    const fr = entry as Record<string, unknown>;
+    if (typeof fr.figure !== "string" || !fr.figure) {
+      fail(slug, `uiRework.figureRevisions[${i}].figure required (string)`);
+    }
+    if (!isNonNegativeInt(fr.revisions)) {
+      fail(slug, `uiRework.figureRevisions[${i}].revisions must be a non-negative integer`);
+    }
+    return { figure: fr.figure, revisions: fr.revisions };
+  });
+  return {
+    heroRegenerations: u.heroRegenerations as number,
+    figureRevisions,
+    toneFixes: u.toneFixes as number,
+    qaCatches: u.qaCatches as number,
+    serializerRoundTrips: u.serializerRoundTrips as number,
+  };
 }
 
 function validateArtifact(slug: string, a: unknown, idx: number): Artifact {
@@ -144,6 +203,9 @@ function validateFrontmatter(slug: string, data: Record<string, unknown>): BlogF
     heroImage = { src: h.src, alt: h.alt };
   }
 
+  const uiRework =
+    data.uiRework !== undefined ? validateUiRework(slug, data.uiRework) : undefined;
+
   return {
     title: data.title,
     slug,
@@ -161,6 +223,7 @@ function validateFrontmatter(slug: string, data: Record<string, unknown>): BlogF
       ? (data.related as string[])
       : undefined,
     heroImage,
+    uiRework,
   };
 }
 
