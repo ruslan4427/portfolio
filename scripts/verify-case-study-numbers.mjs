@@ -780,6 +780,101 @@ if (lexora !== null) {
   }
 }
 
+// 14. tools-built.ts ui-ux-pro impact rows vs scorecard.json uiRework (hrekov-dev blog aggregate).
+//     Hero regens, QA catches, serializer round-trips — each row in the /tools card must match
+//     the aggregator's output so a backfill drift (new post without uiRework, or a frontmatter
+//     typo) fails the build before merge.
+{
+  const SCORECARD = join(REPO, "scorecard.json");
+  const TOOLS_BUILT = join(REPO, "content/tools-built.ts");
+  if (existsSync(SCORECARD) && existsSync(TOOLS_BUILT)) {
+    const scorecard = JSON.parse(readFileSync(SCORECARD, "utf8"));
+    const hrekovProj = scorecard.projects?.find((p) => p.slug === "hrekov-dev");
+    const ui = hrekovProj?.uiRework;
+    if (ui && typeof ui === "object") {
+      const toolsSrc = readFileSync(TOOLS_BUILT, "utf8");
+      const findRow = (label) => {
+        const re = new RegExp(
+          `label:\\s*"${label.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")}"[\\s\\S]{0,400}?value:\\s*(null|"([^"]+)")`,
+          "i",
+        );
+        const m = toolsSrc.match(re);
+        if (!m) return undefined;
+        return m[1] === "null" ? null : m[2];
+      };
+
+      // Hero regens — card shows "N.NN", scorecard carries a number (rounded to 2dp).
+      const heroCard = findRow("Hero regens · avg");
+      if (heroCard !== undefined) {
+        if (ui.avgHeroRegenerations === null) {
+          if (heroCard !== null)
+            problems.push(
+              `tools-built ui-ux-pro Hero regens: card="${heroCard}", scorecard.json=null`,
+            );
+        } else if (heroCard === null) {
+          problems.push(
+            `tools-built ui-ux-pro Hero regens: card=null, scorecard.json=${ui.avgHeroRegenerations}`,
+          );
+        } else {
+          const claimed = parseFloat(heroCard);
+          if (Math.abs(claimed - ui.avgHeroRegenerations) > 0.005)
+            problems.push(
+              `tools-built ui-ux-pro Hero regens: card="${heroCard}", scorecard.json=${ui.avgHeroRegenerations}`,
+            );
+        }
+      }
+
+      // QA catches — null in scorecard means card value must be null (renders "—").
+      const qaCard = findRow("QA catches · avg");
+      if (qaCard !== undefined) {
+        if (ui.avgQaCatches === null && qaCard !== null)
+          problems.push(
+            `tools-built ui-ux-pro QA catches: card="${qaCard}", scorecard.json=null — null-is-honest rule: card value must be null when aggregate is null`,
+          );
+        if (ui.avgQaCatches !== null) {
+          if (qaCard === null)
+            problems.push(
+              `tools-built ui-ux-pro QA catches: card=null, scorecard.json=${ui.avgQaCatches}`,
+            );
+          else {
+            const claimed = parseFloat(qaCard);
+            if (Math.abs(claimed - ui.avgQaCatches) > 0.005)
+              problems.push(
+                `tools-built ui-ux-pro QA catches: card="${qaCard}", scorecard.json=${ui.avgQaCatches}`,
+              );
+          }
+        }
+      }
+
+      // Serializer round-trips — integer total.
+      const serCard = findRow("Serializer round-trips");
+      if (serCard !== undefined && serCard !== null) {
+        const claimed = parseInt(serCard, 10);
+        if (claimed !== ui.totalSerializerRoundTrips)
+          problems.push(
+            `tools-built ui-ux-pro Serializer round-trips: card="${serCard}", scorecard.json=${ui.totalSerializerRoundTrips}`,
+          );
+      }
+
+      // Caption anchor — "X of Y shipped posts" phrasing must reconcile with aggregate.
+      const captionMatch = toolsSrc.match(
+        /Backfilled across\s+(\d+)\s+of\s+(\d+)\s+shipped posts/i,
+      );
+      if (captionMatch) {
+        const [, backfilled, eligible] = captionMatch;
+        if (+backfilled !== ui.backfilledFrom)
+          problems.push(
+            `tools-built ui-ux-pro caption backfilled: text=${backfilled}, scorecard.json=${ui.backfilledFrom}`,
+          );
+        if (+eligible !== ui.totalEligible)
+          problems.push(
+            `tools-built ui-ux-pro caption eligible: text=${eligible}, scorecard.json=${ui.totalEligible}`,
+          );
+      }
+    }
+  }
+}
+
 if (problems.length) {
   console.error("✗ case-study number drift");
   for (const p of problems) console.error("  •", p);

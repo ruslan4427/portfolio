@@ -54,7 +54,7 @@ export const TOOLS_BUILT: ToolBuilt[] = [
         },
         {
           label: "Rework ratio",
-          value: "0.39",
+          value: "0.45",
           caption: "This portfolio (hrekov-dev) under ShipLoop vs 4.5 on a tier-0 baseline.",
           method: "fix(…) commits ÷ feat(…) commits (conventional commits only, lifetime).",
           baseline: "SMM Factory tier-0 = 4.5 — ten times more rework per shipped feature.",
@@ -91,9 +91,38 @@ export const TOOLS_BUILT: ToolBuilt[] = [
       why: "AI design output drifts toward generic SaaS unless something forces it to read the project's existing system before suggesting a palette or font.",
       systematizes:
         "Four-section method: tokens first, contrast gate, visual verification in the browser, then current design thinking. Style overrides are opt-in — defaults aim for a broadly safe editorial result.",
-      impact: null,
-      impactNote:
-        "No retroactive measurement — the skill shipped alongside this portfolio redesign but there's no clean pre/post session to compare. Will backfill when a measurement rig lands.",
+      impact: [
+        {
+          label: "Hero regens · avg",
+          value: "1.00",
+          caption:
+            "Nano Banana 2 + the ink preset lands a publishable hero on the first pass. Backfilled across 4 of 5 shipped posts.",
+          method:
+            "Sum of heroRegenerations frontmatter ÷ posts carrying the rig (4 posts, 4 heroes).",
+          baseline:
+            "Generic AI illustration pipelines typically take 3–5 regens before an on-brand hero lands.",
+        },
+        {
+          label: "QA catches · avg",
+          value: null,
+          caption:
+            "4 of 5 shipped posts pre-date the rig — they carry null, not zero. The first rig-era post ships 2026-10-19.",
+          method:
+            "qaCatches is nullable: null = pre-rig (discipline wasn't operational), int = rig-era measurement.",
+          baseline:
+            "First non-null value lands Monday with shipping-claude-shiploop — the first blog post to run the formal UX pass.",
+        },
+        {
+          label: "Serializer round-trips",
+          value: "5",
+          caption:
+            "LinkedIn + dev.to republishes forced by UI-layer serializer bugs. Total across all shipped posts.",
+          method:
+            "Sum of serializerRoundTrips frontmatter — only counts republishes caused by a serializer issue, not cosmetic edits.",
+          baseline:
+            "4 of 5 posts shipped with 0 round-trips. The outlier (classify-before-you-code) drove the whole number.",
+        },
+      ],
     },
   },
 ];
