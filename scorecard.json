@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-17T15:24:29.237Z",
+  "generatedAt": "2026-10-18T02:16:46.331Z",
   "configVersion": 1,
   "projects": [
     {
@@ -35,6 +35,7 @@
           "commits": 1
         }
       ],
+      "uiRework": null,
       "details": {
         "disciplineCriteria": {
           "hasSpec": true,
@@ -349,6 +350,7 @@
           "commits": 0
         }
       ],
+      "uiRework": null,
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -454,6 +456,7 @@
           "commits": 2
         }
       ],
+      "uiRework": null,
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -503,6 +506,7 @@
           "commits": 1
         }
       ],
+      "uiRework": null,
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -568,6 +572,7 @@
           "commits": 0
         }
       ],
+      "uiRework": null,
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -605,9 +610,9 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 1,
-        "reworkRatio": 0.39,
+        "reworkRatio": 0.43,
         "timeToShipDays": 1,
-        "tokens": 61896355,
+        "tokens": 64233809,
         "expertHitRate": null
       },
       "context": {
@@ -747,10 +752,49 @@
         },
         {
           "date": "2026-10-17",
-          "tokens": 3667524,
-          "commits": 3
+          "tokens": 4584475,
+          "commits": 39
+        },
+        {
+          "date": "2026-10-18",
+          "tokens": 1420503,
+          "commits": 0
         }
       ],
+      "uiRework": {
+        "backfilledFrom": 4,
+        "totalEligible": 5,
+        "avgHeroRegenerations": 1,
+        "avgQaCatches": null,
+        "totalSerializerRoundTrips": 5,
+        "perPost": [
+          {
+            "slug": "classify-before-you-code",
+            "hasRig": true,
+            "qaCatches": null
+          },
+          {
+            "slug": "launching-the-journal",
+            "hasRig": true,
+            "qaCatches": null
+          },
+          {
+            "slug": "no-company-no-api",
+            "hasRig": true,
+            "qaCatches": null
+          },
+          {
+            "slug": "shipping-claude-shiploop",
+            "hasRig": false,
+            "qaCatches": "missing"
+          },
+          {
+            "slug": "shipping-the-cross-poster",
+            "hasRig": true,
+            "qaCatches": null
+          }
+        ]
+      },
       "details": {
         "disciplineCriteria": {
           "hasSpec": true,
@@ -759,19 +803,19 @@
           "hasDevlog": true
         },
         "commitCounts": {
-          "fix": 18,
-          "feat": 46,
-          "total": 117,
-          "conventional": 64
+          "fix": 23,
+          "feat": 53,
+          "total": 153,
+          "conventional": 76
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 61896355,
+          "opus": 64233809,
           "sonnet": 0,
           "haiku": 0,
           "other": 0
         },
-        "specsCounted": 7,
+        "specsCounted": 8,
         "devlogExpertStats": {
           "consulted": 1,
           "planChangedYes": 0,
@@ -788,7 +832,7 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 0,
-        "reworkRatio": 0,
+        "reworkRatio": 1,
         "timeToShipDays": null,
         "tokens": null,
         "expertHitRate": null
@@ -813,8 +857,14 @@
           "date": "2026-10-16",
           "tokens": 0,
           "commits": 1
+        },
+        {
+          "date": "2026-10-17",
+          "tokens": 0,
+          "commits": 1
         }
       ],
+      "uiRework": null,
       "details": {
         "disciplineCriteria": {
           "hasSpec": false,
@@ -823,10 +873,10 @@
           "hasDevlog": false
         },
         "commitCounts": {
-          "fix": 0,
+          "fix": 1,
           "feat": 1,
-          "total": 2,
-          "conventional": 1
+          "total": 3,
+          "conventional": 2
         },
         "sessionCount": null,
         "tokensByModel": null,

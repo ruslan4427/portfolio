@@ -2531,3 +2531,35 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
 
 ---
+
+## 2026-10-17 — Sprint 17 · ui-ux-pro effectiveness rig lands
+
+**Problem:** `ui-ux-pro.effectiveness.impact` on /tools has read `null` since Sprint 16 shipped the tool, with a placeholder note ("no retroactive measurement — will backfill when a rig lands"). The skill was in daily use (every blog post, every page edit) but the /tools page couldn't say so. A tool-scorecard entry with a dash isn't a receipt — it's an IOU. The ask: ship the measurement rig and backfill, so the row stops being a promise.
+
+**Decision:** Five choices worth preserving.
+
+1. **Source of truth = post frontmatter, not a side ledger.** Blog MDX gained an optional `uiRework: {heroRegenerations, figureRevisions[], toneFixes, qaCatches, serializerRoundTrips}` block. The scorecard parser reads frontmatter directly — the same mechanism as `distribution.linkedin.status`. One file per post, no mystery database.
+
+2. **`qaCatches: number | null`, not required int.** All 5 shipped posts pre-date the formal ui-ux-pro pass. Writing `0` for them would be dishonest — zero means "I ran the pass and found nothing," which never happened. `null` means "the discipline wasn't operational yet." The plan.md A1 amendment mid-sprint turned a required-int field into nullable; the validator in `content/blog.ts` enforces `null | non-negative integer`. The null-is-honest rule holds for /tools dashes AND for per-post schema.
+
+3. **Backfill ratio surfaced, not hidden.** `/tools` caption reads "Backfilled across 4 of 5 shipped posts" — explicit methodology. verify:numbers check #14 enforces the "4 of 5" phrasing against `scorecard.json.projects[hrekov-dev].uiRework.{backfilledFrom, totalEligible}`, so a backfill drift (new post without `uiRework`, or a frontmatter typo) fails the build.
+
+4. **Aggregator ships in-tree, not canonical-vs-mirror.** Sprint 15 established a vendored-vs-canonical parser pattern (`~/shiploop-publish/lib/` → `scripts/scorecard-src/`). For this one dimension I short-cut: wrote the aggregator directly at `scripts/scorecard-src/lib/ui-rework.mjs`, no canonical mirror in the OSS repo. Scope: the ui-rework rig is tied to blog surfaces, and only hrekov-dev has a `content/blog/` directory. Pulling it into claude-shiploop OSS would export dead code to every consumer. If a second project gains a blog + rig later, hoist to canonical then.
+
+5. **Monday's post is the first non-null `qaCatches`.** `shipping-claude-shiploop` is scheduled 2026-10-19 — the first rig-era post. Its uiRework field was deliberately omitted from the backfill; it fills at ship time with the first measured value from a formal ui-ux-pro pass. The `/tools` caption telegraphs this ("first rig-era post ships 2026-10-19"), so the dash isn't permanent — it's a date-stamped placeholder.
+
+**Result:**
+- `content/blog.ts` extended with `UiRework` type + validator (`number | null` qaCatches).
+- 4 posts backfilled: launching-the-journal, shipping-the-cross-poster, no-company-no-api, classify-before-you-code. Per-post evidence trace in `memory/iteration-17.md` with git SHAs for every claim (`b1e95f5` hero batch, `9e36d43` figure batch, `c57813d` tone pass, serializer republish chain for classify's 5 round-trips).
+- `scripts/scorecard-src/lib/ui-rework.mjs` parses `content/blog/*.mdx` via gray-matter, filters to published posts, returns `{backfilledFrom, totalEligible, avgHeroRegenerations, avgQaCatches, totalSerializerRoundTrips, perPost[]}`.
+- `scorecard.json`: hrekov-dev gets the full block (`{4, 5, 1, null, 5}`), all 6 other projects get `uiRework: null` (no blog surface).
+- `/tools` ui-ux-pro row now shows: Hero regens avg 1.00 · QA catches avg — · Serializer round-trips 5. Three rows match `md:grid-cols-3`; captions carry methodology; no `parserSource` yet (aggregator is portfolio-local, not public standalone).
+- verify:numbers check #14 added — Hero regens, QA catches (null-is-honest enforced), Serializer round-trips, backfill ratio phrasing. Sanity test: breaking "1.00"→"9.99" and "4 of 5"→"2 of 5" both fire the right error, revert clean.
+- Snapshot CI stays green (uiRework is additive top-level sibling to daily/details, not in required PROJECT_KEYS).
+
+**Lesson:**
+- **"— will backfill when a rig lands" is the IOU, and IOUs on a tool scorecard age poorly.** Sprint 16 shipped the ui-ux-pro skill with impact:null and the explicit "backfill later" caption. Sprint 17 did the backfill, which took one evening because the discipline (uiRework block in frontmatter) was straightforward to spec. The right move the next time a tool ships without a measurement rig is to open the backlog ticket for the rig immediately — not a comment in content config, not a note in a devlog.
+- **Null in the schema is a design decision, not a type error to be eliminated.** The first-draft plan.md said all uiRework fields required when present. That rule collided with the honest answer for pre-rig posts. Mid-sprint amendment: `qaCatches: number | null` + validator that accepts both. The same rule governs the aggregator's output and the /tools dash. One null-is-honest rule, three places it shows up.
+- **Vendored-vs-canonical is a pattern, not a mandate.** Sprint 15 set up the mirror discipline for scorecard parsing. Sprint 17 skipped it because the aggregator is tied to a surface only hrekov-dev has. Scope-matched abstraction over doctrinal fidelity — the OSS consumers would have gotten dead code.
+
+---
