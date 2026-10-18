@@ -18,7 +18,6 @@
 
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import matter from "gray-matter";
 
 /** @param {string} repoPath */
 async function readBlogDir(repoPath) {
@@ -61,6 +60,11 @@ export async function aggregateUiRework(repoPath) {
   if (!repoPath) return null;
   const dirInfo = await readBlogDir(repoPath);
   if (!dirInfo) return null;
+
+  // Lazy import so the config-version regression smoke (which copies
+  // the parser to /tmp without node_modules) can crash out on
+  // configVersion mismatch before this ever resolves.
+  const { default: matter } = await import("gray-matter");
 
   let backfilledFrom = 0;
   let totalEligible = 0;

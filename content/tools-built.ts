@@ -54,7 +54,7 @@ export const TOOLS_BUILT: ToolBuilt[] = [
         },
         {
           label: "Rework ratio",
-          value: "0.45",
+          value: "0.43",
           caption: "This portfolio (hrekov-dev) under ShipLoop vs 4.5 on a tier-0 baseline.",
           method: "fix(…) commits ÷ feat(…) commits (conventional commits only, lifetime).",
           baseline: "SMM Factory tier-0 = 4.5 — ten times more rework per shipped feature.",

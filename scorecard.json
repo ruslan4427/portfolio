@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T02:05:22.943Z",
+  "generatedAt": "2026-10-18T02:16:46.331Z",
   "configVersion": 1,
   "projects": [
     {
@@ -610,9 +610,9 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 1,
-        "reworkRatio": 0.45,
+        "reworkRatio": 0.43,
         "timeToShipDays": 1,
-        "tokens": 63844094,
+        "tokens": 64233809,
         "expertHitRate": null
       },
       "context": {
@@ -753,11 +753,11 @@
         {
           "date": "2026-10-17",
           "tokens": 4584475,
-          "commits": 36
+          "commits": 39
         },
         {
           "date": "2026-10-18",
-          "tokens": 1030788,
+          "tokens": 1420503,
           "commits": 0
         }
       ],
@@ -804,13 +804,13 @@
         },
         "commitCounts": {
           "fix": 23,
-          "feat": 51,
-          "total": 150,
-          "conventional": 74
+          "feat": 53,
+          "total": 153,
+          "conventional": 76
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 63844094,
+          "opus": 64233809,
           "sonnet": 0,
           "haiku": 0,
           "other": 0
