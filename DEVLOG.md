@@ -5,6 +5,28 @@ One block per meaningful work session. Format:
 
 ---
 
+## 2026-10-18 · Sprint 18 follow-up — Analysis + Conclusion on /tools
+
+**Problem.** The /tools EffectivenessBlock surfaces three impact numbers per tool but the reader has no way to see the shape of the measurement — what we track, what we deliberately don't, and what to take away. User asked for the natural sales-shape ("save X tokens, Y% better, Z% faster") and the honest answer is that two of those three claims can't be made yet: smm-factory (tier-0 baseline) wasn't token-logged, naked time-to-ship is `null`, and ui-ux-pro's rig is one day old at write time with its first non-null QA-catch value still arriving on Monday. Rather than invent plausible numbers, surface the analysis itself as the explanation.
+
+**Decision.** Three-file quick-ship (classified S by the router: < 3 files, < 1h after the content was drafted in chat).
+
+- **Schema.** `content/tools-built.ts` grows `ToolAnalysis = { measured, unmeasured, conclusion }`. `ToolBuilt.effectiveness.analysis?` is optional so a tool without the narrative renders unchanged.
+- **Content.** Both tools get an `analysis` object. claude-shiploop lists discipline / rework / expert / hygiene as measured, token-delta / time-to-ship / expert-auto-rollup as unmeasured-with-why, and a conclusion that says "9.4× fewer fix cycles, expert ~2× better; token-savings and time-to-ship claims refused until matched-size tier-0 run is logged." ui-ux-pro lists hero regens / QA catches / serializer round-trips / backfill coverage as measured, rig-era QA catches / token delta / revisions-per-figure as unmeasured, concluding with "70-80% above industry on hero regens; full QA claim awaits Monday."
+- **Rendering.** `components/tools/EffectivenessBlock.tsx` grows a fourth section after Measured impact: two-column grid for measured/unmeasured bullets + a backlit Conclusion card. `components/tools/ToolCard.tsx` passes the new prop through.
+
+**Result.**
+- `/tools` renders two new Analysis sections (one per tool) in a single page. SSR check: 2× `>Analysis<` h5s, 4× "What we measure" strings, both conclusions present.
+- `npm run prebuild` green (verify:numbers caught drift that landed since Sprint 18: memory file count 45 → 46 after writing `iteration-18.md`; reconciled across `projects.ts` + `hrekov-dev.mdx` tagline/body/MetricGrid/frontmatter detail).
+- `npm run build` green (23 routes).
+- No new STABLE_LOGIC rule — the "null-is-honest" discipline already covers refusing to invent token-delta claims.
+
+**Lesson.**
+- **Honest absence is a product surface.** The user asked for "save X tokens / Y% better / Z% faster" and the right move was to say "we can't claim two of those yet, here's why" — and then put *that answer* on the page as the methodology. Surfacing the gap on the same card as the number builds more trust than hiding it. Null-is-honest, phase IV.
+- **Content drafted in chat skips the spec ritual.** Classifier called this S after the content was discussed; writing a formal spec would have re-stated the same shape. Dog-fooded the ShipLoop router's actual decision tree — S means spec exists in principle (the DEVLOG entry *is* the spec once the work ships), not that it's a separate file.
+
+---
+
 ## 2026-10-18 · Sprint 18 — archetype tag + universal GitHub hygiene
 
 **Problem.** The /tools scorecard graded seven projects on five discipline metrics but was silent on the two basics every production repo should answer in one glance: does CI pass on main, and is there a credential sitting in the index? Sprint 15 shipped the scorecard; Sprint 16 pulled it off `/tools` in favor of the ToolsBuilt pivot; the components (`ScorecardTable`, `ScorecardMethodology`) stayed in the tree but weren't mounted. Sprint 18 adds universal hygiene columns + an archetype tag per project, then remounts the scorecard on `/tools` so the reader can see all seven at a glance.
