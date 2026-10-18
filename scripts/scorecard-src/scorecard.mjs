@@ -25,6 +25,7 @@ const REQUIRED_CONFIG_VERSION = 1;
 import { countCommits, commitsByDate, reworkRatio } from "./lib/git-log.mjs";
 import { scanDevlog, expertHitRate } from "./lib/devlog.mjs";
 import { disciplineScore, medianTimeToShip } from "./lib/metrics.mjs";
+import { aggregateUiRework } from "./lib/ui-rework.mjs";
 
 /** @param {string[]} args */
 function parseArgs(args) {
@@ -89,13 +90,14 @@ function durationFromTimestamps(firstTs, lastTs) {
 
 /** @param {typeof SCORECARD_CONFIG.projects[number]} project */
 async function scoreProject(project) {
-  const [tokens, commits, devlog, discipline, tts, commitsByDay] = await Promise.all([
+  const [tokens, commits, devlog, discipline, tts, commitsByDay, uiRework] = await Promise.all([
     readSessionTokens(project.logPath),
     countCommits(project.repoPath),
     scanDevlog(project.repoPath),
     disciplineScore(project.repoPath),
     medianTimeToShip(project.repoPath),
     commitsByDate(project.repoPath),
+    aggregateUiRework(project.repoPath),
   ]);
 
   const measuredMix = tokens ? modelMixFromMeasured(tokens.byModel) : null;
@@ -127,6 +129,7 @@ async function scoreProject(project) {
       tokenSource,
     },
     daily,
+    uiRework,
     details: {
       disciplineCriteria: discipline ? discipline.criteria : null,
       commitCounts: commits,
