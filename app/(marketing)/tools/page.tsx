@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { InstallBlock } from "@/components/tools/InstallBlock";
+import { ScorecardMethodology } from "@/components/tools/ScorecardMethodology";
+import { ScorecardTable } from "@/components/tools/ScorecardTable";
 import { SkillGrid } from "@/components/tools/SkillGrid";
 import { ToolsBuilt } from "@/components/tools/ToolsBuilt";
 import { MaskReveal } from "@/components/ui/MaskReveal";
@@ -10,11 +12,11 @@ import { INSTALL_COMMAND } from "@/content/tools";
 export const metadata: Metadata = {
   title: "Tools",
   description:
-    "Open-source Claude Code skills shipped from this portfolio: the ShipLoop discipline and the ui-ux-pro design skill. Install in one command, inspect every number.",
+    "Open-source Claude Code skills shipped from this portfolio: the ShipLoop discipline and the ui-ux-pro design skill. Seven projects scored on hygiene, discipline, and rework — null when unmeasured.",
   openGraph: {
     title: "Tools — Ruslan Hrekov",
     description:
-      "Open-source Claude Code skills shipped from this portfolio: the ShipLoop discipline and the ui-ux-pro design skill.",
+      "Open-source Claude Code skills shipped from this portfolio, plus a seven-project scorecard with universal CI + secret-scanning hygiene.",
     url: "https://hrekov.dev/tools",
   },
 };
@@ -50,6 +52,17 @@ export default function ToolsPage() {
       <section className="px-[var(--gutter)] pb-[var(--section-py)]">
         <div className="mx-auto max-w-[var(--content-max)]">
           <ToolsBuilt />
+        </div>
+      </section>
+
+      <section className="px-[var(--gutter)] py-[var(--section-py)]">
+        <div className="mx-auto max-w-[var(--content-max)]">
+          <Reveal>
+            <ScorecardTable />
+          </Reveal>
+          <Reveal className="mt-16">
+            <ScorecardMethodology />
+          </Reveal>
         </div>
       </section>
 

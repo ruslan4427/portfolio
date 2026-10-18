@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-18T02:46:05.170Z",
-  "configVersion": 1,
+  "generatedAt": "2026-10-18T07:30:27.659Z",
+  "configVersion": 2,
   "projects": [
     {
       "slug": "lexora",
@@ -11,7 +11,11 @@
         "reworkRatio": 0,
         "timeToShipDays": 13,
         "tokens": null,
-        "expertHitRate": null
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": null,
+          "secretScanPass": null
+        }
       },
       "context": {
         "complexity": "M",
@@ -21,6 +25,7 @@
         },
         "duration": "17 days",
         "tier": 0,
+        "archetype": "design-tool",
         "tokenSource": "unmeasurable"
       },
       "daily": [
@@ -60,7 +65,7 @@
         "startDate": "2026-09-12",
         "shipDate": "2026-09-29"
       },
-      "notes": "Pre-ShipLoop. 4/4 discipline score reflects speckit-era artifacts, not institutional ShipLoop (tier reflects the latter). Rework 0 and TTS 13d both from n=1 sample. Tokens not reconstructable from mixed home-dir sessions (bail-out triggered 2026-10-14 — see spec §10.1)."
+      "notes": "Pre-ShipLoop. 4/4 discipline score reflects speckit-era artifacts, not institutional ShipLoop (tier reflects the latter). Rework 0 and TTS 13d both from n=1 sample. Tokens not reconstructable from mixed home-dir sessions (bail-out triggered 2026-10-14 — see spec §10.1). githubRepo null — private repository, hygiene not independently verifiable from the public /tools reader."
     },
     {
       "slug": "noble-saas",
@@ -70,17 +75,22 @@
         "disciplineScore": 0,
         "reworkRatio": 1.44,
         "timeToShipDays": null,
-        "tokens": 1493060,
-        "expertHitRate": null
+        "tokens": 1648476,
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": false,
+          "secretScanPass": null
+        }
       },
       "context": {
         "complexity": "L",
         "modelMix": {
-          "opus": 9,
-          "sonnet": 91
+          "opus": 17,
+          "sonnet": 83
         },
-        "duration": "61 days active",
+        "duration": "75 days active",
         "tier": 0,
+        "archetype": "saas-app",
         "tokenSource": "dedicated-session-log"
       },
       "daily": [
@@ -348,6 +358,11 @@
           "date": "2026-10-04",
           "tokens": 44458,
           "commits": 0
+        },
+        {
+          "date": "2026-10-18",
+          "tokens": 155416,
+          "commits": 0
         }
       ],
       "uiRework": null,
@@ -364,9 +379,9 @@
           "total": 234,
           "conventional": 171
         },
-        "sessionCount": 9,
+        "sessionCount": 10,
         "tokensByModel": {
-          "opus": 129062,
+          "opus": 284478,
           "sonnet": 1363998,
           "haiku": 0,
           "other": 0
@@ -387,7 +402,11 @@
         "reworkRatio": 4.5,
         "timeToShipDays": null,
         "tokens": null,
-        "expertHitRate": null
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": null,
+          "secretScanPass": null
+        }
       },
       "context": {
         "complexity": "M",
@@ -397,6 +416,7 @@
         },
         "duration": "27 days",
         "tier": 0,
+        "archetype": "automation",
         "tokenSource": "unmeasurable"
       },
       "daily": [
@@ -477,7 +497,7 @@
         "startDate": "2026-06-08",
         "shipDate": "2026-07-04"
       },
-      "notes": "Pre-ShipLoop. Rework 4.5 from a small n=11 conventional sample (9 fix / 2 feat) — directional, not statistically robust. Tokens not reconstructable from mixed home-dir sessions (bail-out triggered 2026-10-14 — see spec §10.1)."
+      "notes": "Pre-ShipLoop. Rework 4.5 from a small n=11 conventional sample (9 fix / 2 feat) — directional, not statistically robust. Tokens not reconstructable from mixed home-dir sessions (bail-out triggered 2026-10-14 — see spec §10.1). githubRepo null — private repository."
     },
     {
       "slug": "angel",
@@ -488,7 +508,11 @@
         "reworkRatio": null,
         "timeToShipDays": null,
         "tokens": null,
-        "expertHitRate": null
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": null,
+          "secretScanPass": null
+        }
       },
       "context": {
         "complexity": "S",
@@ -497,6 +521,7 @@
         },
         "duration": "scaffold only",
         "tier": 0,
+        "archetype": "saas-app",
         "tokenSource": "unmeasurable"
       },
       "daily": [
@@ -527,7 +552,7 @@
         "startDate": "2026-05-12",
         "shipDate": null
       },
-      "notes": "Pre-ShipLoop. Prototype did not progress past Next.js scaffold (1 commit). Zero session hits across home-dir scan — likely never engaged Claude Code beyond initial setup."
+      "notes": "Pre-ShipLoop. Prototype did not progress past Next.js scaffold (1 commit). Zero session hits across home-dir scan — likely never engaged Claude Code beyond initial setup. githubRepo null — not published to GitHub."
     },
     {
       "slug": "fieldmark",
@@ -538,7 +563,11 @@
         "reworkRatio": 2,
         "timeToShipDays": null,
         "tokens": 2631355,
-        "expertHitRate": null
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": null,
+          "secretScanPass": null
+        }
       },
       "context": {
         "complexity": "M",
@@ -548,6 +577,7 @@
         },
         "duration": "4 days active",
         "tier": 1,
+        "archetype": "saas-app",
         "tokenSource": "dedicated-session-log"
       },
       "daily": [
@@ -602,7 +632,7 @@
         "startDate": "2026-09-12",
         "shipDate": "2026-09-19"
       },
-      "notes": "Self-authored test_plan.md (517 lines) acted as pre-spec; no ShipLoop discipline yet."
+      "notes": "Self-authored test_plan.md (517 lines) acted as pre-spec; no ShipLoop discipline yet. githubRepo null — private repository. Archetype saas-app covers mobile+backend products in this taxonomy; splitting into mobile-app deferred to Sprint 19+ per spec §5.1."
     },
     {
       "slug": "hrekov-dev",
@@ -610,10 +640,14 @@
       "tier": 2,
       "metrics": {
         "disciplineScore": 1,
-        "reworkRatio": 0.46,
+        "reworkRatio": 0.48,
         "timeToShipDays": 1,
-        "tokens": 64542904,
-        "expertHitRate": null
+        "tokens": 66027499,
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": true,
+          "secretScanPass": true
+        }
       },
       "context": {
         "complexity": "L",
@@ -622,6 +656,7 @@
         },
         "duration": "28 days active",
         "tier": 2,
+        "archetype": "saas-app",
         "tokenSource": "dedicated-session-log"
       },
       "daily": [
@@ -753,12 +788,12 @@
         {
           "date": "2026-10-17",
           "tokens": 4584475,
-          "commits": 35
+          "commits": 36
         },
         {
           "date": "2026-10-18",
-          "tokens": 1729598,
-          "commits": 0
+          "tokens": 3214193,
+          "commits": 1
         }
       ],
       "uiRework": {
@@ -798,19 +833,19 @@
           "hasDevlog": true
         },
         "commitCounts": {
-          "fix": 23,
+          "fix": 24,
           "feat": 50,
-          "total": 149,
-          "conventional": 73
+          "total": 151,
+          "conventional": 74
         },
         "sessionCount": 1,
         "tokensByModel": {
-          "opus": 64542904,
+          "opus": 66027499,
           "sonnet": 0,
           "haiku": 0,
           "other": 0
         },
-        "specsCounted": 8,
+        "specsCounted": 9,
         "devlogExpertStats": {
           "consulted": 1,
           "planChangedYes": 0,
@@ -830,7 +865,11 @@
         "reworkRatio": 1,
         "timeToShipDays": null,
         "tokens": null,
-        "expertHitRate": null
+        "expertHitRate": null,
+        "hygiene": {
+          "workflowsHealthy": true,
+          "secretScanPass": true
+        }
       },
       "context": {
         "complexity": "L",
@@ -840,6 +879,7 @@
         },
         "duration": "3 days",
         "tier": 2,
+        "archetype": "llm-skill",
         "tokenSource": "unmeasurable"
       },
       "daily": [

@@ -3,11 +3,19 @@ import scorecardJson from "@/scorecard.json";
 type Scorecard = typeof scorecardJson;
 type ScorecardProject = Scorecard["projects"][number];
 type Tier = 0 | 1 | 2;
+type Archetype = "saas-app" | "automation" | "llm-skill" | "design-tool";
 
 const TIER_LABEL: Record<Tier, string> = {
   0: "0 · naked",
   1: "1 · self-spec",
   2: "2 · ShipLoop",
+};
+
+const ARCHETYPE_LABEL: Record<Archetype, string> = {
+  "saas-app": "SaaS",
+  automation: "Automation",
+  "llm-skill": "LLM Skill",
+  "design-tool": "Design",
 };
 
 const METRIC_LABEL = [
@@ -16,6 +24,11 @@ const METRIC_LABEL = [
   { key: "timeToShipDays" as const, label: "Time to ship", caption: "median days, spec → ship" },
   { key: "tokens" as const, label: "Tokens", caption: "sum across sessions" },
   { key: "expertHitRate" as const, label: "Expert hit rate", caption: "plan-changed ÷ consulted" },
+];
+
+const HYGIENE_LABEL = [
+  { key: "workflowsHealthy" as const, label: "Workflows", caption: "last main run per workflow" },
+  { key: "secretScanPass" as const, label: "Secrets", caption: "GitHub secret scanning alerts" },
 ];
 
 function humanizeTokens(n: number): string {
@@ -54,6 +67,53 @@ function TierPill({ tier }: { tier: Tier }) {
     >
       Tier {TIER_LABEL[tier]}
     </span>
+  );
+}
+
+function ArchetypePill({ archetype }: { archetype: Archetype | null | undefined }) {
+  if (!archetype) return null;
+  return (
+    <span className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
+      {ARCHETYPE_LABEL[archetype]}
+    </span>
+  );
+}
+
+function HygieneDot({ value }: { value: boolean | null | undefined }) {
+  if (value === true) {
+    return (
+      <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--status-live)]" aria-label="pass" />
+    );
+  }
+  if (value === false) {
+    return (
+      <span className="font-sans text-[14px] leading-none text-[color:var(--ink-muted)]" aria-label="fail">
+        ✕
+      </span>
+    );
+  }
+  return (
+    <span className="font-sans text-[14px] leading-none text-[color:var(--ink-muted)]" aria-label="unmeasured">
+      —
+    </span>
+  );
+}
+
+function HygieneCell({
+  value,
+  project,
+}: {
+  value: boolean | null | undefined;
+  project: ScorecardProject;
+}) {
+  const isNull = value === null || value === undefined;
+  return (
+    <td
+      className="border-t border-[color:var(--hairline)] px-3 py-4 align-top"
+      title={isNull ? project.notes : undefined}
+    >
+      <HygieneDot value={value} />
+    </td>
   );
 }
 
@@ -138,6 +198,18 @@ export function ScorecardTable() {
                   </div>
                 </th>
               ))}
+              {HYGIENE_LABEL.map((h) => (
+                <th
+                  key={h.key}
+                  scope="col"
+                  className="px-3 py-4 text-left font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+                >
+                  <div>{h.label}</div>
+                  <div className="mt-0.5 text-[10px] normal-case tracking-normal text-[color:var(--ink-muted)]">
+                    {h.caption}
+                  </div>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -150,8 +222,9 @@ export function ScorecardTable() {
                   <div className="font-serif text-[18px] leading-tight text-[color:var(--ink-primary)]">
                     {p.name}
                   </div>
-                  <div className="mt-1.5">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                     <TierPill tier={p.tier as Tier} />
+                    <ArchetypePill archetype={p.context.archetype as Archetype | undefined} />
                   </div>
                   <div className="mt-2 font-sans text-[11px] text-[color:var(--ink-muted)]">
                     {p.context.complexity} · {p.context.duration}
@@ -159,6 +232,13 @@ export function ScorecardTable() {
                 </th>
                 {METRIC_LABEL.map((m) => (
                   <Cell key={m.key} metricKey={m.key} project={p} />
+                ))}
+                {HYGIENE_LABEL.map((h) => (
+                  <HygieneCell
+                    key={h.key}
+                    value={p.metrics.hygiene?.[h.key] as boolean | null | undefined}
+                    project={p}
+                  />
                 ))}
               </tr>
             ))}
@@ -177,11 +257,12 @@ export function ScorecardTable() {
               <h4 className="font-serif text-[22px] leading-tight text-[color:var(--ink-primary)]">
                 {p.name}
               </h4>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <TierPill tier={p.tier as Tier} />
-                <span className="font-sans text-[11px] text-[color:var(--ink-muted)]">
-                  {p.context.complexity} · {p.context.duration}
-                </span>
+                <ArchetypePill archetype={p.context.archetype as Archetype | undefined} />
+              </div>
+              <div className="mt-2 font-sans text-[11px] text-[color:var(--ink-muted)]">
+                {p.context.complexity} · {p.context.duration}
               </div>
             </header>
             <dl className="grid grid-cols-2 gap-3">
@@ -215,6 +296,17 @@ export function ScorecardTable() {
                 );
               })}
             </dl>
+            <div className="mt-3 flex flex-wrap items-center gap-4 rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] px-3 py-2.5">
+              <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+                Health
+              </span>
+              {HYGIENE_LABEL.map((h) => (
+                <span key={h.key} className="inline-flex items-center gap-1.5">
+                  <HygieneDot value={p.metrics.hygiene?.[h.key] as boolean | null | undefined} />
+                  <span className="font-sans text-[11px] text-[color:var(--ink-body)]">{h.label}</span>
+                </span>
+              ))}
+            </div>
             {p.notes && (
               <p className="mt-4 font-sans text-[12px] leading-relaxed text-[color:var(--ink-muted)]">
                 {p.notes}

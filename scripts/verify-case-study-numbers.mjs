@@ -875,6 +875,89 @@ if (lexora !== null) {
   }
 }
 
+// 15. Hygiene aggregate claims in prose vs scorecard.json.
+//     Prose like "N of 7 pass workflows" or "all 7 projects pass secret scanning"
+//     drifts the moment a CI run flips. Pattern list is explicit (not every digit
+//     counts as a hygiene aggregate claim) and scoped to the two columns the
+//     scorecard actually probes. Guards against the Sprint 18 risk 5 — adding
+//     hygiene prose to future case studies without regen-ing against reality.
+{
+  const SCORECARD = join(REPO, "scorecard.json");
+  if (existsSync(SCORECARD)) {
+    const scorecard = JSON.parse(readFileSync(SCORECARD, "utf8"));
+    const projects = Array.isArray(scorecard.projects) ? scorecard.projects : [];
+    const total = projects.length;
+    const countPass = (key) =>
+      projects.filter((p) => p?.metrics?.hygiene?.[key] === true).length;
+    const workflowsPass = countPass("workflowsHealthy");
+    const secretsPass = countPass("secretScanPass");
+
+    const AGG_SOURCES = [
+      ...listMdx(join(REPO, "content/case-studies")),
+      ...listMdx(join(REPO, "content/blog")),
+      join(REPO, "components/tools/ScorecardMethodology.tsx"),
+      join(REPO, "components/tools/ScorecardTable.tsx"),
+      join(REPO, "app/(marketing)/tools/page.tsx"),
+    ].filter((p) => existsSync(p));
+
+    const COLUMN_PATTERNS = {
+      workflowsHealthy: /workflows?(?:\s+health(?:y)?)?|CI\s+(?:pass|green|health)/i,
+      secretScanPass: /secret[\s-]?scann?ing|secrets?\b/i,
+    };
+
+    for (const file of AGG_SOURCES) {
+      const src = readFileSync(file, "utf8");
+
+      // "N of 7 ... pass workflows" / "N of 7 ... pass secret scanning"
+      const n_of_total = /\b(\d+)\s+of\s+(\d+)\s+(?:projects?\s+)?pass(?:es)?\s+([A-Za-z\s-]{0,40})/gi;
+      let m;
+      while ((m = n_of_total.exec(src)) !== null) {
+        const n = parseInt(m[1], 10);
+        const claimedTotal = parseInt(m[2], 10);
+        const tail = m[3].trim();
+        for (const [key, re] of Object.entries(COLUMN_PATTERNS)) {
+          if (!re.test(tail)) continue;
+          const actualPass = key === "workflowsHealthy" ? workflowsPass : secretsPass;
+          if (claimedTotal !== total)
+            problems.push(
+              `[${file}] hygiene total mismatch: prose "${m[0]}" claims ${claimedTotal}, scorecard.json has ${total}`,
+            );
+          if (n !== actualPass)
+            problems.push(
+              `[${file}] hygiene ${key} pass count: prose "${m[0]}" claims ${n}, scorecard.json has ${actualPass}`,
+            );
+        }
+      }
+
+      // "all 7 ... pass workflows" / "all 7 projects pass secret scanning"
+      const all_n = /\ball\s+(\d+)\s+(?:projects?\s+)?pass(?:es)?\s+([A-Za-z\s-]{0,40})/gi;
+      while ((m = all_n.exec(src)) !== null) {
+        const claimedTotal = parseInt(m[1], 10);
+        const tail = m[2].trim();
+        for (const [key, re] of Object.entries(COLUMN_PATTERNS)) {
+          if (!re.test(tail)) continue;
+          const actualPass = key === "workflowsHealthy" ? workflowsPass : secretsPass;
+          if (claimedTotal !== total)
+            problems.push(
+              `[${file}] hygiene "all N" total: prose "${m[0]}" claims ${claimedTotal}, scorecard.json has ${total}`,
+            );
+          if (actualPass !== total)
+            problems.push(
+              `[${file}] hygiene "all N" ${key}: prose "${m[0]}" claims all pass, scorecard.json has ${actualPass}/${total}`,
+            );
+        }
+      }
+    }
+  }
+}
+
+function listMdx(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => join(dir, f));
+}
+
 if (problems.length) {
   console.error("✗ case-study number drift");
   for (const p of problems) console.error("  •", p);

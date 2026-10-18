@@ -21,11 +21,12 @@ import { readSessionTokens } from "./lib/claude-logs.mjs";
 // Hardcoded in the parser (NOT imported from the config) so the lockstep
 // guard works: bumping configVersion requires editing this constant in a
 // separate file, which the diff makes obvious at review time.
-const REQUIRED_CONFIG_VERSION = 1;
+const REQUIRED_CONFIG_VERSION = 2;
 import { countCommits, commitsByDate, reworkRatio } from "./lib/git-log.mjs";
 import { scanDevlog, expertHitRate } from "./lib/devlog.mjs";
 import { disciplineScore, medianTimeToShip } from "./lib/metrics.mjs";
 import { aggregateUiRework } from "./lib/ui-rework.mjs";
+import { probeGitHubHealth } from "./lib/github-health.mjs";
 
 /** @param {string[]} args */
 function parseArgs(args) {
@@ -90,7 +91,7 @@ function durationFromTimestamps(firstTs, lastTs) {
 
 /** @param {typeof SCORECARD_CONFIG.projects[number]} project */
 async function scoreProject(project) {
-  const [tokens, commits, devlog, discipline, tts, commitsByDay, uiRework] = await Promise.all([
+  const [tokens, commits, devlog, discipline, tts, commitsByDay, uiRework, hygiene] = await Promise.all([
     readSessionTokens(project.logPath),
     countCommits(project.repoPath),
     scanDevlog(project.repoPath),
@@ -98,6 +99,7 @@ async function scoreProject(project) {
     medianTimeToShip(project.repoPath),
     commitsByDate(project.repoPath),
     aggregateUiRework(project.repoPath),
+    probeGitHubHealth(project.githubRepo),
   ]);
 
   const measuredMix = tokens ? modelMixFromMeasured(tokens.byModel) : null;
@@ -120,12 +122,14 @@ async function scoreProject(project) {
       timeToShipDays: tts ? tts.medianDays : null,
       tokens: tokens ? tokens.total : null,
       expertHitRate: expertHitRate(devlog),
+      hygiene,
     },
     context: {
       complexity: project.complexity,
       modelMix: measuredMix ?? project.modelMix,
       duration: measuredDuration ?? project.duration,
       tier: project.tier,
+      archetype: project.archetype,
       tokenSource,
     },
     daily,
