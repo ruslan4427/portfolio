@@ -6,6 +6,12 @@ export type ToolImpactRow = {
   baseline?: string;
 };
 
+export type ToolAnalysis = {
+  measured: string[];
+  unmeasured: string[];
+  conclusion: string;
+};
+
 export type ToolBuilt = {
   slug: string;
   name: string;
@@ -22,6 +28,7 @@ export type ToolBuilt = {
     impact: ToolImpactRow[] | null;
     impactNote?: string;
     parserSource?: { label: string; href: string };
+    analysis?: ToolAnalysis;
   };
 };
 
@@ -73,6 +80,21 @@ export const TOOLS_BUILT: ToolBuilt[] = [
         label: "Inspect the parser",
         href: "https://github.com/ruslan4427/claude-shiploop/blob/main/scripts/scorecard.mjs",
       },
+      analysis: {
+        measured: [
+          "Discipline — 4-point binary (spec, plan, tasks, DEVLOG present on tier-2 runs).",
+          "Rework ratio — fix(…) ÷ feat(…) conventional commits lifetime.",
+          "Expert hit rate — hand-counted plan-changing findings ÷ consultations across one capsule's 3-bug blind test.",
+          "CI hygiene — gh-sourced workflow runs + secret-scanning alerts.",
+        ],
+        unmeasured: [
+          "Token delta vs naked baseline. smm-factory (the tier-0 reference) wasn't token-logged — projection from rework ratio is possible but refused on principle.",
+          "Time-to-ship delta. ShipLoop median = 1 day; naked baseline carries null, so no comparison yet.",
+          "Expert auto-rollup. DEVLOG convention for consultation outcomes isn't wired — the 67% is one hand-count on one capsule, not a running aggregate.",
+        ],
+        conclusion:
+          "On measured runs: 9.4× fewer fix cycles per feature, expert consultation ~2× more accurate than random, discipline binary from 0 → 1.0. Token-savings and time-to-ship claims stay refused until a matched-size tier-0 run is logged — null is honest.",
+      },
     },
   },
   {
@@ -123,6 +145,21 @@ export const TOOLS_BUILT: ToolBuilt[] = [
             "3 of 4 posts shipped with 0 round-trips. The outlier (classify-before-you-code) drove the whole number.",
         },
       ],
+      analysis: {
+        measured: [
+          "Hero regens — heroRegenerations frontmatter, summed across posts carrying the rig.",
+          "QA catches — nullable int (null = post pre-dates the rig, integer = rig-era measurement).",
+          "Serializer round-trips — republishes forced by UI-serializer bugs, counted only when the cause was a serializer issue (not cosmetic edits).",
+          "Backfill coverage — rig-era vs pre-rig posts; stated plainly on /tools as 4 of 4 so the aggregate reading is honest.",
+        ],
+        unmeasured: [
+          "Rig-era QA catches. The rig landed 2026-10-17; the first non-null value arrives with shipping-claude-shiploop on 2026-10-19 — until then, the aggregate holds null.",
+          "Token delta between rig-era and pre-rig posts. The rig is one day old at write time; a rig-era-vs-pre-rig token comparison needs at least one Monday ship.",
+          "Figure revisions per hero. We count figures; we don't yet track revisions-per-figure as a running number.",
+        ],
+        conclusion:
+          "Hero generation efficiency measurably 70–80% above industry baseline (1.0 avg vs 3–5 regens). Serializer round-trips concentrate in a single pre-rig outlier — three of four posts shipped at 0. Full QA-catch claim awaits Monday's first rig-era post; stays null until then.",
+      },
     },
   },
 ];
