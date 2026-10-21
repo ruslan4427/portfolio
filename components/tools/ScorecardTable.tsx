@@ -63,7 +63,7 @@ function TierPill({ tier }: { tier: Tier }) {
         : "border border-[color:var(--hairline)] bg-[color:var(--bg-page)] text-[color:var(--ink-muted)]";
   return (
     <span
-      className={`inline-flex items-center rounded-[var(--radius-pill)] px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-[0.1em] ${toneClass}`}
+      className={`inline-flex items-center rounded-[var(--radius-pill)] px-2.5 py-0.5 font-sans text-[length:var(--type-caption)] ${toneClass}`}
     >
       Tier {TIER_LABEL[tier]}
     </span>
@@ -73,28 +73,23 @@ function TierPill({ tier }: { tier: Tier }) {
 function ArchetypePill({ archetype }: { archetype: Archetype | null | undefined }) {
   if (!archetype) return null;
   return (
-    <span className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
+    <span className="inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2.5 py-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
       {ARCHETYPE_LABEL[archetype]}
     </span>
   );
 }
 
 function HygieneDot({ value }: { value: boolean | null | undefined }) {
-  if (value === true) {
-    return (
-      <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--status-live)]" aria-label="pass" />
-    );
-  }
-  if (value === false) {
-    return (
-      <span className="font-sans text-[14px] leading-none text-[color:var(--ink-muted)]" aria-label="fail">
-        ✕
-      </span>
-    );
-  }
+  const [mark, word, tone] =
+    value === true
+      ? ["✓", "pass", "font-semibold text-[color:var(--ink-primary)]"]
+      : value === false
+        ? ["✕", "fail", "text-[color:var(--ink-muted)]"]
+        : ["—", "not measured", "text-[color:var(--ink-muted)]"];
   return (
-    <span className="font-sans text-[14px] leading-none text-[color:var(--ink-muted)]" aria-label="unmeasured">
-      —
+    <span className={`font-sans text-[length:var(--type-small)] leading-none ${tone}`}>
+      <span aria-hidden>{mark}</span>
+      <span className="sr-only">{word}</span>
     </span>
   );
 }
@@ -144,7 +139,7 @@ function Cell({
         {formatted}
       </div>
       {tokenSource && (
-        <div className="mt-1 font-sans text-[10px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
+        <div className="mt-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {tokenSource.replace(/-/g, " ")}
         </div>
       )}
@@ -158,31 +153,22 @@ export function ScorecardTable() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
-        <div>
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] leading-[1.05] text-[color:var(--ink-primary)]">
-            Scorecard.
-          </h3>
-          <p className="mt-2 max-w-[48ch] text-[15px] leading-relaxed text-[color:var(--ink-body)]">
-            Seven projects across three discipline tiers. Numbers are measured
-            from git logs, DEVLOGs, and Claude Code session files — never
-            self-reported. Null is honest; it means the signal was not
-            reconstructable, not that the project failed.
-          </p>
-        </div>
-        <div className="font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-          Generated {generated}
-        </div>
-      </div>
+      <p className="mb-4 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+        {projects.length} projects · generated {generated} · ✓ pass · ✕ fail · — not measured
+      </p>
 
       {/* ───── Desktop table (≥ md) ───── */}
-      <div className="hidden overflow-x-auto rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] shadow-[var(--shadow-card)] md:block">
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Scorecard table"
+        className="hidden overflow-x-auto rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] md:block">
         <table className="w-full border-collapse">
           <thead>
             <tr>
               <th
                 scope="col"
-                className="px-4 py-4 text-left font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+                className="px-4 py-4 text-left font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
               >
                 Project
               </th>
@@ -190,10 +176,10 @@ export function ScorecardTable() {
                 <th
                   key={m.key}
                   scope="col"
-                  className="px-3 py-4 text-left font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+                  className="px-3 py-4 text-left font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
                 >
-                  <div>{m.label}</div>
-                  <div className="mt-0.5 text-[10px] normal-case tracking-normal text-[color:var(--ink-muted)]">
+                  <div className="font-semibold text-[color:var(--ink-primary)]">{m.label}</div>
+                  <div className="mt-0.5 text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                     {m.caption}
                   </div>
                 </th>
@@ -202,10 +188,10 @@ export function ScorecardTable() {
                 <th
                   key={h.key}
                   scope="col"
-                  className="px-3 py-4 text-left font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+                  className="px-3 py-4 text-left font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
                 >
-                  <div>{h.label}</div>
-                  <div className="mt-0.5 text-[10px] normal-case tracking-normal text-[color:var(--ink-muted)]">
+                  <div className="font-semibold text-[color:var(--ink-primary)]">{h.label}</div>
+                  <div className="mt-0.5 text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                     {h.caption}
                   </div>
                 </th>
@@ -226,7 +212,7 @@ export function ScorecardTable() {
                     <TierPill tier={p.tier as Tier} />
                     <ArchetypePill archetype={p.context.archetype as Archetype | undefined} />
                   </div>
-                  <div className="mt-2 font-sans text-[11px] text-[color:var(--ink-muted)]">
+                  <div className="mt-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                     {p.context.complexity} · {p.context.duration}
                   </div>
                 </th>
@@ -254,14 +240,14 @@ export function ScorecardTable() {
             className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-5 shadow-[var(--shadow-card)]"
           >
             <header className="mb-4">
-              <h4 className="font-serif text-[22px] leading-tight text-[color:var(--ink-primary)]">
+              <h3 className="font-serif text-[22px] leading-tight text-[color:var(--ink-primary)]">
                 {p.name}
-              </h4>
+              </h3>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <TierPill tier={p.tier as Tier} />
                 <ArchetypePill archetype={p.context.archetype as Archetype | undefined} />
               </div>
-              <div className="mt-2 font-sans text-[11px] text-[color:var(--ink-muted)]">
+              <div className="mt-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                 {p.context.complexity} · {p.context.duration}
               </div>
             </header>
@@ -275,7 +261,7 @@ export function ScorecardTable() {
                     className="rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] p-3"
                     title={isNull ? p.notes : undefined}
                   >
-                    <dt className="font-sans text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+                    <dt className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                       {m.label}
                     </dt>
                     <dd
@@ -287,7 +273,7 @@ export function ScorecardTable() {
                     >
                       {formatMetric(m.key, value)}
                       {m.key === "tokens" && !isNull && (
-                        <span className="mt-1 block font-sans text-[9px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
+                        <span className="mt-1 block font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                           {p.context.tokenSource.replace(/-/g, " ")}
                         </span>
                       )}
@@ -297,18 +283,18 @@ export function ScorecardTable() {
               })}
             </dl>
             <div className="mt-3 flex flex-wrap items-center gap-4 rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] px-3 py-2.5">
-              <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+              <span className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                 Health
               </span>
               {HYGIENE_LABEL.map((h) => (
                 <span key={h.key} className="inline-flex items-center gap-1.5">
                   <HygieneDot value={p.metrics.hygiene?.[h.key] as boolean | null | undefined} />
-                  <span className="font-sans text-[11px] text-[color:var(--ink-body)]">{h.label}</span>
+                  <span className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-body)]">{h.label}</span>
                 </span>
               ))}
             </div>
             {p.notes && (
-              <p className="mt-4 font-sans text-[12px] leading-relaxed text-[color:var(--ink-muted)]">
+              <p className="mt-4 font-sans text-[length:var(--type-caption)] leading-relaxed text-[color:var(--ink-muted)]">
                 {p.notes}
               </p>
             )}

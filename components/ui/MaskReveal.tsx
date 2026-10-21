@@ -28,9 +28,10 @@ export function MaskReveal({
   const inner = reduced
     ? { opacity: 0 }
     : { y: "110%", opacity: 0 };
-  const rest = reduced
-    ? { opacity: 1 }
-    : { y: "0%", opacity: 1 };
+  // Always settle y: the hook reads false on the first render, so the
+  // motion variant can start before reduced flips to true. Without y here
+  // the text stays parked at 110% behind the mask.
+  const rest = { y: "0%", opacity: 1 };
 
   const viewport = { once: true, margin: "-80px" };
   const inViewProps =

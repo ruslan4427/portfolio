@@ -202,6 +202,10 @@ components/
                         BlogReadTracker (IO sentinel per slug)
   blog/                 PostCard (featured grid), PostRow (chronological)
   canvas/DotGrid.tsx    Cursor-reactive canvas (mounted once in root layout)
+  tools/                /tools (Sprint 24): ToolSection (identity + install |
+                        impact numbers + Disclosure for method), InstallBlock,
+                        SkillGrid (command rows by stage), ScorecardTable,
+                        ScorecardMethodology
   case-study/           CaseReader (lens founder|hiring|engineer + depth
                         short|full, localStorage, ?for= pre-select), LensHero,
                         ChapterRail, CaseSection, GlanceBento, LensCTA,

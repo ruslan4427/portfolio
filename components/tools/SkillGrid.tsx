@@ -1,5 +1,4 @@
 import { CATEGORY_LABEL, type Tool, type ToolCategory, tools } from "@/content/tools";
-import { Reveal } from "@/components/ui/Reveal";
 
 const CATEGORY_ORDER: ToolCategory[] = ["entry", "lifecycle", "quality", "meta"];
 
@@ -15,60 +14,45 @@ function groupByCategory(ts: Tool[]) {
     .filter((g) => g.items.length > 0);
 }
 
+/** ShipLoop's commands as compact rows, grouped by lifecycle stage. */
 export function SkillGrid() {
   const groups = groupByCategory(tools);
   return (
-    <div className="flex flex-col gap-14">
-      {groups.map(({ cat, items }) => (
-        <section key={cat}>
-          <div className="mb-5 flex items-baseline gap-3 border-b border-[color:var(--hairline)] pb-2">
-            <h3 className="font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-              {CATEGORY_LABEL[cat]}
-            </h3>
-            <span className="font-sans text-[11px] text-[color:var(--ink-muted)] tabular-nums">
-              {items.length}
-            </span>
-          </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {items.map((t, i) => (
-              <Reveal key={t.slug} delay={0.05 + i * 0.03}>
-                <SkillCard tool={t} />
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-  );
-}
-
-function SkillCard({ tool }: { tool: Tool }) {
-  return (
-    <article className="flex h-full flex-col gap-4 rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6 shadow-[var(--shadow-card)] md:p-8">
-      <header>
-        <h4 className="font-serif text-[clamp(22px,2.4vw,30px)] leading-[1.1] text-[color:var(--ink-primary)]">
-          {tool.name}
-        </h4>
-      </header>
-      <p className="text-[15px] leading-relaxed text-[color:var(--ink-body)]">
-        {tool.description}
-      </p>
-      <div>
-        <div className="mb-1 font-sans text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-          Invocation
-        </div>
-        <code className="block overflow-x-auto rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] px-3 py-2 font-mono text-[13px] text-[color:var(--ink-primary)]">
-          {tool.invocation}
-        </code>
-      </div>
-      <div className="mt-auto">
-        <div className="mb-1 font-sans text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-          When to use
-        </div>
-        <p className="text-[14px] leading-relaxed text-[color:var(--ink-body)]">
-          {tool.whenToUse}
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <h3 className="font-serif text-[length:var(--type-display-s)] leading-[1.1] text-[color:var(--ink-primary)]">
+          What&rsquo;s inside · {tools.length} commands
+        </h3>
+        <p className="text-[length:var(--type-small)] leading-[1.55] text-[color:var(--ink-muted)]">
+          Plus the domain-expert subagent that <span className="text-[color:var(--ink-primary)]">/shiploop-expert</span> calls — eight parts in all.
         </p>
       </div>
-    </article>
+      <div className="flex flex-col gap-8">
+        {groups.map(({ cat, items }) => (
+          <section key={cat} aria-labelledby={`skills-${cat}`} className="flex flex-col gap-1">
+            <h4 id={`skills-${cat}`} className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+              {CATEGORY_LABEL[cat]} · {items.length}
+            </h4>
+            <ul className="flex flex-col">
+              {items.map((t) => (
+                <li key={t.slug} className="flex flex-col gap-2 border-t border-[color:var(--hairline)] py-4">
+                  <p className="font-sans text-[length:var(--type-title)] font-semibold leading-tight text-[color:var(--ink-primary)]">
+                    {t.name}
+                  </p>
+                  <p className="text-[length:var(--type-small)] leading-[1.6] text-[color:var(--ink-body)]">{t.description}</p>
+                  <p className="text-[length:var(--type-small)] leading-[1.6] text-[color:var(--ink-body)]">
+                    <span className="text-[color:var(--ink-muted)]">Use when: </span>
+                    {t.whenToUse}
+                  </p>
+                  <code className="w-fit max-w-full overflow-x-auto rounded-[var(--radius-inline)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-2 py-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-primary)]">
+                    {t.invocation}
+                  </code>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
   );
 }
