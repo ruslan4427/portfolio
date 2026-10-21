@@ -229,8 +229,9 @@ export function FieldmarkCover({ src, alt, sizes }: Props) {
         sizes={sizes}
         className="object-cover fm-cover-fallback"
       />
-      <div className="fm-cover-wrap" aria-label={alt}>
+      <div className="fm-cover-wrap" role="img" aria-label={alt}>
         <div
+          aria-hidden="true"
           className="fm-cover-scene"
           dangerouslySetInnerHTML={{ __html: SCENE_HTML }}
         />

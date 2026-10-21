@@ -2669,3 +2669,13 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Result:** An overlap/clip sweep over every figure on the six cases at 1440 and 390 (node boxes, text, label pills, foreignObject overflow) reports zero issues outside the SVG phone reconstructions, whose tight line boxes are intentional. tsc clean (pre-existing LayoutProps typegen error aside); new code lint-clean.
 
 **Lesson:** Hand-placed coordinates were the root cause of every spacing complaint — each fix was a local shift that the next width undid. Moving layout into the component turned "keep the frames apart" from a review checklist into a property of the system.
+
+## 2026-10-21 — Sprint 23 · /work index rebuilt around the reading lens
+
+**Problem:** `/work` still used the pre-redesign layout: centred badge hero, copy claiming "Five case studies" while six exist, a Year filter with a single value, cards showing only name, role and one metric, a pre-launch project labelled "Active", white/black overlay chips, 11px text and an italic display numeral.
+
+**Decision:** Left-aligned hero with the count derived from `projects.ts`; the same "Reading as" lens control as the case pages (shared localStorage key, no depth toggle here). A full-width "Start here" card picks the case that answers that reader first (founder → Noble, hiring → hrekov-dev, engineer → smm-factory) with the lens headline and four stats; the grid shows the other cases with lens headline, two stats on accent rules, stack tags and plain-language status. Card links carry `?for=` so the case opens in the same view. Filters collapse to one row of role/stack chips with live counts; zero-match and all-match options are dropped. ProjectCard moved to v2 tokens (on-dark chips, 13px floor, no italic numeral, panel radius). Animated covers are now `role="img"` with the scene `aria-hidden`; the Lexora cover's decorative `<button>` (focusable inside a link) became a span.
+
+**Result:** /work renders at 1440 and 390 with no overflow; lens switch changes the start pick and card copy; Flutter filter → Lexora, Fieldmark. axe: no violations on mobile; on desktop only the Noble cover's struck-through "done" rows (app colours reproduced verbatim per case rulebook §10 — incidental text inside an image, WCAG 1.4.3 exception).
+
+**Lesson:** An index page is a router, not a gallery. Once the case pages knew who was reading, the index had to answer the same question first — "where should *I* start?" — or the lens would reset at the door.

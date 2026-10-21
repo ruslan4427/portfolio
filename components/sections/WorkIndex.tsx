@@ -1,203 +1,138 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { ProjectCard } from "./ProjectCard";
+import { useCaseReader } from "@/components/case-study/CaseReader";
 import { Stagger, StaggerItem } from "@/components/ui/Stagger";
-import { easeSmooth } from "@/lib/motion";
-import {
-  projects,
-  type ProjectRoleTag,
-  type ProjectStackTag,
-} from "@/content/projects";
+import { caseLenses, workStartHere } from "@/content/case-lenses";
+import { projects, type ProjectRoleTag, type ProjectStackTag } from "@/content/projects";
+import { ProjectCard } from "./ProjectCard";
 
-const ROLE_CHIPS: { value: ProjectRoleTag; label: string }[] = [
-  { value: "frontend", label: "Frontend" },
-  { value: "full-stack", label: "Full-stack" },
-  { value: "cto", label: "CTO" },
-  { value: "consulting", label: "Consulting" },
-];
-
-const STACK_CHIPS: { value: ProjectStackTag; label: string }[] = [
-  { value: "react", label: "React" },
-  { value: "next", label: "Next.js" },
-  { value: "flutter", label: "Flutter" },
-  { value: "node", label: "Node" },
-  { value: "ai", label: "AI / LLM" },
-];
-
-const YEAR_CHIPS = Array.from(
-  new Set(projects.map((p) => Number(p.year)).filter(Number.isFinite)),
-).sort((a, b) => b - a);
-
-export function WorkIndex() {
-  const [roles, setRoles] = useState<Set<ProjectRoleTag>>(new Set());
-  const [stacks, setStacks] = useState<Set<ProjectStackTag>>(new Set());
-  const [years, setYears] = useState<Set<number>>(new Set());
-
-  const filtered = useMemo(() => {
-    return projects.filter((p) => {
-      const roleOK =
-        roles.size === 0 ||
-        (p.roleTags?.some((t) => roles.has(t)) ?? false);
-      const stackOK =
-        stacks.size === 0 ||
-        (p.stackTags?.some((t) => stacks.has(t)) ?? false);
-      const yearOK =
-        years.size === 0 || (p.year ? years.has(Number(p.year)) : false);
-      return roleOK && stackOK && yearOK;
-    });
-  }, [roles, stacks, years]);
-
-  const anyActive = roles.size + stacks.size + years.size > 0;
-
-  const clearAll = () => {
-    setRoles(new Set());
-    setStacks(new Set());
-    setYears(new Set());
-  };
-
-  return (
-    <section className="relative px-[var(--gutter)] pb-[var(--section-py)]">
-      <div className="mx-auto max-w-[var(--content-max)]">
-        <div className="mb-10 flex flex-col gap-4">
-          <ChipRow
-            label="Role"
-            options={ROLE_CHIPS}
-            active={roles}
-            setActive={setRoles}
-          />
-          <ChipRow
-            label="Stack"
-            options={STACK_CHIPS}
-            active={stacks}
-            setActive={setStacks}
-          />
-          <ChipRow
-            label="Year"
-            options={YEAR_CHIPS.map((y) => ({ value: y, label: String(y) }))}
-            active={years}
-            setActive={setYears}
-          />
-        </div>
-
-        {filtered.length > 0 ? (
-          <Stagger as="ul" className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {filtered.map((project) => (
-              <StaggerItem as="li" key={project.slug}>
-                <ProjectCard project={project} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        ) : (
-          <EmptyState onClear={clearAll} />
-        )}
-
-        {anyActive && filtered.length > 0 ? (
-          <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="font-sans text-xs text-[color:var(--ink-muted)] underline underline-offset-4 hover:text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:text-[color:var(--ink-primary)]"
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-type ChipRowProps<T extends string | number> = {
-  label: string;
-  options: { value: T; label: string }[];
-  active: Set<T>;
-  setActive: (next: Set<T>) => void;
+const ROLE_LABEL: Record<ProjectRoleTag, string> = {
+  frontend: "Frontend",
+  "full-stack": "Full-stack",
+  cto: "CTO / lead",
+  consulting: "Consulting",
 };
 
-function ChipRow<T extends string | number>({
-  label,
-  options,
-  active,
-  setActive,
-}: ChipRowProps<T>) {
-  const toggle = (value: T) => {
-    const next = new Set(active);
-    if (next.has(value)) {
-      next.delete(value);
-    } else {
-      next.add(value);
-    }
-    setActive(next);
-  };
+const STACK_LABEL: Record<ProjectStackTag, string> = {
+  react: "React",
+  next: "Next.js",
+  flutter: "Flutter",
+  node: "Node",
+  ai: "AI / LLM",
+};
 
-  const clearRow = () => setActive(new Set<T>());
-  const rowIsAll = active.size === 0;
+type Filter = { kind: "role"; value: ProjectRoleTag } | { kind: "stack"; value: ProjectStackTag } | null;
 
-  return (
-    <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
-      <span className="font-sans text-xs uppercase tracking-wider text-[color:var(--ink-muted)] md:w-16">
-        {label}
-      </span>
-      <div className="flex flex-wrap gap-2">
-        <Chip label="All" active={rowIsAll} onClick={clearRow} />
-        {options.map((opt) => (
-          <Chip
-            key={String(opt.value)}
-            label={opt.label}
-            active={active.has(opt.value)}
-            onClick={() => toggle(opt.value)}
-          />
-        ))}
-      </div>
-    </div>
-  );
+function matches(p: (typeof projects)[number], f: Filter) {
+  if (!f) return true;
+  return f.kind === "role" ? (p.roleTags?.includes(f.value) ?? false) : (p.stackTags?.includes(f.value) ?? false);
 }
 
-function Chip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+// Only options that match at least one case, so no chip leads to an empty grid.
+const stackOptions = (Object.keys(STACK_LABEL) as ProjectStackTag[])
+  .map((v) => ({ v, n: projects.filter((p) => p.stackTags?.includes(v)).length }))
+  .filter((o) => o.n > 0);
+const roleOptions = (Object.keys(ROLE_LABEL) as ProjectRoleTag[])
+  .map((v) => ({ v, n: projects.filter((p) => p.roleTags?.includes(v)).length }))
+  .filter((o) => o.n > 0 && o.n < projects.length);
+
+const chipBase =
+  "inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-pill)] border px-4 font-sans text-sm transition-colors duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]";
+
+function Chip({ label, count, active, onClick }: { label: string; count?: number; active: boolean; onClick: () => void }) {
   return (
-    <motion.button
+    <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      whileHover={{ y: -3, transition: { duration: 0.35, ease: easeSmooth } }}
-      whileFocus={{ y: -3, transition: { duration: 0.35, ease: easeSmooth } }}
-      transition={{ duration: 0.18, ease: easeSmooth }}
-      className={
-        "rounded-full border px-3.5 py-1.5 font-sans text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 " +
-        (active
-          ? "border-transparent bg-[color:var(--cta)] text-[color:var(--cta-ink)] shadow-[var(--shadow-card)]"
-          : "border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)]")
-      }
+      className={`${chipBase} ${
+        active
+          ? "border-transparent bg-[color:var(--bg-inverse)] text-[color:var(--ink-on-dark)]"
+          : "border-[color:var(--outline-strong)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)]"
+      }`}
     >
       {label}
-    </motion.button>
+      {count !== undefined && (
+        <span className={active ? "text-[color:var(--ink-on-dark-muted)]" : "text-[color:var(--ink-muted)]"}>{count}</span>
+      )}
+    </button>
   );
 }
 
-function EmptyState({ onClear }: { onClear: () => void }) {
+export function WorkIndex() {
+  const { lens } = useCaseReader();
+  const [filter, setFilter] = useState<Filter>(null);
+  const pick = workStartHere[lens];
+  const featured = projects.find((p) => p.slug === pick.slug);
+
+  const rest = useMemo(
+    () => projects.filter((p) => matches(p, filter) && (filter !== null || p.slug !== pick.slug)),
+    [filter, pick.slug],
+  );
+
+  const href = (slug: string) => `/work/${slug}?for=${lens}`;
+  const isActive = (f: Filter) => JSON.stringify(f) === JSON.stringify(filter);
+
   return (
-    <div className="flex flex-col items-center gap-4 py-16 text-center">
-      <p className="max-w-md text-[color:var(--ink-muted)]">
-        Nothing matches that combination. Try loosening a chip, or clear the
-        filters to see everything.
-      </p>
-      <button
-        type="button"
-        onClick={onClear}
-        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
-      >
-        Clear filters
-      </button>
+    <div className="flex flex-col gap-14">
+      {featured && filter === null && (
+        <section aria-labelledby="start-here-heading">
+          <h2 id="start-here-heading" className="sr-only">
+            Start here
+          </h2>
+          <ProjectCard
+            project={featured}
+            view={caseLenses[featured.slug]?.lenses[lens]}
+            statusLabel={caseLenses[featured.slug]?.statusLabel}
+            href={href(featured.slug)}
+            startHereWhy={pick.why}
+            feature
+          />
+        </section>
+      )}
+
+      <section aria-labelledby="all-cases-heading" className="flex flex-col gap-8">
+        <div className="flex flex-col gap-5 border-t border-[color:var(--hairline)] pt-10">
+          <h2 id="all-cases-heading" className="font-serif text-[length:var(--type-display-m)] leading-[1.02] text-[color:var(--ink-primary)]">
+            {filter === null ? "The other cases" : "Matching cases"}
+          </h2>
+          <div role="group" aria-label="Filter cases" className="flex flex-wrap gap-2">
+            <Chip label="All" count={projects.length} active={filter === null} onClick={() => setFilter(null)} />
+            {roleOptions.map((o) => (
+              <Chip
+                key={o.v}
+                label={ROLE_LABEL[o.v]}
+                count={o.n}
+                active={isActive({ kind: "role", value: o.v })}
+                onClick={() => setFilter(isActive({ kind: "role", value: o.v }) ? null : { kind: "role", value: o.v })}
+              />
+            ))}
+            {stackOptions.map((o) => (
+              <Chip
+                key={o.v}
+                label={STACK_LABEL[o.v]}
+                count={o.n}
+                active={isActive({ kind: "stack", value: o.v })}
+                onClick={() => setFilter(isActive({ kind: "stack", value: o.v }) ? null : { kind: "stack", value: o.v })}
+              />
+            ))}
+          </div>
+        </div>
+
+        <Stagger as="ul" className="grid grid-cols-1 gap-6 md:grid-cols-2" aria-live="polite">
+          {rest.map((project) => (
+            <StaggerItem as="li" key={project.slug} className="h-full">
+              <ProjectCard
+                project={project}
+                view={caseLenses[project.slug]?.lenses[lens]}
+                statusLabel={caseLenses[project.slug]?.statusLabel}
+                href={href(project.slug)}
+              />
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </section>
     </div>
   );
 }

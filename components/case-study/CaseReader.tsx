@@ -135,7 +135,7 @@ function segmentClass(active: boolean) {
   }`;
 }
 
-export function LensControls() {
+export function LensControls({ showDepth = true }: { showDepth?: boolean }) {
   const { lens, depth, setLens, setDepth } = useCaseReader();
 
   return (
@@ -146,7 +146,7 @@ export function LensControls() {
       <div
         role="group"
         aria-label="Reading lens"
-        className="inline-flex flex-wrap gap-1 rounded-[var(--radius-pill)] border border-[color:var(--outline-strong)] bg-[color:var(--bg-elevated)] p-0.5"
+        className="inline-flex flex-wrap gap-1 sm:flex-nowrap rounded-[var(--radius-pill)] border border-[color:var(--outline-strong)] bg-[color:var(--bg-elevated)] p-0.5"
       >
         {LENSES.map((l) => (
           <button
@@ -160,6 +160,7 @@ export function LensControls() {
           </button>
         ))}
       </div>
+      {showDepth && (
       <div
         role="group"
         aria-label="Reading depth"
@@ -182,6 +183,7 @@ export function LensControls() {
           Full story
         </button>
       </div>
+      )}
     </div>
   );
 }

@@ -240,8 +240,9 @@ export function SmmFactoryCover({ src, alt, sizes }: Props) {
         sizes={sizes}
         className="object-cover sm-cover-fallback"
       />
-      <div className="sm-cover-wrap" aria-label={alt}>
+      <div className="sm-cover-wrap" role="img" aria-label={alt}>
         <div
+          aria-hidden="true"
           className="sm-cover-scene"
           dangerouslySetInnerHTML={{ __html: SCENE_HTML }}
         />

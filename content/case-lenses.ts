@@ -76,18 +76,18 @@ export const caseLenses: Record<string, CaseLensData> = {
       problem:
         "A language model doesn’t remember. Every session starts blank, so multi-session work either burns the first half hour re-explaining, or needs a memory around the model.",
       outcome: "A site that is its own proof: every decision dated, every rule earned, all of it public.",
-      time: "22 sprints",
+      time: "23 sprints",
       timeNote: "27 active days · live at hrekov.dev",
     },
     lenses: {
       founder: {
         headline: "How work on your project would actually happen — written down, dated and walkable.",
-        stats: [s("Sprints", "22"), s("Memory files", "47"), s("Rules promoted", "11"), s("Ramp-up saved", "~94 min")],
+        stats: [s("Sprints", "23"), s("Memory files", "47"), s("Rules promoted", "11"), s("Ramp-up saved", "~94 min")],
         cta: { title: "Want this workflow on your project?", label: "Book a fractional call" },
       },
       hiring: {
         headline: "A solo build that keeps its own memory: every decision dated, every rule earned.",
-        stats: [s("DEVLOG entries", "72"), s("Promoted", "15.3%"), s("Active days", "27"), s("Case studies", "6")],
+        stats: [s("DEVLOG entries", "73"), s("Promoted", "15.1%"), s("Active days", "27"), s("Case studies", "6")],
       },
       engineer: {
         headline: "A persistence layer for a stateless model: typed memory, a one-line index, a promotion gate.",
@@ -220,6 +220,22 @@ export const caseLenses: Record<string, CaseLensData> = {
         stats: [s("Roles", "5"), s("Commits pushed", "1"), s("Target", "375px"), s("Model", "Sonnet")],
       },
     },
+  },
+};
+
+/** Which case answers each reader first on /work. */
+export const workStartHere: Record<Lens, { slug: string; why: string }> = {
+  founder: {
+    slug: "noble-saas",
+    why: "A real product with a price, a payback and live billing — the clearest picture of what a build delivers.",
+  },
+  hiring: {
+    slug: "hrekov-dev",
+    why: "How the work actually happens: every decision dated, every rule earned, in a repo you can walk.",
+  },
+  engineer: {
+    slug: "smm-factory",
+    why: "Eight agents, model stratification and a render pipeline — the most architecture per page.",
   },
 };
 
