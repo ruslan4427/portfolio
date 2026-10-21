@@ -82,7 +82,7 @@ export const caseLenses: Record<string, CaseLensData> = {
     lenses: {
       founder: {
         headline: "How work on your project would actually happen — written down, dated and walkable.",
-        stats: [s("Sprints", "22"), s("Memory files", "46"), s("Rules promoted", "11"), s("Ramp-up saved", "~1 h")],
+        stats: [s("Sprints", "22"), s("Memory files", "47"), s("Rules promoted", "11"), s("Ramp-up saved", "~94 min")],
         cta: { title: "Want this workflow on your project?", label: "Book a fractional call" },
       },
       hiring: {
