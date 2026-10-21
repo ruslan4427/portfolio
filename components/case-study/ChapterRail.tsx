@@ -74,7 +74,7 @@ export function ChapterRail({ chapters }: { chapters: CaseChapter[] }) {
               <span className="flex flex-col gap-1">
                 <span>{c.title}</span>
                 {c.id === startId && (
-                  <span className="w-fit rounded-[var(--radius-pill)] bg-[color:var(--bg-inverse)] px-2 py-0.5 text-[length:var(--type-caption)] font-normal text-[color:var(--ink-on-dark)]">
+                  <span className="w-fit rounded-[var(--radius-pill)] bg-[color:var(--accent)] px-2 py-0.5 text-[length:var(--type-caption)] font-normal text-[color:var(--accent-ink)]">
                     Start here
                   </span>
                 )}
@@ -106,7 +106,7 @@ export function ChapterRail({ chapters }: { chapters: CaseChapter[] }) {
         </p>
         <div className="mb-3.5 h-0.5 rounded-[var(--radius-pill)] bg-[color:var(--hairline)]">
           <div
-            className="h-0.5 rounded-[var(--radius-pill)] bg-[color:var(--ink-primary)] transition-[width] duration-[var(--dur-fast)]"
+            className="h-0.5 rounded-[var(--radius-pill)] bg-[color:var(--accent)] transition-[width] duration-[var(--dur-fast)]"
             style={{ width: `${progress}%` }}
           />
         </div>

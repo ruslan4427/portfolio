@@ -24,7 +24,7 @@ export function LensStats({ data }: { data: CaseLensData }) {
       </p>
       <dl className="grid grid-cols-2 gap-x-5 gap-y-4">
         {data.lenses[lens].stats.map((s) => (
-          <div key={s.label} className="border-t border-[color:var(--ink-primary)] pt-2.5">
+          <div key={s.label} className="border-t-2 border-[color:var(--accent)] pt-2.5">
             <dt className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
               {s.label}
             </dt>

@@ -11,9 +11,8 @@ import {
   DiagramCanvas,
   DiagramLegend,
   DiagramSteps,
-  ExpandButton,
   SchematicIconMark,
-  WideHint,
+  ZoomTarget,
   type DiagramEdge,
   type DiagramNode,
   type SchematicIcon,
@@ -532,7 +531,7 @@ const statusMark: Record<NonNullable<FlowNode["status"]>, string> = {
 // Before / after follows the monochrome state recipe (specs/19 §4.4).
 const rowFrame: Record<NonNullable<FlowRow["tone"]>, string> = {
   before: "border-dashed border-[color:var(--outline-strong)] bg-[color:var(--bg-page)]",
-  after: "border-[color:var(--ink-primary)] bg-[color:var(--bg-elevated)]",
+  after: "border-[color:var(--accent)] bg-[color:var(--bg-elevated)]",
   neutral: "border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]",
 };
 
@@ -602,7 +601,7 @@ function FlowNodeCard({ node, step }: { node: FlowNode; step: number }) {
   );
 }
 
-function FlowRowBody({ row, reduced }: { row: FlowRow; reduced: boolean }) {
+function FlowRowBody({ row, reduced, onOpen }: { row: FlowRow; reduced: boolean; onOpen: () => void }) {
   if (row.diagram) {
     const d = row.diagram;
     return (
@@ -610,39 +609,29 @@ function FlowRowBody({ row, reduced }: { row: FlowRow; reduced: boolean }) {
         <div className="mb-3">
           <DiagramLegend nodes={d.nodes} edges={d.edges} />
         </div>
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label={`${row.label} (scrolls sideways on small screens)`}
-          className="overflow-x-auto rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] p-2 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-        >
-          <DiagramCanvas
-            nodes={d.nodes}
-            edges={d.edges}
-            width={d.width ?? 900}
-            height={d.height ?? 260}
-            ariaLabel={row.label}
-          />
-        </div>
-        <WideHint width={d.width ?? 900} />
+        <ZoomTarget label={row.label} onOpen={onOpen} className="bg-[color:var(--bg-page)] p-2">
+          <DiagramCanvas nodes={d.nodes} edges={d.edges} ariaLabel={row.label} />
+        </ZoomTarget>
         <DiagramSteps nodes={d.nodes} edges={d.edges} />
       </div>
     );
   }
   const nodes = row.nodes ?? [];
   return (
-    <ol className="flex flex-col items-center" aria-label={`${row.label} — ${nodes.length} steps`}>
-      {nodes.map((node, i) => (
-        <Fragment key={node.label + i}>
-          <FlowNodeCard node={node} step={i + 1} />
-          {i < nodes.length - 1 && (
-            <li aria-hidden className="list-none">
-              <FlowArrow reduced={reduced} />
-            </li>
-          )}
-        </Fragment>
-      ))}
-    </ol>
+    <ZoomTarget label={row.label} onOpen={onOpen}>
+      <ol className="flex flex-col items-center" aria-label={`${row.label} — ${nodes.length} steps`}>
+        {nodes.map((node, i) => (
+          <Fragment key={node.label + i}>
+            <FlowNodeCard node={node} step={i + 1} />
+            {i < nodes.length - 1 && (
+              <li aria-hidden className="list-none">
+                <FlowArrow reduced={reduced} />
+              </li>
+            )}
+          </Fragment>
+        ))}
+      </ol>
+    </ZoomTarget>
   );
 }
 
@@ -657,7 +646,6 @@ export function FlowSchema({
 }) {
   const [open, setOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
-  const name = title ?? "Flow";
 
   const rowsBlock = (
     <div className="space-y-5">
@@ -676,7 +664,7 @@ export function FlowSchema({
                   <span
                     className={`rounded-[var(--radius-pill)] px-2 py-0.5 ${
                       tone === "after"
-                        ? "bg-[color:var(--bg-inverse)] text-[color:var(--ink-on-dark)]"
+                        ? "bg-[color:var(--accent)] text-[color:var(--accent-ink)]"
                         : "border border-dashed border-[color:var(--outline-strong)] text-[color:var(--ink-primary)]"
                     }`}
                   >
@@ -691,7 +679,7 @@ export function FlowSchema({
                 </p>
               )}
             </div>
-            <FlowRowBody row={row} reduced={reduced} />
+            <FlowRowBody row={row} reduced={reduced} onOpen={() => setOpen(true)} />
           </section>
         );
       })}
@@ -706,14 +694,7 @@ export function FlowSchema({
       viewport={{ once: false, margin: "0px 0px -80px 0px" }}
       transition={{ duration: 0.7, ease: EASE }}
     >
-      <div className="mb-4 flex items-start justify-between gap-4">
-        {title ? (
-          <p className="pt-2.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">{title}</p>
-        ) : (
-          <span />
-        )}
-        <ExpandButton label={`Expand flow: ${name}`} onClick={() => setOpen(true)} />
-      </div>
+      {title && <p className="mb-4 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">{title}</p>}
       {rowsBlock}
       {caption && (
         <figcaption className="mt-4 font-sans text-[length:var(--type-caption)] leading-[1.6] text-[color:var(--ink-muted)]">
@@ -2240,7 +2221,7 @@ function WireflowCanvas({
       role="img"
       aria-label={ariaLabel ?? "Wireflow map"}
       className="block h-auto w-full"
-      style={{ minWidth: minWidth ?? Math.min(width, 480) }}
+      style={minWidth ? { minWidth } : undefined}
     >
       <defs>
         {(Object.keys(markerIds) as WireflowEdgeKind[]).map((k) => (

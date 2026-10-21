@@ -112,7 +112,9 @@ Single source of truth: `app/globals.css` `:root { ... }` block and the
 - Page: `#F5F4EF` (warm paper) · Elevated: `#FFFFFF`
 - Ink: `#111` primary · `#2A2A28` body · `#6B6B66` muted · `#A8A8A2` faint (decorative only)
 - CTA: `#0A0A0A` on `#FAFAF7` ink
-- Status: `#22C55E` (available dot — the only chromatic accent, functional not decorative)
+- Status: `#22C55E` (available dot — functional, never decorative)
+- Accent: `#A94427` brick (`--accent`, `--accent-ink`, `--accent-soft`) — the one
+  emphasis hue: diagram key paths, reading progress, key numbers. Small doses only.
 - Hairline: `rgba(17,17,17,0.08)` · Outline: `rgba(17,17,17,0.14)`
 - Serif (display, upright): Playfair Display via `--font-serif` (backed by `--font-display`)
 - Sans (body, nav, chrome): Inter via `--font-sans`
@@ -248,8 +250,9 @@ content/
 
 ## Contribution rules
 
-1. Never invent new color values. Extend `globals.css` `:root`. **Monochrome
-   is the rule**; green `#22C55E` is functional (availability), not decorative.
+1. Never invent new color values. Extend `globals.css` `:root`. **Ink-led
+   palette**: green `#22C55E` is functional (availability); brick `--accent`
+   is the single emphasis hue, used sparingly (see STABLE_LOGIC).
 2. Two font families only: `--font-serif` (Playfair Display, upright for
    display) and `--font-sans` (Inter, everything else). Do not add a third,
    and don't reintroduce italic display without a fresh design spec.

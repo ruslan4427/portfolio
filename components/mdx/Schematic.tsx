@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { usePrefersReducedMotion } from "@/lib/motion";
@@ -19,11 +19,18 @@ import { usePrefersReducedMotion } from "@/lib/motion";
  *   non-decision node with `outcome` and no outgoing edge → Outcome, stadium
  *              (ISO 5807 terminator) with ✓ / ✕
  *
+ * Layout is automatic (Sprint 22): nodes are laid out for the measured
+ * width of the text column — layered top-to-bottom for branching graphs,
+ * a left-to-right "snake" for simple chains — with fixed gaps, so nothing
+ * overlaps and node text stays at 14px. MDX x/y are ignored.
+ *
  * Connectors are orthogonal with the arrowhead at the target only.
  * Solid = main flow, dashed = async / optional / return path, faint =
- * secondary. Monochrome: state is carried by shape, glyph and line style,
- * never hue. Every diagram gets a legend for the symbols it uses and a
- * text alternative ("Read as steps") per WCAG 1.1.1.
+ * secondary. `color: "success"` marks the key path and is drawn in the
+ * brick accent; the approved outcome gets the accent frame. Meaning is
+ * always also carried by shape, glyph, label or line style. Every diagram
+ * gets a legend for what it uses and a text alternative ("Read as steps")
+ * per WCAG 1.1.1. Click opens the full-screen view.
  *
  * Animation keeps the case-study contract (content/case-studies/CLAUDE.md
  * §7): reveal replays on every scroll; reduced motion renders static.
@@ -113,8 +120,9 @@ export type DiagramNode = {
   id: string;
   shape: DiagramShape;
   label: string;
-  x: number;
-  y: number;
+  /** Kept for MDX compatibility; layout is automatic. */
+  x?: number;
+  y?: number;
   color?: DiagramColor;
   outcome?: DiagramOutcome;
   icon?: SchematicIcon;
@@ -156,16 +164,26 @@ const SHAPE_KIND: Record<DiagramShape, Kind> = {
   action: "decision",
 };
 
-const DIMS: Record<Kind, { w: number; h: number }> = {
-  actor: { w: 132, h: 64 },
-  data: { w: 176, h: 76 },
-  store: { w: 176, h: 84 },
-  process: { w: 176, h: 76 },
-  decision: { w: 180, h: 112 },
-  terminal: { w: 176, h: 64 },
+const HEIGHT: Record<Kind, number> = {
+  actor: 60,
+  data: 72,
+  store: 80,
+  process: 72,
+  decision: 104,
+  terminal: 60,
 };
 
-const SKEW = 16;
+const SKEW = 14;
+const MIN_GAP_X = 40;
+const MAX_GAP_X = 150;
+const GAP_Y = 56;
+const PAD = 12;
+const MIN_NODE_W = 150;
+const MAX_NODE_W = 220;
+const LABEL_CHAR_W = 6.8;
+const LANE = 8;
+
+const labelWidth = (label?: string) => (label ? label.length * LABEL_CHAR_W + 18 : 0);
 
 function kindOf(node: DiagramNode, hasOutgoing: boolean): Kind {
   // A decision keeps its diamond even when it ends the flow; the ✓/✕ glyph
@@ -175,16 +193,212 @@ function kindOf(node: DiagramNode, hasOutgoing: boolean): Kind {
   return SHAPE_KIND[node.shape];
 }
 
-type Placed = DiagramNode & { kind: Kind; w: number; h: number };
+/**
+ * Node height grows with its wrapped text, so a narrow column never clips a
+ * label. Widths are rough per-character estimates for Inter at 14 / 12.5px.
+ */
+function nodeHeight(node: DiagramNode, kind: Kind, w: number): number {
+  const inner =
+    kind === "decision" ? w * 0.6 : kind === "data" ? w - SKEW * 2 - 8 : w - 20;
+  const lines = (text: string, charW: number) => Math.max(1, Math.ceil((text.length * charW) / Math.max(40, inner)));
+  const labelLen = node.label.length + (node.outcome ? 2 : 0);
+  const content =
+    (node.icon && kind !== "store" && kind !== "decision" ? 20 : 0) +
+    lines("x".repeat(labelLen), 7.8) * 17 +
+    (node.sub ? lines(node.sub, 6.6) * 15 : 0) +
+    (kind === "store" ? 14 : 0);
+  const needed = kind === "decision" ? content / 0.62 + 8 : content + 14;
+  return Math.max(HEIGHT[kind], Math.ceil(needed));
+}
 
-function place(nodes: DiagramNode[], edges: DiagramEdge[]): Record<string, Placed> {
-  const outgoing = new Set(edges.map((e) => e.from));
-  const map: Record<string, Placed> = {};
-  for (const n of nodes) {
-    const kind = kindOf(n, outgoing.has(n.id));
-    map[n.id] = { ...n, kind, ...DIMS[kind] };
+function isKey(node: { color?: DiagramColor; outcome?: DiagramOutcome }) {
+  return node.color === "success" || node.outcome === "approved";
+}
+
+/* ------------------------------- Layout --------------------------------- */
+
+type Placed = DiagramNode & { kind: Kind; x: number; y: number; w: number; h: number; row: number };
+type RouteKind = "direct" | "back" | "skip";
+type Layout = {
+  nodes: Record<string, Placed>;
+  order: string[];
+  routes: RouteKind[];
+  width: number;
+  height: number;
+  /** Inner edge of each side corridor (where gutter routes run). */
+  left: number;
+  right: number;
+  leftGutter: number;
+  rightGutter: number;
+};
+
+/** Edge indices that point back up the flow (found by DFS in author order). */
+function findBackEdges(nodes: DiagramNode[], edges: DiagramEdge[]): Set<number> {
+  const back = new Set<number>();
+  const state = new Map<string, 0 | 1 | 2>();
+  const visit = (id: string) => {
+    state.set(id, 1);
+    edges.forEach((e, i) => {
+      if (e.from !== id) return;
+      const st = state.get(e.to) ?? 0;
+      if (st === 1) back.add(i);
+      else if (st === 0) visit(e.to);
+    });
+    state.set(id, 2);
+  };
+  const incoming = new Set(edges.map((e) => e.to));
+  for (const n of nodes) if (!incoming.has(n.id) && !state.get(n.id)) visit(n.id);
+  for (const n of nodes) if (!state.get(n.id)) visit(n.id);
+  return back;
+}
+
+function buildRows(
+  nodes: DiagramNode[],
+  fwd: DiagramEdge[],
+  cols: number,
+): { rows: string[][]; snake: boolean } {
+  const inDeg = new Map<string, number>();
+  const outDeg = new Map<string, number>();
+  for (const e of fwd) {
+    inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1);
+    outDeg.set(e.from, (outDeg.get(e.from) ?? 0) + 1);
   }
-  return map;
+  const rows: string[][] = [];
+  const isChain = nodes.every((n) => (inDeg.get(n.id) ?? 0) <= 1 && (outDeg.get(n.id) ?? 0) <= 1);
+  if (isChain) {
+    // Follow the chain from its head so reading order is flow order.
+    const next = new Map(fwd.map((e) => [e.from, e.to]));
+    const seq: string[] = [];
+    for (const h of nodes.filter((n) => !inDeg.get(n.id)).map((n) => n.id)) {
+      let cur: string | undefined = h;
+      while (cur && !seq.includes(cur)) {
+        seq.push(cur);
+        cur = next.get(cur);
+      }
+    }
+    for (const n of nodes) if (!seq.includes(n.id)) seq.push(n.id);
+    for (let i = 0; i < seq.length; i += cols) rows.push(seq.slice(i, i + cols));
+    return { rows, snake: true };
+  }
+  // Longest-path ranks over forward edges; ranks wider than `cols` wrap.
+  const order = nodes.map((n) => n.id);
+  const rank = new Map<string, number>(order.map((id) => [id, 0]));
+  for (let guard = 0, changed = true; changed && guard < nodes.length + 2; guard++) {
+    changed = false;
+    for (const e of fwd) {
+      const r = (rank.get(e.from) ?? 0) + 1;
+      if (r > (rank.get(e.to) ?? 0)) {
+        rank.set(e.to, r);
+        changed = true;
+      }
+    }
+  }
+  const maxRank = Math.max(0, ...rank.values());
+  const slot = new Map<string, number>();
+  for (let r = 0; r <= maxRank; r++) {
+    const ids = order
+      .filter((id) => rank.get(id) === r)
+      .map((id, i) => {
+        const ps = fwd.filter((e) => e.to === id).map((e) => slot.get(e.from)).filter((x): x is number => x !== undefined);
+        return { id, i, bc: ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : i };
+      })
+      .sort((a, b) => a.bc - b.bc || a.i - b.i)
+      .map((o) => o.id);
+    for (let i = 0; i < ids.length; i += cols) {
+      const row = ids.slice(i, i + cols);
+      rows.push(row);
+      row.forEach((id, j) => slot.set(id, j - (row.length - 1) / 2));
+    }
+  }
+  return { rows, snake: false };
+}
+
+export function layoutDiagram(nodes: DiagramNode[], edges: DiagramEdge[], width: number): Layout {
+  const back = findBackEdges(nodes, edges);
+  const fwd = edges.filter((_, i) => !back.has(i));
+  const outgoing = new Set(edges.map((e) => e.from));
+  const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+
+  // Gap between columns must hold the widest edge label that may sit in it.
+  const gapX = Math.min(MAX_GAP_X, Math.max(MIN_GAP_X, ...edges.map((e) => labelWidth(e.label) + 16)));
+
+  // Pass 1: rows at a provisional column count, to learn which edges need
+  // a side corridor; pass 2: final geometry with the corridors reserved.
+  const colsFor = (usable: number) =>
+    Math.max(1, Math.min(4, Math.floor((usable + gapX) / (MIN_NODE_W + 24 + gapX))));
+  let leftGutter = 0;
+  const rightGutter = back.size ? 28 + Math.max(0, ...[...back].map((i) => labelWidth(edges[i].label))) : 0;
+  let cols = colsFor(width - PAD * 2 - rightGutter);
+  let built = buildRows(nodes, fwd, cols);
+  const rowIndex = () => {
+    const m = new Map<string, number>();
+    built.rows.forEach((row, r) => row.forEach((id) => m.set(id, r)));
+    return m;
+  };
+  let rowOf = rowIndex();
+  const skipLabels = () =>
+    edges
+      .map((e, i) => ({ e, i }))
+      .filter(({ e, i }) => !back.has(i) && (rowOf.get(e.to) ?? 0) - (rowOf.get(e.from) ?? 0) > 1);
+  if (skipLabels().length) {
+    leftGutter = 28 + Math.max(0, ...skipLabels().map(({ e }) => labelWidth(e.label)));
+    const next = colsFor(width - PAD * 2 - leftGutter - rightGutter);
+    if (next !== cols) {
+      cols = next;
+      built = buildRows(nodes, fwd, cols);
+      rowOf = rowIndex();
+      const skips = skipLabels();
+      leftGutter = skips.length ? 28 + Math.max(0, ...skips.map(({ e }) => labelWidth(e.label))) : 0;
+    }
+  }
+
+  const usable = Math.max(MIN_NODE_W, width - PAD * 2 - leftGutter - rightGutter);
+  const nodeW = Math.min(MAX_NODE_W, Math.max(MIN_NODE_W - 20, (usable - (cols - 1) * gapX) / cols));
+  const gridW = cols * nodeW + (cols - 1) * gapX;
+  const left = PAD + leftGutter + Math.max(0, (usable - gridW) / 2);
+  const placed: Record<string, Placed> = {};
+  let y = PAD;
+  built.rows.forEach((row, r) => {
+    const kinds = row.map((id) => kindOf(byId[id], outgoing.has(id)));
+    const heights = row.map((id, j) => nodeHeight(byId[id], kinds[j], nodeW));
+    const rowH = Math.max(...heights);
+    // Snake rows keep their grid columns; layered rows are centred.
+    const offset = built.snake ? 0 : ((cols - row.length) * (nodeW + gapX)) / 2;
+    row.forEach((id, j) => {
+      const col = built.snake && r % 2 === 1 ? cols - 1 - j : j;
+      const kind = kinds[j];
+      placed[id] = {
+        ...byId[id],
+        kind,
+        row: r,
+        w: nodeW,
+        h: heights[j],
+        x: left + offset + col * (nodeW + gapX) + nodeW / 2,
+        y: y + rowH / 2,
+      };
+    });
+    y += rowH + GAP_Y;
+  });
+
+  const routes: RouteKind[] = edges.map((e, i) => {
+    if (back.has(i)) return "back";
+    const a = placed[e.from];
+    const b = placed[e.to];
+    if (a && b && b.row - a.row > 1) return "skip";
+    return "direct";
+  });
+
+  return {
+    nodes: placed,
+    order: built.rows.flat(),
+    routes,
+    width,
+    height: y - GAP_Y + PAD,
+    left,
+    right: left + gridW,
+    leftGutter,
+    rightGutter,
+  };
 }
 
 /* ------------------------------- Shapes --------------------------------- */
@@ -192,9 +406,10 @@ function place(nodes: DiagramNode[], edges: DiagramEdge[]): Record<string, Place
 function NodeShape({ node }: { node: Placed }) {
   const { x, y, w, h, kind } = node;
   const faint = node.color === "faint";
-  const stroke = faint ? "var(--outline-strong)" : "var(--ink-primary)";
-  const fill = faint ? "var(--bg-page)" : "var(--bg-elevated)";
-  const strokeWidth = kind === "terminal" ? 2 : 1.5;
+  const key = isKey(node);
+  const stroke = key ? "var(--accent)" : faint ? "var(--outline-strong)" : "var(--ink-primary)";
+  const fill = key ? "var(--accent-soft)" : faint ? "var(--bg-page)" : "var(--bg-elevated)";
+  const strokeWidth = key || kind === "terminal" ? 2 : 1.5;
   const dash = faint ? "4 3" : undefined;
   const common = { stroke, strokeWidth, strokeDasharray: dash, fill };
   const l = x - w / 2;
@@ -211,13 +426,10 @@ function NodeShape({ node }: { node: Placed }) {
       return <polygon points={`${x},${t} ${l + w},${y} ${x},${t + h} ${l},${y}`} {...common} />;
     case "data":
       return (
-        <polygon
-          points={`${l + SKEW},${t} ${l + w},${t} ${l + w - SKEW},${t + h} ${l},${t + h}`}
-          {...common}
-        />
+        <polygon points={`${l + SKEW},${t} ${l + w},${t} ${l + w - SKEW},${t + h} ${l},${t + h}`} {...common} />
       );
     case "store": {
-      const ry = 9;
+      const ry = 8;
       return (
         <g>
           <path
@@ -233,19 +445,15 @@ function NodeShape({ node }: { node: Placed }) {
 
 function NodeLabel({ node }: { node: Placed }) {
   const { x, y, w, h, kind } = node;
-  const inset = kind === "decision" ? { x: w * 0.22, y: h * 0.2 } : kind === "data" ? { x: SKEW + 6, y: 8 } : { x: 10, y: 8 };
+  const inset =
+    kind === "decision" ? { x: w * 0.2, y: h * 0.16 } : kind === "data" ? { x: SKEW + 4, y: 6 } : { x: 10, y: 6 };
   const top = kind === "store" ? 10 : 0;
   const innerW = w - inset.x * 2;
   const innerH = h - inset.y * 2 - top;
   const onDark = kind === "actor";
+  const showIcon = node.icon && kind !== "store" && kind !== "decision";
   return (
-    <foreignObject
-      x={x - innerW / 2}
-      y={y - innerH / 2 + top / 2}
-      width={innerW}
-      height={innerH}
-      style={{ pointerEvents: "none" }}
-    >
+    <foreignObject x={x - innerW / 2} y={y - innerH / 2 + top / 2} width={innerW} height={innerH} style={{ pointerEvents: "none" }}>
       <div
         style={{
           display: "flex",
@@ -257,18 +465,22 @@ function NodeLabel({ node }: { node: Placed }) {
           gap: 2,
           textAlign: "center",
           fontFamily: "var(--font-sans)",
-          lineHeight: 1.15,
+          lineHeight: 1.2,
           color: onDark ? "var(--ink-on-dark)" : node.color === "faint" ? "var(--ink-muted)" : "var(--ink-primary)",
         }}
       >
-        {node.icon && kind !== "store" && (
+        {showIcon && (
           <SchematicIconMark
-            name={node.icon}
-            className={`h-[18px] w-[18px] shrink-0 ${onDark ? "text-[color:var(--ink-on-dark)]" : "text-[color:var(--ink-primary)]"}`}
+            name={node.icon!}
+            className={`h-4 w-4 shrink-0 ${onDark ? "text-[color:var(--ink-on-dark)]" : "text-[color:var(--ink-primary)]"}`}
           />
         )}
         <span style={{ fontSize: 14, fontWeight: 600 }}>
-          {node.outcome ? `${node.outcome === "approved" ? "✓" : "✕"} ` : ""}
+          {node.outcome && (
+            <span style={{ color: node.outcome === "approved" ? "var(--accent)" : "inherit" }}>
+              {node.outcome === "approved" ? "✓ " : "✕ "}
+            </span>
+          )}
           {node.label}
         </span>
         {node.sub && (
@@ -285,33 +497,46 @@ function NodeLabel({ node }: { node: Placed }) {
 
 type Pt = { x: number; y: number };
 
-function port(n: Placed, side: "l" | "r" | "t" | "b"): Pt {
+function sideX(n: Placed, dir: 1 | -1) {
   const hw = n.kind === "data" ? n.w / 2 - SKEW / 2 : n.w / 2;
-  if (side === "l") return { x: n.x - hw, y: n.y };
-  if (side === "r") return { x: n.x + hw, y: n.y };
-  if (side === "t") return { x: n.x, y: n.y - n.h / 2 };
-  return { x: n.x, y: n.y + n.h / 2 };
+  return n.x + dir * hw;
 }
 
-/** Orthogonal route: exit along the dominant axis, one elbow pair. */
-function route(a: Placed, b: Placed): { pts: Pt[]; mid: Pt } {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    const s = port(a, dx >= 0 ? "r" : "l");
-    const e = port(b, dx >= 0 ? "l" : "r");
-    if (Math.abs(s.y - e.y) < 2) return { pts: [s, e], mid: { x: (s.x + e.x) / 2, y: s.y } };
-    const mx = (s.x + e.x) / 2;
-    return { pts: [s, { x: mx, y: s.y }, { x: mx, y: e.y }, e], mid: { x: mx, y: (s.y + e.y) / 2 } };
+/** Orthogonal route between two placed nodes. */
+function route(a: Placed, b: Placed, kind: RouteKind, lane: number, layout: Layout): { pts: Pt[]; mid: Pt } {
+  if (kind === "back") {
+    // Return path: out the right side, up the right corridor, back in.
+    const gx = layout.right + 12 + lane * LANE;
+    const s = { x: sideX(a, 1), y: a.y };
+    const e = { x: sideX(b, 1), y: b.y };
+    return {
+      pts: [s, { x: gx, y: s.y }, { x: gx, y: e.y }, e],
+      mid: { x: layout.right + layout.rightGutter / 2 + 6, y: (s.y + e.y) / 2 },
+    };
   }
-  const s = port(a, dy >= 0 ? "b" : "t");
-  const e = port(b, dy >= 0 ? "t" : "b");
-  if (Math.abs(s.x - e.x) < 2) return { pts: [s, e], mid: { x: s.x, y: (s.y + e.y) / 2 } };
-  const my = (s.y + e.y) / 2;
+  if (kind === "skip") {
+    // Edge that jumps a row: down the left corridor so it crosses no node.
+    const gx = layout.left - 12 - lane * LANE;
+    const s = { x: sideX(a, -1), y: a.y };
+    const e = { x: sideX(b, -1), y: b.y };
+    return {
+      pts: [s, { x: gx, y: s.y }, { x: gx, y: e.y }, e],
+      mid: { x: layout.left - layout.leftGutter / 2 - 6, y: (s.y + e.y) / 2 },
+    };
+  }
+  if (Math.abs(a.y - b.y) < 4) {
+    const dir = b.x >= a.x ? 1 : -1;
+    const s = { x: sideX(a, dir as 1 | -1), y: a.y };
+    const e = { x: sideX(b, (-dir) as 1 | -1), y: b.y };
+    return { pts: [s, e], mid: { x: (s.x + e.x) / 2, y: s.y } };
+  }
+  const s = { x: a.x, y: a.y + a.h / 2 };
+  const e = { x: b.x, y: b.y - b.h / 2 };
+  const my = e.y - GAP_Y / 2;
+  if (Math.abs(s.x - e.x) < 2) return { pts: [s, e], mid: { x: s.x, y: my } };
   return { pts: [s, { x: s.x, y: my }, { x: e.x, y: my }, e], mid: { x: (s.x + e.x) / 2, y: my } };
 }
 
-/** Polyline with rounded inner corners. */
 function roundedPath(pts: Pt[], r = 10): string {
   if (pts.length < 3) return `M${pts[0].x},${pts[0].y} L${pts[1].x},${pts[1].y}`;
   let d = `M${pts[0].x},${pts[0].y}`;
@@ -331,32 +556,35 @@ function roundedPath(pts: Pt[], r = 10): string {
 
 function Connector({
   edge,
-  nodes,
-  markerId,
-  markerFaintId,
+  index,
+  layout,
+  lane,
+  markers,
   reduced,
 }: {
   edge: DiagramEdge;
-  nodes: Record<string, Placed>;
-  markerId: string;
-  markerFaintId: string;
+  index: number;
+  layout: Layout;
+  lane: number;
+  markers: Record<"ink" | "faint" | "accent", string>;
   reduced: boolean;
 }) {
-  const a = nodes[edge.from];
-  const b = nodes[edge.to];
+  const a = layout.nodes[edge.from];
+  const b = layout.nodes[edge.to];
   if (!a || !b) return null;
-  const faint = edge.color === "faint";
-  const { pts, mid } = route(a, b);
-  const labelW = edge.label ? edge.label.length * 7 + 18 : 0;
+  const tone = edge.color === "success" ? "accent" : edge.color === "faint" ? "faint" : "ink";
+  const stroke = tone === "accent" ? "var(--accent)" : tone === "faint" ? "var(--outline-strong)" : "var(--ink-primary)";
+  const { pts, mid } = route(a, b, layout.routes[index], lane, layout);
+  const labelW = labelWidth(edge.label);
   return (
     <g>
       <motion.path
         d={roundedPath(pts)}
         fill="none"
-        stroke={faint ? "var(--outline-strong)" : "var(--ink-primary)"}
-        strokeWidth={faint ? 1.2 : 1.5}
+        stroke={stroke}
+        strokeWidth={tone === "accent" ? 2 : tone === "faint" ? 1.2 : 1.5}
         strokeDasharray={edge.style === "dashed" ? "6 5" : undefined}
-        markerEnd={`url(#${faint ? markerFaintId : markerId})`}
+        markerEnd={`url(#${markers[tone]})`}
         initial={reduced ? false : { pathLength: 0 }}
         whileInView={{ pathLength: 1 }}
         viewport={{ once: false, margin: "-40px" }}
@@ -364,15 +592,7 @@ function Connector({
       />
       {edge.label && (
         <g>
-          <rect
-            x={mid.x - labelW / 2}
-            y={mid.y - 12}
-            width={labelW}
-            height={24}
-            rx={12}
-            fill="var(--bg-page)"
-            stroke="var(--hairline)"
-          />
+          <rect x={mid.x - labelW / 2} y={mid.y - 11} width={labelW} height={22} rx={11} fill="var(--bg-page)" stroke="var(--hairline)" />
           <text
             x={mid.x}
             y={mid.y + 1}
@@ -380,7 +600,7 @@ function Connector({
             dominantBaseline="middle"
             fontFamily="var(--font-sans)"
             fontSize={12.5}
-            fill="var(--ink-body)"
+            fill={tone === "accent" ? "var(--accent)" : "var(--ink-body)"}
           >
             {edge.label}
           </text>
@@ -392,85 +612,90 @@ function Connector({
 
 /* ------------------------------- Canvas --------------------------------- */
 
+function useMeasuredWidth(fallback: number) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(fallback);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = Math.round(entries[0].contentRect.width);
+      if (w > 0) setWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width };
+}
+
 export function DiagramCanvas({
   nodes,
   edges,
-  width,
-  height,
   ariaLabel,
-  describedBy,
-  minScale = 0.8,
+  fallbackWidth = 680,
 }: {
   nodes: DiagramNode[];
   edges: DiagramEdge[];
-  width: number;
-  height: number;
   ariaLabel?: string;
-  describedBy?: string;
-  /** Smallest render scale before the canvas scrolls instead of shrinking. */
-  minScale?: number;
+  fallbackWidth?: number;
 }) {
   const uid = useId().replace(/:/g, "");
   const reduced = usePrefersReducedMotion();
-  const placed = place(nodes, edges);
-  const markerId = `arrow-${uid}`;
-  const markerFaintId = `arrow-faint-${uid}`;
+  const { ref, width } = useMeasuredWidth(fallbackWidth);
+  const layout = layoutDiagram(nodes, edges, width);
+  const markers = { ink: `arr-${uid}`, faint: `arr-f-${uid}`, accent: `arr-a-${uid}` };
+  const markerFill = { ink: "var(--ink-primary)", faint: "var(--outline-strong)", accent: "var(--accent)" };
+  const lanes = { back: 0, skip: 0 };
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label={ariaLabel ?? "Diagram"}
-      aria-describedby={describedBy}
-      className="block h-auto w-full"
-      style={{ minWidth: minScale > 0 ? Math.round(width * minScale) : undefined }}
-    >
-      <defs>
-        {[
-          [markerId, "var(--ink-primary)"],
-          [markerFaintId, "var(--outline-strong)"],
-        ].map(([id, fill]) => (
-          <marker
-            key={id}
-            id={id}
-            viewBox="0 0 10 10"
-            refX={9}
-            refY={5}
-            markerWidth={7}
-            markerHeight={7}
-            orient="auto"
-          >
-            <path d="M0,0 L10,5 L0,10 z" fill={fill} />
-          </marker>
-        ))}
-      </defs>
-      <g>
-        {edges.map((e, i) => (
-          <Connector
-            key={`${e.from}-${e.to}-${i}`}
-            edge={e}
-            nodes={placed}
-            markerId={markerId}
-            markerFaintId={markerFaintId}
-            reduced={reduced}
-          />
-        ))}
-      </g>
-      <g>
-        {Object.values(placed).map((n, i) => (
-          <motion.g
-            key={n.id}
-            initial={reduced ? false : { opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, margin: "-40px" }}
-            transition={{ duration: 0.3, delay: i * 0.04, ease: EASE }}
-          >
-            <NodeShape node={n} />
-            <NodeLabel node={n} />
-          </motion.g>
-        ))}
-      </g>
-    </svg>
+    <div ref={ref} className="w-full">
+      <svg
+        width={layout.width}
+        height={layout.height}
+        viewBox={`0 0 ${layout.width} ${layout.height}`}
+        role="img"
+        aria-label={ariaLabel ?? "Diagram"}
+        className="block h-auto max-w-full"
+      >
+        <defs>
+          {(Object.keys(markers) as (keyof typeof markers)[]).map((k) => (
+            <marker key={k} id={markers[k]} viewBox="0 0 10 10" refX={9} refY={5} markerWidth={7} markerHeight={7} orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill={markerFill[k]} />
+            </marker>
+          ))}
+        </defs>
+        <g>
+          {edges.map((e, i) => (
+            <Connector
+              key={`${e.from}-${e.to}-${i}`}
+              edge={e}
+              index={i}
+              layout={layout}
+              lane={layout.routes[i] === "direct" ? 0 : lanes[layout.routes[i] as "back" | "skip"]++}
+              markers={markers}
+              reduced={reduced}
+            />
+          ))}
+        </g>
+        <g>
+          {layout.order.map((id, i) => {
+            const n = layout.nodes[id];
+            return (
+              <motion.g
+                key={id}
+                initial={reduced ? false : { opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: false, margin: "-40px" }}
+                transition={{ duration: 0.3, delay: i * 0.04, ease: EASE }}
+              >
+                <NodeShape node={n} />
+                <NodeLabel node={n} />
+              </motion.g>
+            );
+          })}
+        </g>
+      </svg>
+    </div>
   );
 }
 
@@ -499,6 +724,15 @@ function LegendGlyph({ kind }: { kind: Kind }) {
   }
 }
 
+function LineGlyph({ color, dashed }: { color: string; dashed?: boolean }) {
+  return (
+    <svg viewBox="0 0 28 22" aria-hidden="true" className="h-[18px] w-6 shrink-0">
+      <path d="M2,11 H22" stroke={color} strokeWidth={dashed ? 1.5 : 2} strokeDasharray={dashed ? "4 3" : undefined} />
+      <path d="M20,7 L26,11 L20,15 z" fill={color} />
+    </svg>
+  );
+}
+
 export function DiagramLegend({
   nodes,
   edges,
@@ -508,8 +742,8 @@ export function DiagramLegend({
   edges: DiagramEdge[];
   legend?: DiagramLegendItem[];
 }) {
-  const placed = place(nodes, edges);
-  const used = new Set(Object.values(placed).map((n) => n.kind));
+  const outgoing = new Set(edges.map((e) => e.from));
+  const used = new Set(nodes.map((n) => kindOf(n, outgoing.has(n.id))));
   const labels = new Map<Kind, string>();
   for (const item of legend ?? []) {
     const kind = SHAPE_KIND[item.shape];
@@ -517,7 +751,8 @@ export function DiagramLegend({
   }
   const kinds = KIND_ORDER.filter((k) => used.has(k));
   const hasDashed = edges.some((e) => e.style === "dashed");
-  if (kinds.length + (hasDashed ? 1 : 0) < 2) return null;
+  const hasKey = edges.some((e) => e.color === "success") || nodes.some(isKey);
+  if (kinds.length < 2 && !hasDashed && !hasKey) return null;
 
   return (
     <ul className="flex flex-wrap items-center gap-x-5 gap-y-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-body)]">
@@ -535,18 +770,18 @@ export function DiagramLegend({
         </li>
       ))}
       <li className="flex items-center gap-2">
-        <svg viewBox="0 0 28 22" aria-hidden="true" className="h-[18px] w-6 shrink-0">
-          <path d="M2,11 H22" stroke="var(--ink-primary)" strokeWidth={1.5} />
-          <path d="M20,7 L26,11 L20,15 z" fill="var(--ink-primary)" />
-        </svg>
-        <span>Main flow</span>
+        <LineGlyph color="var(--ink-primary)" />
+        <span>Flow</span>
       </li>
+      {hasKey && (
+        <li className="flex items-center gap-2">
+          <LineGlyph color="var(--accent)" />
+          <span>Key path / outcome</span>
+        </li>
+      )}
       {hasDashed && (
         <li className="flex items-center gap-2">
-          <svg viewBox="0 0 28 22" aria-hidden="true" className="h-[18px] w-6 shrink-0">
-            <path d="M2,11 H22" stroke="var(--ink-primary)" strokeWidth={1.5} strokeDasharray="4 3" />
-            <path d="M20,7 L26,11 L20,15 z" fill="var(--ink-primary)" />
-          </svg>
+          <LineGlyph color="var(--ink-primary)" dashed />
           <span>Async / optional</span>
         </li>
       )}
@@ -577,15 +812,7 @@ function orderedEdges(nodes: DiagramNode[], edges: DiagramEdge[]): DiagramEdge[]
   return [...out, ...edges.filter((e) => !used.has(e))];
 }
 
-export function DiagramSteps({
-  id,
-  nodes,
-  edges,
-}: {
-  id?: string;
-  nodes: DiagramNode[];
-  edges: DiagramEdge[];
-}) {
+export function DiagramSteps({ nodes, edges }: { nodes: DiagramNode[]; edges: DiagramEdge[] }) {
   const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
   const steps = orderedEdges(nodes, edges);
   if (steps.length === 0) return null;
@@ -603,7 +830,7 @@ export function DiagramSteps({
           ↓
         </span>
       </summary>
-      <ol id={id} className="space-y-1.5 px-4 pb-4 font-sans text-[length:var(--type-small)] leading-[1.5] text-[color:var(--ink-body)]">
+      <ol className="space-y-1.5 px-4 pb-4 font-sans text-[length:var(--type-small)] leading-[1.5] text-[color:var(--ink-body)]">
         {steps.map((e, i) => (
           <li key={`${e.from}-${e.to}-${i}`} className="flex gap-3">
             <span className="min-w-[22px] text-[length:var(--type-caption)] text-[color:var(--ink-muted)] tabular-nums">
@@ -625,32 +852,38 @@ export function DiagramSteps({
 
 /* ------------------------------- Figure --------------------------------- */
 
-// Canvases wider than this (at the legibility floor) can't fit the 720px
-// article column, so they scroll and say so.
-const COLUMN_PX = 680;
-
-export function WideHint({ width }: { width: number }) {
-  if (width * 0.8 <= COLUMN_PX) return null;
+/**
+ * The diagram itself is the control that opens the full-screen view. A div
+ * with button semantics, because a real <button> may only hold phrasing
+ * content and diagrams hold lists and SVG.
+ */
+export function ZoomTarget({
+  label,
+  onOpen,
+  children,
+  className = "",
+}: {
+  label: string;
+  onOpen: () => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <p className="mt-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
-      Wide diagram — scroll sideways, or use Expand for the full view.
-    </p>
-  );
-}
-
-export function ExpandButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--outline-strong)] bg-[color:var(--bg-elevated)] px-3.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      aria-label={`Open full screen: ${label}`}
+      className={`block w-full cursor-zoom-in rounded-[var(--radius-tile)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] ${className}`}
     >
-      <svg viewBox="0 0 16 16" aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.5}>
-        <path d="M10 2h4v4M6 14H2v-4M14 2 9 7M2 14l5-5" />
-      </svg>
-      Expand
-    </button>
+      {children}
+    </div>
   );
 }
 
@@ -658,8 +891,6 @@ export function Diagram({
   title,
   nodes,
   edges,
-  width = 760,
-  height = 420,
   legend,
   caption,
 }: {
@@ -673,7 +904,6 @@ export function Diagram({
 }) {
   const [open, setOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
-  const stepsId = useId();
   const name = title ?? "Diagram";
 
   return (
@@ -684,42 +914,20 @@ export function Diagram({
       viewport={{ once: false, margin: "0px 0px -80px 0px" }}
       transition={{ duration: 0.7, ease: EASE }}
     >
-      <div className="mb-3 flex items-start justify-between gap-4">
-        {title ? (
-          <p className="pt-2.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">{title}</p>
-        ) : (
-          <span />
-        )}
-        <ExpandButton label={`Expand diagram: ${name}`} onClick={() => setOpen(true)} />
-      </div>
+      {title && <p className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">{title}</p>}
       <div className="mb-3">
         <DiagramLegend nodes={nodes} edges={edges} legend={legend} />
       </div>
-      <div
-        tabIndex={0}
-        role="region"
-        aria-label={`${name} (scrolls sideways on small screens)`}
-        className="overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-      >
-        <DiagramCanvas
-          nodes={nodes}
-          edges={edges}
-          width={width}
-          height={height}
-          ariaLabel={name}
-          describedBy={stepsId}
-        />
-      </div>
-      <WideHint width={width} />
-      <DiagramSteps id={stepsId} nodes={nodes} edges={edges} />
+      <ZoomTarget label={name} onOpen={() => setOpen(true)} className="border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-3">
+        <DiagramCanvas nodes={nodes} edges={edges} ariaLabel={name} />
+      </ZoomTarget>
+      <DiagramSteps nodes={nodes} edges={edges} />
       {caption && (
-        <figcaption className="mt-4 font-sans text-[length:var(--type-caption)] leading-[1.6] text-[color:var(--ink-muted)]">
-          {caption}
-        </figcaption>
+        <figcaption className="mt-4 font-sans text-[length:var(--type-caption)] leading-[1.6] text-[color:var(--ink-muted)]">{caption}</figcaption>
       )}
       <Lightbox open={open} onClose={() => setOpen(false)} label={title} caption={caption}>
-        <div className="w-full">
-          <DiagramCanvas nodes={nodes} edges={edges} width={width} height={height} ariaLabel={name} minScale={0} />
+        <div className="w-full max-w-[1100px]">
+          <DiagramCanvas nodes={nodes} edges={edges} ariaLabel={name} fallbackWidth={1000} />
         </div>
       </Lightbox>
     </motion.figure>

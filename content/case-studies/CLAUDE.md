@@ -171,9 +171,22 @@ the MDX `shape` by **meaning**, never by look:
 
 Connectors are orthogonal (one elbow pair), arrowhead at the target only.
 `style: "dashed"` = async / optional / return path; `color: "faint"` =
-secondary path. Colour never carries meaning — shape, glyph and line style
-do. A legend for every symbol in use and a "Read as steps" text
+secondary path; `color: "success"` = **key path**, drawn in the brick
+accent, and an `outcome: "approved"` node gets the accent frame. Colour
+never carries meaning alone — shape, glyph, label and line style go with
+it. A legend for every symbol in use and a "Read as steps" text
 alternative (WCAG 1.1.1) are generated automatically.
+
+**Layout is automatic (Sprint 22).** `Diagram` and `FlowSchema` diagram
+rows lay themselves out for the measured width of the text column:
+branching graphs layered top-to-bottom, simple chains as a left-to-right
+"snake"; gaps grow to fit the widest edge label; edges that jump a row run
+down a left corridor, return paths up a right corridor; node height grows
+with its wrapped text. MDX `x`/`y`/`width`/`height` are accepted but
+ignored, so §4.2–4.5 (margins, shared viewBox, sibling shifts) no longer
+apply to these two primitives — author the graph (nodes, edges, labels) in
+reading order and the layout keeps every frame apart. Clicking the diagram
+opens it full screen.
 
 ### 4.2 viewBox margin — SYMMETRIC rule
 
@@ -367,8 +380,8 @@ Use when a flow has >6 nodes or needs two tiers (actors above, system below).
 rich graph.
 
 - Shapes, notation & dimensions: same table as §4.1.
-- Canvas sizing: body column is ~695px wide, but the Diagram SVG scrolls
-  horizontally and expands in the lightbox, so budget by node count.
+- Canvas sizing: automatic (see §4.1). The legacy guidance below only
+  matters for authoring order — list nodes roughly in reading order.
   - ≤ 6 nodes: `width=900, height=320`, single row.
   - 7–10 nodes: `width=1500, height=620`, 2 lanes (actors y≈100, system y≈310,
     outcomes y≈200/420/540). The 10-node Noble booking flow at
@@ -439,9 +452,10 @@ costs $Y and never recoups*. Pure 2-row horizontal bar race with %-fill.
 `WireflowMap` all ship with an `ExpandButton` top-right that opens
 `components/ui/Lightbox.tsx` — a portal modal with ESC-close,
 backdrop-click dismiss, `max-w: min(1400px, 96vw)`. On `Diagram` and
-`FlowSchema` (Sprint 21) the button is always visible, ≥44px, labelled
-"Expand", and the figure itself is no longer wrapped in a `<button>` (a
-screen reader would read the whole diagram as one button label).
+`FlowSchema` (Sprint 22) there is no separate button: the diagram itself
+is the control (`role="button"`, Enter/Space, `aria-label="Open full
+screen: …"`), consistent with the other figures. Figures stay visible in
+the "2-min read" depth — they are the skim path.
 
 **Non-negotiable rule for authoring new chart primitives**:
 

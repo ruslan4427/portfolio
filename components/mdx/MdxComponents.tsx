@@ -33,7 +33,7 @@ export const mdxComponents = {
   ),
   a: (props: ComponentPropsWithoutRef<"a">) => (
     <a
-      className="text-[color:var(--ink-primary)] underline underline-offset-4 decoration-[color:var(--outline)] hover:decoration-[color:var(--ink-primary)] transition-colors"
+      className="text-[color:var(--ink-primary)] underline underline-offset-4 decoration-[color:var(--outline)] hover:decoration-[color:var(--accent)] transition-colors"
       {...props}
     />
   ),

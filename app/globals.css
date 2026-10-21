@@ -54,6 +54,13 @@
   --hairline-on-dark: rgba(250, 250, 247, 0.14);
   --fill-on-dark: rgba(250, 250, 247, 0.06);
 
+  /* Accent — brick. One emphasis hue (Sprint 22): key paths in diagrams,
+     reading progress, "Start here", key numbers. Never large fills, never
+     on the inverse panel. Green stays reserved for availability. */
+  --accent: #a94427;
+  --accent-ink: #fafaf7;
+  --accent-soft: rgba(169, 68, 39, 0.08);
+
   /* Control boundary — inputs, toggles. --outline stays for card edges. */
   --outline-strong: var(--ink-muted);
 
@@ -108,6 +115,8 @@
   --color-on-dark: var(--ink-on-dark);
   --color-on-dark-muted: var(--ink-on-dark-muted);
   --color-outline-strong: var(--outline-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
 
   --font-serif: var(--font-display);
   --font-sans: var(--font-inter);
@@ -689,7 +698,9 @@ html.lenis body {
   display: none;
 }
 
-[data-depth="short"] section[data-case-section]:not([data-open="true"]) > :not(h2):not(:nth-child(2)):not(.case-section-more) {
+/* Figures (diagrams, flows, screenshots, charts) stay visible in the 2-min
+   read: they are the skim path. Only prose and secondary blocks collapse. */
+[data-depth="short"] section[data-case-section]:not([data-open="true"]) > :not(h2):not(:nth-child(2)):not(.case-section-more):not(figure) {
   display: none;
 }
 

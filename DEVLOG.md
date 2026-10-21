@@ -2655,3 +2655,17 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Result:** All 14 diagram rows across the six cases render in the standard notation; axe reports no violations inside any figure; production build clean, no runtime errors. Overlaps found by a bounds script against the new shape sizes (hrekov-dev tiers, ShipLoop session row, Lexora builds) were fixed by shifting siblings per rulebook §4.4. Rulebook §4.1/§4.8/§6.5 updated.
 
 **Lesson:** A notation is only useful if the shapes keep the meaning readers bring with them. Inventing a private shape vocabulary costs every reader a legend lookup; borrowing ISO 5807 + C4 costs nothing and makes the authoring rule ("pick the shape by meaning") checkable.
+
+## 2026-10-21 — Sprint 22 · brick accent, self-laying-out diagrams, figures always open
+
+**Problem:** Ruslan found the monochrome site flat and asked for a brick accent he had seen work with the palette; diagrams and screenshots hid behind a separate Expand button (and behind "Read the full section" in the 2-min read); wide diagrams scrolled sideways inside the text column; and several diagrams had edge labels sitting on nodes.
+
+**Decision:**
+- Rule change, owner's call: a single emphasis hue, brick `--accent` `#A94427` (5.38:1 on paper, 5.67:1 under `--accent-ink`), alongside the functional green. Used for key paths/outcomes in diagrams, the hero stat rules, reading progress, "Start here", "After" rows and link hover — never large fills, never alone. STABLE_LOGIC and CLAUDE.md updated.
+- Diagrams lay themselves out for the measured column width (layered top-to-bottom for branching graphs, snake rows for chains). Column gap grows to the widest edge label; row-skipping edges use a left corridor and return paths a right corridor, labels inside the corridor; node height follows wrapped text. Node text stays 14px at every width; MDX coordinates are ignored.
+- The diagram itself opens full screen on click (div with button semantics, keyboard operable); the Expand button is gone. In the 2-min read, figures stay visible and only prose collapses.
+- WireflowMap no longer forces a 480px minimum width on phones.
+
+**Result:** An overlap/clip sweep over every figure on the six cases at 1440 and 390 (node boxes, text, label pills, foreignObject overflow) reports zero issues outside the SVG phone reconstructions, whose tight line boxes are intentional. tsc clean (pre-existing LayoutProps typegen error aside); new code lint-clean.
+
+**Lesson:** Hand-placed coordinates were the root cause of every spacing complaint — each fix was a local shift that the next width undid. Moving layout into the component turned "keep the frames apart" from a review checklist into a property of the system.
