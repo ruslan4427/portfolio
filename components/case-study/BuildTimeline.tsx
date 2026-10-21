@@ -201,10 +201,7 @@ export function BuildTimeline({ slug, phases }: { slug: string; phases: Phase[] 
                 viewport={{ once: false, margin: "0px 0px -40px 0px" }}
                 transition={{ duration: 0.6, delay: dayDelay, ease: EASE }}
               >
-                <title>
-                  {d.iso} · {humanizeTokens(tokens)} tokens
-                  {commits > 0 ? ` · ${commits} commits` : ""}
-                </title>
+                <title>{`${d.iso} · ${humanizeTokens(tokens)} tokens${commits > 0 ? ` · ${commits} commits` : ""}`}</title>
               </motion.rect>
             )}
             {commits > 0 && (
@@ -223,9 +220,7 @@ export function BuildTimeline({ slug, phases }: { slug: string; phases: Phase[] 
                   transformBox: "fill-box" as const,
                 }}
               >
-                <title>
-                  {d.iso} · {commits} commits
-                </title>
+                <title>{`${d.iso} · ${commits} commits`}</title>
               </motion.circle>
             )}
           </g>
