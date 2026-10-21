@@ -71,7 +71,7 @@ export const mdxComponents = {
     <em className="italic" {...props} />
   ),
   table: (props: ComponentPropsWithoutRef<"table">) => (
-    <div className="my-8 overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)]">
+    <div tabIndex={0} role="region" aria-label="Table" className="my-8 overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]">
       <table
         className="w-full border-collapse text-sm text-[color:var(--ink-body)]"
         {...props}

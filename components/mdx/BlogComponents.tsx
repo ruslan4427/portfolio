@@ -7,29 +7,22 @@ export function Figure({
   src,
   alt,
   caption,
-  width,
-  height,
 }: {
   src: string;
   alt: string;
   caption?: string;
+  /** Source size; kept for MDX compatibility — the frame is a fixed 3:2 crop. */
   width: number;
   height: number;
 }) {
   return (
     <figure className="not-prose my-10">
-      <div className="overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
-        <Image
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          sizes="(min-width: 768px) 70ch, 92vw"
-          className="block h-auto w-full"
-        />
+      {/* Fixed 3:2 crop: a regenerated image of any size keeps the layout. */}
+      <div className="relative aspect-[3/2] overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--bg-elevated)]">
+        <Image src={src} alt={alt} fill sizes="(min-width: 768px) 70ch, 92vw" className="object-cover" />
       </div>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] leading-relaxed text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 font-sans text-[length:var(--type-caption)] leading-relaxed text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}

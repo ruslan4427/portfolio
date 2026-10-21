@@ -2691,3 +2691,13 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Result:** /tools at 1440 and 390: no overflow, axe clean (definition-list and heading-order issues fixed along the way). Page is ~26% shorter on desktop with every number still reachable. Production build passes.
 
 **Lesson:** A hook that reads a media query after mount can change an animation target mid-flight. When the "reduced" variant drops a property, the animated value doesn't reset — it freezes. Settle every animated property in the final state, whatever the variant.
+
+## 2026-10-21 — Sprint 25 · Journal redesign, studio-photo pipeline
+
+**Problem:** Ruslan asked for a Journal redesign and for every post illustration to move from ink line art to the look of four reference photos (white earbuds, case and keyboard on white, window-light shadows). /blog showed no images at all, every post was `featured: true` so all five sat under "Start here" with "All entries" empty, and the index and post header still used the pre-v2 centered-badge layout with 11px uppercase labels.
+
+**Decision:** Spec `specs/25-journal-studio`. /blog follows the /work and /tools rule: the h1 states the count ("Five working notes."), format chips with counts and "Showing N of M", the newest entry leads as a wide photo card, the rest sit in an equal two-column grid with the photo on top; `featured` no longer drives the index. Post pages get a left-aligned header on the reading column and a frameless 3:2 hero; MDX `Figure` renders a fixed 3:2 crop so a regenerated image of any size keeps the layout. New `studio` preset in `scripts/gen-blog-hero.mjs` (high-key white-on-white still life, one daylight source, long diagonal shadows, no text or people) and `scripts/gen-journal-studio.mjs`, which holds one physical-object metaphor and the replacement alt text for each of the 11 images. Alt text changes only together with the image. Also fixed: MDX table wrapper keyboard-scrollable, BackToJournal in a `nav` landmark and off set-state-in-effect.
+
+**Result:** /blog and a post at 1440 and 390: no overflow, axe clean. Production build passes. The photos themselves are **not generated yet** — `GEMINI_API_KEY` is not available in the cloud environment; the current ink images render in the new frames until `node scripts/gen-journal-studio.mjs` runs with a key.
+
+**Lesson:** Fix the frame before the picture. With a fixed crop in the component, swapping eleven images becomes a content change instead of eleven layout checks.

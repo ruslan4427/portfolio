@@ -1,61 +1,55 @@
+import Image from "next/image";
 import Link from "next/link";
-import type { BlogPost, BlogFormat } from "@/content/blog";
+import type { BlogFrontmatter } from "@/content/blog";
+import { formatDate, formatLabel } from "./format";
 
-const formatLabel: Record<BlogFormat, string> = {
-  "case-study": "Case Study",
-  "build-log": "Build Log",
-  skeptic: "Field Note",
-  pattern: "Pattern",
-};
-
-function formatDate(iso: string): string {
-  const [year, month, day] = iso.split("-");
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${months[Number(month) - 1]} ${Number(day)}, ${year}`;
-}
-
-export function PostCard({ post }: { post: BlogPost }) {
-  const { frontmatter } = post;
-  const displayTags = frontmatter.tags.slice(0, 2);
-
+/**
+ * Journal card: photo first, then format · date · minutes, title, tagline.
+ * `lead` lays the newest entry out wide (photo left, text right on md+).
+ */
+export function PostCard({ post, lead = false }: { post: BlogFrontmatter; lead?: boolean }) {
   return (
     <Link
-      href={`/blog/${frontmatter.slug}`}
-      className="group block rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
+      href={`/blog/${post.slug}`}
+      className="group block h-full rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
     >
-      <article className="flex h-full flex-col rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8 shadow-[var(--shadow-card)] transition-transform duration-300 group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center rounded-full border border-[color:var(--hairline)] px-3 py-1 font-sans text-[11px] text-[color:var(--ink-body)]">
-            {formatLabel[frontmatter.format]}
-          </span>
-          <time
-            dateTime={frontmatter.publishedAt}
-            className="font-sans text-[11px] text-[color:var(--ink-muted)] tabular-nums"
-          >
-            {formatDate(frontmatter.publishedAt)}
-          </time>
+      <article className={`flex h-full flex-col gap-5 ${lead ? "md:flex-row md:items-center md:gap-12" : ""}`}>
+        <div
+          className={`relative aspect-[3/2] overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--bg-elevated)] ${
+            lead ? "md:w-[58%] md:shrink-0" : ""
+          }`}
+        >
+          {post.heroImage && (
+            <Image
+              src={post.heroImage.src}
+              alt=""
+              fill
+              sizes={lead ? "(min-width: 1200px) 680px, (min-width: 768px) 56vw, 92vw" : "(min-width: 1200px) 580px, (min-width: 768px) 46vw, 92vw"}
+              className="object-cover transition-transform duration-[var(--dur-reveal)] group-hover:scale-[1.02] motion-reduce:transition-none"
+            />
+          )}
         </div>
-
-        <h3 className="mt-6 font-serif text-[clamp(24px,2.4vw,32px)] leading-[1.15] text-[color:var(--ink-primary)]">
-          {frontmatter.title}
-        </h3>
-        <p className="mt-3 line-clamp-3 text-[15px] leading-relaxed text-[color:var(--ink-muted)]">
-          {frontmatter.tagline}
-        </p>
-
-        <div className="mt-auto flex items-center justify-between pt-6">
-          <div className="flex flex-wrap gap-2">
-            {displayTags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-[color:var(--hairline)] px-3 py-1 font-sans text-xs text-[color:var(--ink-body)]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-          <span className="font-sans text-[11px] text-[color:var(--ink-muted)] tabular-nums">
-            {frontmatter.readingTime} min
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] tabular-nums">
+            {formatLabel[post.format]} · <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time> ·{" "}
+            {post.readingTime} min
+          </p>
+          <h2
+            className={`font-serif leading-[1.05] text-[color:var(--ink-primary)] ${
+              lead ? "text-[length:var(--type-display-m)]" : "text-[length:var(--type-display-s)]"
+            }`}
+          >
+            {post.title}
+          </h2>
+          <p
+            className={`text-[color:var(--ink-body)] ${
+              lead ? "text-[length:var(--type-body-l)] leading-[1.55]" : "line-clamp-3 text-[length:var(--type-small)] leading-[1.6]"
+            }`}
+          >
+            {post.tagline}
+          </p>
+          <span className="mt-1 w-fit font-sans text-sm text-[color:var(--ink-primary)] underline decoration-[color:var(--outline)] underline-offset-4 group-hover:decoration-[color:var(--accent)]">
+            Read <span aria-hidden>→</span>
           </span>
         </div>
       </article>

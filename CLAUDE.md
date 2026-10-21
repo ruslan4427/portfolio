@@ -180,8 +180,9 @@ app/                    Next.js App Router
       loading.tsx       MDX-bundle skeleton (badge/title/tagline/body pulse)
       not-found.tsx     Case study 404 (SectionBadge + Playfair h1 + Back to work CTA)
       opengraph-image.tsx  Per-slug OG (Playfair embedded)
-    blog/page.tsx       Journal index (featured grid + chronological list;
-                        empty state ships too)
+    blog/page.tsx       Journal index (Sprint 25): count in the h1 → format
+                        chips + "Showing N of M" → newest entry wide, the rest
+                        in a 2-col photo grid (JournalIndex); empty state
     blog/[slug]/
       page.tsx          Blog post (BlogPosting JSON-LD, BackToJournal pill,
                         per-format container width, Receipts aside,
@@ -200,7 +201,8 @@ components/
                         PageViews (route-change gtag config),
                         ExternalLinkTracker (delegated document click),
                         BlogReadTracker (IO sentinel per slug)
-  blog/                 PostCard (featured grid), PostRow (chronological)
+  blog/                 JournalIndex (format filter), PostCard (photo card,
+                        `lead` = wide), format.ts (labels + date)
   canvas/DotGrid.tsx    Cursor-reactive canvas (mounted once in root layout)
   tools/                /tools (Sprint 24): ToolSection (identity + install |
                         impact numbers + Disclosure for method), InstallBlock,
