@@ -2701,3 +2701,5 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Result:** /blog and a post at 1440 and 390: no overflow, axe clean. Production build passes. The photos themselves are **not generated yet** — `GEMINI_API_KEY` is not available in the cloud environment; the current ink images render in the new frames until `node scripts/gen-journal-studio.mjs` runs with a key.
 
 **Lesson:** Fix the frame before the picture. With a fixed crop in the component, swapping eleven images becomes a content change instead of eleven layout checks.
+
+**Follow-up, same day (owner review):** While the studio photos wait on a key, the image grid read as five ink drawings competing. Back to the pre-redesign text tiles (format pill, date, title, tagline, two tags, minutes) on v2 tokens; only the newest entry overall keeps its picture, as the wide lead card at the top. A filtered view is all tiles. Post pages unchanged.

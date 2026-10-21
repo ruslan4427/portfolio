@@ -27,7 +27,7 @@ function Chip({ label, count, active, onClick }: { label: string; count: number;
   );
 }
 
-/** Newest entry wide, the rest in an equal grid; optional format filter. */
+/** Newest entry wide with its picture, the rest as text tiles; optional format filter. */
 export function JournalIndex({ posts }: { posts: BlogFrontmatter[] }) {
   const [format, setFormat] = useState<BlogFormat | null>(null);
   const formats = useMemo(
@@ -38,7 +38,9 @@ export function JournalIndex({ posts }: { posts: BlogFrontmatter[] }) {
     [posts],
   );
   const shown = format ? posts.filter((p) => p.format === format) : posts;
-  const [lead, ...rest] = shown;
+  // Only the newest entry overall gets the picture; a filtered view is all tiles.
+  const lead = format === null ? shown[0] : undefined;
+  const rest = lead ? shown.slice(1) : shown;
 
   return (
     <div className="flex flex-col gap-12">
@@ -63,7 +65,7 @@ export function JournalIndex({ posts }: { posts: BlogFrontmatter[] }) {
       {lead && <PostCard key={lead.slug} post={lead} lead />}
 
       {rest.length > 0 && (
-        <Stagger as="ul" className="grid grid-cols-1 gap-x-8 gap-y-14 md:grid-cols-2">
+        <Stagger as="ul" className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {rest.map((post) => (
             <StaggerItem as="li" key={post.slug} className="h-full">
               <PostCard post={post} />
