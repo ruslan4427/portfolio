@@ -148,7 +148,6 @@ export function BuildTimeline({ slug, phases }: { slug: string; phases: Phase[] 
               fontSize={11}
               fill="var(--ink-muted)"
               style={{
-                textTransform: "uppercase",
                 letterSpacing: "0.1em",
               }}
               variants={{
@@ -267,11 +266,11 @@ export function BuildTimeline({ slug, phases }: { slug: string; phases: Phase[] 
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2
           id="build-timeline-heading"
-          className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+          className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
         >
           Build timeline
         </h2>
-        <p className="font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {summary}
         </p>
       </div>
@@ -285,27 +284,27 @@ export function BuildTimeline({ slug, phases }: { slug: string; phases: Phase[] 
         {chartSvg()}
       </button>
 
-      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 font-sans text-xs text-[color:var(--ink-muted)] md:grid-cols-4">
+      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] md:grid-cols-4">
         <div>
-          <dt className="uppercase tracking-wide">Phases</dt>
+          <dt>Phases</dt>
           <dd className="mt-1 font-serif text-[18px] text-[color:var(--ink-primary)] tabular-nums">
             {phases.length}
           </dd>
         </div>
         <div>
-          <dt className="uppercase tracking-wide">Days</dt>
+          <dt>Days</dt>
           <dd className="mt-1 font-serif text-[18px] text-[color:var(--ink-primary)] tabular-nums">
             {totalDays}
           </dd>
         </div>
         <div>
-          <dt className="uppercase tracking-wide">Peak day</dt>
+          <dt>Peak day</dt>
           <dd className="mt-1 font-serif text-[18px] text-[color:var(--ink-primary)] tabular-nums">
             {maxTokens > 0 ? humanizeTokens(maxTokens) : "—"}
           </dd>
         </div>
         <div>
-          <dt className="uppercase tracking-wide">Peak commits</dt>
+          <dt>Peak commits</dt>
           <dd className="mt-1 font-serif text-[18px] text-[color:var(--ink-primary)] tabular-nums">
             {maxCommits > 0 ? maxCommits : "—"}
           </dd>

@@ -62,7 +62,7 @@ function StackIcon({ item }: { item: StackItem }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[color:var(--ink-primary)]/90 font-sans text-[13px] font-semibold text-[color:var(--bg-elevated)]"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-inline)] bg-[color:var(--ink-primary)]/90 font-sans text-[13px] font-semibold text-[color:var(--bg-elevated)]"
     >
       {item.name.charAt(0)}
     </span>
@@ -96,7 +96,7 @@ export function StackRow({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, margin: "-40px" }}
             transition={{ duration: 0.3, delay: i * 0.04, ease: EASE }}
-            className="flex min-h-[104px] flex-col justify-between rounded-[12px] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-3.5"
+            className="flex min-h-[104px] flex-col justify-between rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-3.5"
           >
             <StackIcon item={item} />
             <div className="mt-3">
@@ -104,7 +104,7 @@ export function StackRow({
                 {item.name}
               </div>
               {item.version && (
-                <div className="mt-0.5 font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
+                <div className="mt-0.5 font-sans text-[length:var(--type-caption)] tabular-nums text-[color:var(--ink-muted)]">
                   {item.version}
                 </div>
               )}
@@ -124,13 +124,13 @@ export function StackRow({
               delay: items.length * 0.04,
               ease: EASE,
             }}
-            className="group flex min-h-[104px] flex-col justify-between rounded-[12px] border border-[color:var(--ink-primary)] bg-[color:var(--ink-primary)] p-3.5 text-[color:var(--bg-elevated)] no-underline transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
+            className="group flex min-h-[104px] flex-col justify-between rounded-[var(--radius-tile)] border border-[color:var(--ink-primary)] bg-[color:var(--ink-primary)] p-3.5 text-[color:var(--bg-elevated)] no-underline transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
           >
             <div className="flex items-center justify-between">
               <span
                 aria-hidden="true"
                 className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ background: "#22C55E" }}
+                style={{ background: "var(--status-live)" }}
               />
               <svg
                 viewBox="0 0 24 24"
@@ -150,7 +150,7 @@ export function StackRow({
               <div className="font-sans text-[13px] font-medium leading-tight">
                 {live.label ?? "Live product"}
               </div>
-              <div className="mt-0.5 truncate font-sans text-[11px] opacity-70">
+              <div className="mt-0.5 truncate font-sans text-[length:var(--type-caption)] opacity-70">
                 {hostOf(live.href)}
               </div>
             </div>
@@ -158,7 +158,7 @@ export function StackRow({
         )}
       </div>
       {(dateRange || caption) && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-sans text-[12px] text-[color:var(--ink-muted)]">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {dateRange && (
             <span className="inline-flex items-center gap-1.5 tabular-nums">
               <svg
@@ -316,7 +316,7 @@ export function PhoneRow({
               </span>
             </button>
             {item.label && (
-              <div className="mt-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+              <div className="mt-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                 {item.label}
               </div>
             )}
@@ -324,7 +324,7 @@ export function PhoneRow({
         ))}
       </div>
       {caption && (
-        <figcaption className="mt-5 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-5 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -390,8 +390,8 @@ export function CompareGrid({
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-[color:var(--hairline)]">
-              <th className="px-4 py-4 font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)]">
-                &nbsp;
+              <th className="px-4 py-4 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+                <span className="sr-only">Criterion</span>
               </th>
               {columns.map((col) => (
                 <th
@@ -409,11 +409,11 @@ export function CompareGrid({
                   >
                     {col.name}
                   </div>
-                  <div className="mt-1 font-sans text-xs tabular-nums text-[color:var(--ink-muted)]">
+                  <div className="mt-1 font-sans text-[length:var(--type-caption)] tabular-nums text-[color:var(--ink-muted)]">
                     {col.price}
                   </div>
                   {col.verdict && (
-                    <div className="mt-2 font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)]">
+                    <div className="mt-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                       {col.verdict}
                     </div>
                   )}
@@ -449,7 +449,7 @@ export function CompareGrid({
                     return (
                       <td
                         key={j}
-                        className={`px-4 py-3 text-[color:var(--ink-faint)] ${cellCls}`}
+                        className={`px-4 py-3 text-[color:var(--ink-muted)] ${cellCls}`}
                       >
                         <DashIcon />
                       </td>
@@ -470,7 +470,7 @@ export function CompareGrid({
         </table>
       </motion.div>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -691,14 +691,14 @@ function FlowNodeCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: false, margin: "-50px" }}
       transition={{ duration: 0.35, delay, ease: EASE }}
-      className={`relative flex w-full max-w-[460px] shrink-0 flex-col rounded-[12px] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-3.5 ${
+      className={`relative flex w-full max-w-[460px] shrink-0 flex-col rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-3.5 ${
         pulse ? "ring-1 ring-[color:var(--ink-primary)]/15" : ""
       }`}
     >
       {pulse && (
         <motion.span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[12px] ring-1 ring-[color:var(--ink-primary)]/25"
+          className="pointer-events-none absolute inset-0 rounded-[var(--radius-tile)] ring-1 ring-[color:var(--ink-primary)]/25"
           animate={{ opacity: [0.1, 0.5, 0.1] }}
           transition={{
             duration: 2.4,
@@ -710,7 +710,7 @@ function FlowNodeCard({
       )}
       <div className="flex items-start gap-2.5">
         {node.icon ? (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-inline)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
             <SchematicIconMark name={node.icon} />
           </span>
         ) : node.status ? (
@@ -734,12 +734,12 @@ function FlowNodeCard({
         </div>
       </div>
       {node.detail && (
-        <div className="mt-1 font-sans text-[11px] text-[color:var(--ink-muted)]">
+        <div className="mt-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {node.detail}
         </div>
       )}
       {node.bullets && node.bullets.length > 0 && (
-        <ul className="mt-2 space-y-0.5 font-sans text-[11px] leading-[1.5] text-[color:var(--ink-body)]">
+        <ul className="mt-2 space-y-0.5 font-sans text-[length:var(--type-caption)] leading-[1.5] text-[color:var(--ink-body)]">
           {node.bullets.map((b, i) => (
             <li key={i} className="flex items-start gap-1.5">
               <span
@@ -797,14 +797,14 @@ export function FlowSchema({
             className={`relative overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-5 pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] ${rowAccent[tone]}`}
           >
             <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-              <div className="min-w-0 font-sans text-[10px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+              <div className="min-w-0 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                 <span className="mr-2 font-serif text-[color:var(--ink-primary)]">
                   {tone === "before" ? "◴" : tone === "after" ? "●" : "○"}
                 </span>
                 {row.label}
               </div>
               {row.meta && (
-                <div className="shrink-0 font-sans text-[10px] tabular-nums text-[color:var(--ink-muted)]">
+                <div className="shrink-0 font-sans text-[length:var(--type-caption)] tabular-nums text-[color:var(--ink-muted)]">
                   {row.meta}
                 </div>
               )}
@@ -845,7 +845,7 @@ export function FlowSchema({
       transition={{ duration: 0.7, ease: EASE }}
     >
       {title && (
-        <div className="mb-4 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-4 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
@@ -858,7 +858,7 @@ export function FlowSchema({
         {rowsBlock}
       </button>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -919,8 +919,10 @@ const diagramShapeDims: Record<DiagramShape, { w: number; h: number }> = {
 
 const diagramColorStroke: Record<DiagramColor, string> = {
   neutral: "var(--ink-primary)",
-  success: "#22C55E",
-  danger: "#111111",
+  // Monochrome state recipe (specs/19 §4.4): the badge glyph carries the
+  // outcome, not hue. Green stays reserved for availability.
+  success: "var(--ink-primary)",
+  danger: "var(--ink-primary)",
   faint: "var(--outline)",
 };
 
@@ -1002,7 +1004,7 @@ function DiagramOutcomeBadge({ node }: { node: DiagramNode }) {
         cx={bx}
         cy={by}
         r={10}
-        fill={approved ? "#22C55E" : "#111111"}
+        fill="var(--ink-primary)"
         stroke="var(--bg-elevated)"
         strokeWidth={2}
       />
@@ -1302,7 +1304,7 @@ export function Diagram({
       transition={{ duration: 0.7, ease: EASE }}
     >
       {title && (
-        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
@@ -1311,7 +1313,7 @@ export function Diagram({
           {legend.map((item) => (
             <div
               key={item.shape + item.label}
-              className="flex items-center gap-2 font-sans text-[11px] text-[color:var(--ink-muted)]"
+              className="flex items-center gap-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
             >
               <svg
                 viewBox="0 0 28 20"
@@ -1340,7 +1342,7 @@ export function Diagram({
         />
       </button>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -1414,10 +1416,10 @@ function rtRowHeight(row: RaceTimelineRow) {
 
 function rtToneClasses(tone?: RaceTimelineRow["tone"]) {
   if (tone === "before") {
-    return "border-[color:rgba(220,38,38,0.22)] bg-[color:rgba(220,38,38,0.04)]";
+    return "border-dashed border-[color:var(--outline-strong)] bg-[color:var(--bg-page)]";
   }
   if (tone === "after") {
-    return "border-[color:rgba(34,197,94,0.22)] bg-[color:rgba(34,197,94,0.03)]";
+    return "border-[color:var(--ink-primary)] bg-[color:var(--bg-elevated)]";
   }
   return "border-[color:var(--hairline)] bg-[color:var(--bg-page)]";
 }
@@ -1694,11 +1696,11 @@ export function RaceTimeline({
           className={`rounded-[var(--radius-tile)] border overflow-hidden ${rtToneClasses(row.tone)}`}
         >
           <div className="flex items-center justify-between gap-4 border-b border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]/70 px-4 py-2">
-            <div className="font-sans text-[12px] font-medium text-[color:var(--ink-primary)]">
+            <div className="font-sans text-[length:var(--type-caption)] font-medium text-[color:var(--ink-primary)]">
               {row.label}
             </div>
             {row.meta && (
-              <div className="font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
+              <div className="font-sans text-[length:var(--type-caption)] tabular-nums text-[color:var(--ink-muted)]">
                 {row.meta}
               </div>
             )}
@@ -1719,12 +1721,12 @@ export function RaceTimeline({
       transition={{ duration: 0.7, ease: EASE }}
     >
       {title && (
-        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
       {legend !== false && (
-        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-3 py-2 font-sans text-[11px] text-[color:var(--ink-muted)]">
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-3 py-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           <span className="inline-flex items-center gap-2">
             <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
               <circle cx="8" cy="8" r="4" fill="#111" />
@@ -1756,7 +1758,7 @@ export function RaceTimeline({
         {rowsBlock}
       </button>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -2041,7 +2043,7 @@ export function ActivityChart({
       transition={{ duration: 0.7, ease: EASE }}
     >
       {title && (
-        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
@@ -2054,7 +2056,7 @@ export function ActivityChart({
         {chartSvg()}
       </button>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -2104,7 +2106,7 @@ export function PaybackBar({
           <div className="whitespace-nowrap font-serif text-6xl leading-[0.95] tabular-nums text-[color:var(--ink-primary)] md:text-7xl">
             {headline.value}
           </div>
-          <div className="mt-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          <div className="mt-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
             {headline.label}
           </div>
         </div>
@@ -2114,7 +2116,7 @@ export function PaybackBar({
             return (
               <div key={row.label}>
                 <div className="mb-2 flex items-baseline justify-between gap-3">
-                  <span className="font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+                  <span className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                     {row.label}
                   </span>
                   <span className="font-sans text-sm font-medium tabular-nums text-[color:var(--ink-primary)]">
@@ -2132,7 +2134,7 @@ export function PaybackBar({
                   />
                 </div>
                 {row.sub && (
-                  <div className="mt-1.5 font-sans text-[11px] text-[color:var(--ink-muted)]">
+                  <div className="mt-1.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                     {row.sub}
                   </div>
                 )}
@@ -2152,7 +2154,7 @@ export function PaybackBar({
       transition={{ duration: 0.7, ease: EASE }}
     >
       {title && (
-        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
@@ -2165,7 +2167,7 @@ export function PaybackBar({
         {chartBlock}
       </button>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -2245,13 +2247,13 @@ export function TechNotes({
     >
       <div className="mb-6 border-b border-[color:var(--hairline)] pb-5">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-2 rounded-md bg-[color:var(--ink-primary)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--bg-elevated)]">
+          <span className="inline-flex items-center gap-2 rounded-[var(--radius-inline)] bg-[color:var(--ink-primary)] px-2.5 py-1 font-sans text-[length:var(--type-caption)] text-[color:var(--bg-elevated)]">
             <span aria-hidden className="text-[color:var(--bg-elevated)]/80">
               {"</>"}
             </span>
             {badge}
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[color:var(--ink-muted)]">
+          <span className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
             {items.length} ref{items.length === 1 ? "" : "s"}
           </span>
         </div>
@@ -2280,7 +2282,7 @@ export function TechNotes({
                 className="group relative flex h-full flex-col gap-2 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4 transition hover:-translate-y-0.5 hover:border-[color:var(--outline)] hover:shadow-[0_8px_24px_-16px_rgba(17,17,17,0.25)] focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+                  <span className="inline-flex items-center gap-1.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                     <span
                       aria-hidden
                       className="text-[color:var(--ink-primary)]"
@@ -2330,7 +2332,7 @@ export function TechNotes({
         })}
       </ul>
       {caption && (
-        <p className="mt-5 font-sans text-xs text-[color:var(--ink-muted)]">
+        <p className="mt-5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </p>
       )}
@@ -2609,7 +2611,7 @@ function WireflowWindow({ node }: { node: WireflowNode }) {
           cx={node.x + w - 11}
           cy={node.y + WF_TITLE_H / 2}
           r={3.2}
-          fill="#22C55E"
+          fill="var(--ink-primary)"
         />
       )}
       <text
@@ -2618,8 +2620,7 @@ function WireflowWindow({ node }: { node: WireflowNode }) {
         fontFamily="var(--font-sans)"
         fontSize={8.5}
         fill="var(--ink-muted)"
-        style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}
-      >
+        >
         {node.title}
       </text>
       <WireflowMockContent node={node} />
@@ -2811,8 +2812,7 @@ function WireflowCalloutEl({
             fontFamily="var(--font-sans)"
             fontSize={9}
             fill="var(--ink-primary)"
-            style={{ textTransform: "uppercase", letterSpacing: "0.14em" }}
-          >
+            >
             {callout.title}
           </text>
           <line
@@ -2977,7 +2977,7 @@ export function WireflowMap({
       transition={{ duration: 0.7, ease: EASE }}
     >
       {title && (
-        <div className="mb-3 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {title}
         </div>
       )}
@@ -2986,7 +2986,7 @@ export function WireflowMap({
           {legend.map((item) => (
             <div
               key={item.kind + item.label}
-              className="flex items-center gap-2 font-sans text-[11px] text-[color:var(--ink-muted)]"
+              className="flex items-center gap-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
             >
               <svg
                 viewBox="0 0 32 10"
@@ -3040,7 +3040,7 @@ export function WireflowMap({
         />
       </button>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}

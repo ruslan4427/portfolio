@@ -33,15 +33,15 @@ function ArtifactBody({ artifact }: { artifact: Artifact }) {
 export function ArtifactList({ artifacts }: { artifacts: Artifact[] }) {
   if (artifacts.length === 0) return null;
   return (
-    <aside className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8">
-      <h2 className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+    <section className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8">
+      <h2 className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
         Artifacts
       </h2>
       <ul className="mt-4 space-y-3">
         {artifacts.map((a, i) => (
           <li key={`${a.type}-${i}`} className="font-sans text-sm">
             <div className="flex items-baseline gap-2">
-              <span className="w-20 shrink-0 font-mono text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+              <span className="w-20 shrink-0 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                 {typeLabel[a.type]}
               </span>
               <ArtifactBody artifact={a} />
@@ -54,6 +54,6 @@ export function ArtifactList({ artifacts }: { artifacts: Artifact[] }) {
           </li>
         ))}
       </ul>
-    </aside>
+    </section>
   );
 }

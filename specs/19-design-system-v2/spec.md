@@ -65,8 +65,8 @@ Exactly the set in `tokens-v2.css`: inverse surface, 4 on-dark inks,
 motion), 3 measures. `@theme` radii reference `var(--radius-*)`.
 
 ### 4.2 Type
-- Every display heading uses one of `--text-display-{xl,l,m,s}`.
-- Nothing renders below `--text-caption` (13px).
+- Every display heading uses one of `--type-display-{xl,l,m,s}`.
+- Nothing renders below `--type-caption` (13px).
 - Eyebrow/micro labels: 13px, sentence case, `--ink-muted`, no tracking.
 
 ### 4.3 Colour use

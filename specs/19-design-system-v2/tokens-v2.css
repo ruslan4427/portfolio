@@ -1,42 +1,38 @@
-/* Design system v2 — proposed additions to app/globals.css.
-   Additive: nothing in the v1 :root block changes value.
-   Paste the :root lines into the existing :root block, and replace the
-   @theme inline radius lines with the ones below. */
+/* Design system v2 — tokens as merged into app/globals.css in Sprint 20.
+   Additive: nothing in the v1 :root block changes value. :root type tokens
+   are named --type-*; @theme radius entries stay literal because a
+   same-name var() inside @theme is self-referential. */
 
 :root {
-  /* Surface — inverse (dark panels: inverse CTA, email panel, video modal) */
-  --bg-inverse: var(--cta); /* #0a0a0a */
+  /* ---------- v2 additions (specs/19-design-system-v2) ---------- */
 
-  /* Ink on dark — replaces text-white/N, bg-white/N, border-white/N */
-  --ink-on-dark: var(--cta-ink);                       /* #fafaf7 · 18.9:1 on inverse */
-  --ink-on-dark-muted: rgba(250, 250, 247, 0.72);      /* 9.8:1 on inverse */
-  --hairline-on-dark: rgba(250, 250, 247, 0.14);       /* decorative */
-  --fill-on-dark: rgba(250, 250, 247, 0.06);           /* input wells on dark */
+  /* Inverse surface + ink on dark (panels only, not a dark mode) */
+  --bg-inverse: var(--cta);
+  --ink-on-dark: var(--cta-ink);
+  --ink-on-dark-muted: rgba(250, 250, 247, 0.72);
+  --hairline-on-dark: rgba(250, 250, 247, 0.14);
+  --fill-on-dark: rgba(250, 250, 247, 0.06);
 
-  /* Control boundary — inputs, segmented controls, checkboxes.
-     --outline (1.3:1) stays for card edges only; controls need 3:1. */
-  --outline-strong: var(--ink-muted);                  /* 4.9:1 on paper */
+  /* Control boundary — inputs, toggles. --outline stays for card edges. */
+  --outline-strong: var(--ink-muted);
 
-  /* Type scale — replaces 26 hand-typed clamp() sizes and 10–12px text */
-  --text-display-xl: clamp(56px, 9vw, 120px);
-  --text-display-l: clamp(44px, 7vw, 96px);
-  --text-display-m: clamp(32px, 4vw, 56px);
-  --text-display-s: clamp(24px, 2.6vw, 36px);
-  --text-title: 20px;
-  --text-body-l: 19px;
-  --text-body: clamp(1rem, 0.9vw + 0.8rem, 1.0625rem);
-  --text-small: 15px;
-  --text-caption: 13px; /* floor — nothing renders smaller */
+  /* Type scale. 13px caption is the floor. */
+  --type-display-xl: clamp(56px, 9vw, 120px);
+  --type-display-l: clamp(44px, 7vw, 96px);
+  --type-display-m: clamp(32px, 4vw, 56px);
+  --type-display-s: clamp(24px, 2.6vw, 36px);
+  --type-title: 20px;
+  --type-body-l: 19px;
+  --type-small: 15px;
+  --type-caption: 13px;
 
-  /* Radii — two new named shapes */
-  --radius-panel: 24px;  /* footer card, inverse CTA, floating email panel */
-  --radius-inline: 6px;  /* inline code, kbd, focus outline on text links */
+  /* Radii — named large panel + inline code */
+  --radius-panel: 24px;
+  --radius-inline: 6px;
 
-  /* Depth + focus */
+  /* Depth, focus, motion */
   --shadow-float: 0 12px 40px rgba(17, 17, 17, 0.18);
   --focus-ring: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--ink-primary);
-
-  /* Motion — mirrors lib/motion.ts so CSS and Framer share curves */
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-fast: 200ms;
@@ -53,32 +49,4 @@
     --dur-fast: 0ms;
     --dur-reveal: 0ms;
   }
-}
-
-@theme inline {
-  --color-inverse: var(--bg-inverse);
-  --color-on-dark: var(--ink-on-dark);
-  --color-on-dark-muted: var(--ink-on-dark-muted);
-  --color-hairline-on-dark: var(--hairline-on-dark);
-  --color-fill-on-dark: var(--fill-on-dark);
-  --color-outline-strong: var(--outline-strong);
-
-  --text-display-xl: var(--text-display-xl);
-  --text-display-l: var(--text-display-l);
-  --text-display-m: var(--text-display-m);
-  --text-display-s: var(--text-display-s);
-  --text-title: var(--text-title);
-  --text-body-l: var(--text-body-l);
-  --text-small: var(--text-small);
-  --text-caption: var(--text-caption);
-
-  /* Replace the hard-coded 16px / 12px / 999px lines with these. */
-  --radius-panel: var(--radius-panel);
-  --radius-card: var(--radius-card);
-  --radius-tile: var(--radius-tile);
-  --radius-inline: var(--radius-inline);
-  --radius-pill: var(--radius-pill);
-
-  --shadow-float: var(--shadow-float);
-  --ease-smooth: var(--ease-smooth);
 }

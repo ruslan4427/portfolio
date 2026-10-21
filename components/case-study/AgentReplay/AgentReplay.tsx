@@ -93,7 +93,12 @@ export function AgentReplay({ data }: { data: ReplayData }) {
         </div>
       </header>
 
-      <div className="overflow-x-auto">
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Agent replay diagram (scrolls sideways)"
+        className="overflow-x-auto focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+      >
         <svg
           viewBox={`0 0 ${data.viewBox.width} ${data.viewBox.height}`}
           className="h-auto w-full min-w-[640px]"

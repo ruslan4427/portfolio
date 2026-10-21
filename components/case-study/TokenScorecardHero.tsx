@@ -57,7 +57,7 @@ function MixBar({ mix, active, scale = 1 }: { mix: TokenScorecardModelMix; activ
         ))}
       </div>
       <dl
-        className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-sans uppercase tracking-wide text-[color:var(--ink-muted)]"
+        className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-sans text-[color:var(--ink-muted)]"
         style={{ fontSize: `${0.6875 * scale}rem` }}
       >
         {entries.map((e, i) => (
@@ -125,7 +125,7 @@ function ScorecardBody({
             >
               unmeasurable
             </div>
-            <p className="mt-3 max-w-[36ch] font-sans text-xs text-[color:var(--ink-muted)]">
+            <p className="mt-3 max-w-[36ch] font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
               Pre-ShipLoop sessions ran in shared home-dir logs; token
               attribution isn’t reconstructable.
             </p>
@@ -133,21 +133,21 @@ function ScorecardBody({
         )}
 
         <motion.dl
-          className="mt-6 flex flex-wrap gap-x-6 gap-y-3 font-sans text-xs text-[color:var(--ink-muted)]"
+          className="mt-6 flex flex-wrap gap-x-6 gap-y-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.65, ease: EASE }}
         >
           <div className="flex items-baseline gap-1.5">
-            <dt className="uppercase tracking-wide">Complexity</dt>
+            <dt>Complexity</dt>
             <dd className="text-[color:var(--ink-body)]">{scorecard.complexity}</dd>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <dt className="uppercase tracking-wide">Duration</dt>
+            <dt>Duration</dt>
             <dd className="text-[color:var(--ink-body)]">{scorecard.duration}</dd>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <dt className="uppercase tracking-wide">Tier</dt>
+            <dt>Tier</dt>
             <dd className="text-[color:var(--ink-body)]">{TIER_LABEL[scorecard.tier]}</dd>
           </div>
         </motion.dl>
@@ -155,7 +155,7 @@ function ScorecardBody({
 
       <div>
         <motion.h3
-          className="font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+          className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.16, ease: EASE }}
@@ -188,7 +188,7 @@ export function TokenScorecardHero({ scorecard }: { scorecard?: TokenScorecard }
       <div className="flex items-start justify-between gap-3">
         <h2
           id="token-scorecard-heading"
-          className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]"
+          className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
         >
           Token scorecard
         </h2>
@@ -196,7 +196,7 @@ export function TokenScorecardHero({ scorecard }: { scorecard?: TokenScorecard }
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Expand token scorecard"
-          className="font-sans text-[10px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)] transition hover:text-[color:var(--ink-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
+          className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] transition hover:text-[color:var(--ink-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
         >
           Expand ↗
         </button>

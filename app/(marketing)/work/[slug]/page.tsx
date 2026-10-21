@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArtifactList } from "@/components/case-study/ArtifactList";
-import { DevlogRefs } from "@/components/case-study/DevlogRefs";
 import { BuildTimeline } from "@/components/case-study/BuildTimeline";
+import { CaseNav } from "@/components/case-study/CaseNav";
+import { CaseReader, LensControls } from "@/components/case-study/CaseReader";
+import { ChapterRail } from "@/components/case-study/ChapterRail";
+import { DevlogRefs } from "@/components/case-study/DevlogRefs";
+import { GlanceBento } from "@/components/case-study/GlanceBento";
+import { LensCTA } from "@/components/case-study/LensCTA";
+import { LensHeadline, LensStats } from "@/components/case-study/LensHero";
 import { TokenScorecardHero } from "@/components/case-study/TokenScorecardHero";
-import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
-import { StackRow } from "@/components/mdx/CaseStudySchemas";
 import { MaskReveal } from "@/components/ui/MaskReveal";
 import { Reveal } from "@/components/ui/Reveal";
-import { SectionBadge } from "@/components/ui/SectionBadge";
+import { caseLenses } from "@/content/case-lenses";
 import { getCaseStudy } from "@/content/case-studies";
 import { projects } from "@/content/projects";
+import { extractChapters } from "@/lib/rehype-case-sections";
 
 type Params = { slug: string };
 
@@ -40,6 +46,8 @@ export async function generateMetadata({
   };
 }
 
+const BODY_ID = "case-body";
+
 export default async function CaseStudyPage({
   params,
 }: {
@@ -47,8 +55,11 @@ export default async function CaseStudyPage({
 }) {
   const { slug } = await params;
   const study = await getCaseStudy(slug);
-  if (!study) notFound();
+  const lensData = caseLenses[slug];
+  if (!study || !lensData) notFound();
   const { frontmatter, source } = study;
+  const project = projects.find((p) => p.slug === slug);
+  const chapters = extractChapters(source);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -66,9 +77,11 @@ export default async function CaseStudyPage({
     mainEntityOfPage: `https://hrekov.dev/work/${frontmatter.slug}`,
   };
 
-  const stats = (frontmatter.supportingArtifacts ?? []).filter(
-    (a) => a.type === "cost" || a.type === "timeline",
-  );
+  const longTitle = frontmatter.title.length > 18;
+  const hasMakingOf =
+    frontmatter.tokenScorecard ||
+    frontmatter.supportingArtifacts?.length ||
+    frontmatter.devlogRefs?.length;
 
   return (
     <main id="main" className="relative min-h-screen">
@@ -76,135 +89,143 @@ export default async function CaseStudyPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <article data-slug={frontmatter.slug}>
-      <BackToWork />
-      <header className="px-[var(--gutter)] pt-40 pb-16">
-        <div className="mx-auto max-w-[65ch]">
-          <Reveal className="mb-8 flex justify-center">
-            <SectionBadge label={frontmatter.status} />
-          </Reveal>
-          <h1 className="text-center font-serif text-[clamp(56px,9vw,120px)] leading-[0.95] text-[color:var(--ink-primary)]">
-            <MaskReveal mode="mount" delay={0.15}>
-              {frontmatter.title}
-            </MaskReveal>
-          </h1>
-          <Reveal delay={0.25}>
-            <p className="mt-8 text-center text-xl leading-[1.55] text-[color:var(--ink-body)]">
-              {frontmatter.tagline}
-            </p>
-          </Reveal>
-          <Reveal delay={0.35}>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3 font-sans text-xs text-[color:var(--ink-muted)]">
-              <span>{frontmatter.role}</span>
-              <span aria-hidden>·</span>
-              <span>{frontmatter.year}</span>
-              <span aria-hidden>·</span>
-              <span>{frontmatter.readingTime} min read</span>
+      <CaseReader slug={slug} className="px-[var(--gutter)]">
+        <article data-slug={frontmatter.slug} className="mx-auto flex max-w-[var(--content-max)] flex-col">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-28">
+            <nav aria-label="Breadcrumb">
+              <Link
+                href="/work"
+                className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-4 font-sans text-sm text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+              >
+                <span aria-hidden>←</span> All cases
+              </Link>
+            </nav>
+            <LensControls />
+          </div>
+
+          <header className="flex flex-wrap items-end gap-x-14 gap-y-10 pt-16 pb-12">
+            <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+                {project && (
+                  <>
+                    <span>
+                      Case {project.index} of {String(projects.length).padStart(2, "0")}
+                    </span>
+                    <span aria-hidden>·</span>
+                  </>
+                )}
+                <span>{frontmatter.role}</span>
+                <span aria-hidden>·</span>
+                <span>{frontmatter.year}</span>
+                <span aria-hidden>·</span>
+                <span>{frontmatter.readingTime} min full read</span>
+                <span className="rounded-[var(--radius-pill)] border border-[color:var(--outline)] px-2.5 py-0.5 text-[color:var(--ink-primary)]">
+                  {lensData.statusLabel}
+                </span>
+              </div>
+              <h1
+                className={`font-serif leading-[0.95] text-[color:var(--ink-primary)] ${
+                  longTitle
+                    ? "max-w-[16ch] text-[length:var(--type-display-l)]"
+                    : "text-[length:var(--type-display-xl)]"
+                }`}
+              >
+                <MaskReveal mode="mount" delay={0.1}>
+                  {frontmatter.title}
+                </MaskReveal>
+              </h1>
+              <LensHeadline data={lensData} />
             </div>
-          </Reveal>
-          {frontmatter.stackItems && frontmatter.stackItems.length > 0 && (
-            <Reveal delay={0.45} className="mt-8">
-              <StackRow
-                items={frontmatter.stackItems}
-                live={frontmatter.live}
-                dateRange={frontmatter.dateRange}
-              />
+            <div className="min-w-0 flex-[1_1_340px]">
+              <LensStats data={lensData} />
+            </div>
+          </header>
+
+          {frontmatter.heroImage && (
+            <Reveal delay={0.1} className="pb-12">
+              <figure className="relative aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+                <Image
+                  src={frontmatter.heroImage.src}
+                  alt={frontmatter.heroImage.alt}
+                  fill
+                  sizes="(min-width: 1200px) 1200px, 92vw"
+                  priority
+                  className="object-cover"
+                />
+              </figure>
             </Reveal>
           )}
-        </div>
-      </header>
 
-      {frontmatter.heroImage && (
-        <Reveal delay={0.1} className="px-[var(--gutter)] pb-16">
-          <figure className="mx-auto max-w-[1100px]">
-            <div className="relative aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
-              <Image
-                src={frontmatter.heroImage.src}
-                alt={frontmatter.heroImage.alt}
-                fill
-                sizes="(min-width: 1200px) 1100px, 92vw"
-                priority
-                className="object-cover"
-              />
-            </div>
-          </figure>
-        </Reveal>
-      )}
+          <div className="pb-16">
+            <GlanceBento
+              glance={lensData.glance}
+              stack={frontmatter.stack}
+              scorecard={frontmatter.tokenScorecard}
+            />
+          </div>
 
-      {frontmatter.recruiterSummary && (
-        <section className="px-[var(--gutter)] pb-12">
-          <div className="mx-auto max-w-[65ch] rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8">
-            <h2 className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-              At a glance
-            </h2>
-            <div className="mt-4 space-y-4 text-[15px] leading-[1.7] text-[color:var(--ink-body)]">
-              {frontmatter.recruiterSummary
-                .trim()
-                .split(/\n{2,}/)
-                .map((para, i) => (
-                  <p key={`recruiter-${i}`}>{para.trim()}</p>
-                ))}
-            </div>
-            {stats.length > 0 && (
-              <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-[color:var(--hairline)] pt-6">
-                {stats.map((s, i) => (
-                  <div key={`stat-${i}`} className="flex flex-col">
-                    <dt className="font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
-                      {s.type === "cost" ? "Cost" : "Timeline"} · {s.label}
-                    </dt>
-                    <dd className="mt-1 font-serif text-xl text-[color:var(--ink-primary)] tabular-nums">
-                      {s.detail ?? s.label}
-                    </dd>
+          <div className="grid grid-cols-1 gap-x-14 gap-y-8 border-t border-[color:var(--hairline)] pt-16 lg:grid-cols-[var(--rail-w)_minmax(0,1fr)]">
+            <ChapterRail chapters={chapters} />
+            <div id={BODY_ID} className="min-w-0 max-w-[720px]">
+              {frontmatter.recruiterSummary && (
+                <div className="mb-10 rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-7">
+                  <h2 className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+                    In short
+                  </h2>
+                  <div className="mt-3 space-y-4 text-[length:var(--type-small)] leading-[1.7] text-[color:var(--ink-body)]">
+                    {frontmatter.recruiterSummary
+                      .trim()
+                      .split(/\n{2,}/)
+                      .map((para, i) => (
+                        <p key={`summary-${i}`}>{para.trim()}</p>
+                      ))}
                   </div>
-                ))}
-              </dl>
-            )}
+                </div>
+              )}
+              <CaseStudyBody source={source} />
+            </div>
           </div>
-        </section>
-      )}
 
-      {frontmatter.tokenScorecard && (
-        <section className="px-[var(--gutter)] pb-12">
-          <div className="mx-auto max-w-[65ch]">
-            <TokenScorecardHero scorecard={frontmatter.tokenScorecard} />
+          {hasMakingOf && (
+            <section
+              id="how-it-was-made"
+              aria-labelledby="how-it-was-made-heading"
+              className="mt-16 scroll-mt-24 border-t border-[color:var(--hairline)] pt-16 lg:pl-[calc(var(--rail-w)+56px)]"
+            >
+              <div className="flex max-w-[720px] flex-col gap-8">
+                <div className="flex flex-col gap-2">
+                  <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+                    Receipts
+                  </p>
+                  <h2
+                    id="how-it-was-made-heading"
+                    className="font-serif text-[length:var(--type-display-m)] leading-[1.02] text-[color:var(--ink-primary)]"
+                  >
+                    How it was made
+                  </h2>
+                </div>
+                {frontmatter.tokenScorecard && (
+                  <TokenScorecardHero scorecard={frontmatter.tokenScorecard} />
+                )}
+                {frontmatter.tokenScorecard?.phases && (
+                  <BuildTimeline slug={frontmatter.slug} phases={frontmatter.tokenScorecard.phases} />
+                )}
+                {frontmatter.supportingArtifacts && frontmatter.supportingArtifacts.length > 0 && (
+                  <ArtifactList artifacts={frontmatter.supportingArtifacts} />
+                )}
+                {frontmatter.devlogRefs && frontmatter.devlogRefs.length > 0 && (
+                  <DevlogRefs refs={frontmatter.devlogRefs} />
+                )}
+              </div>
+            </section>
+          )}
+
+          <div className="flex flex-col gap-4 pt-20 pb-32">
+            <LensCTA data={lensData} title={project?.name ?? frontmatter.title} />
+            <CaseNav slug={slug} />
           </div>
-        </section>
-      )}
-
-      {frontmatter.tokenScorecard?.phases && (
-        <section className="px-[var(--gutter)] pb-16">
-          <div className="mx-auto max-w-[65ch]">
-            <BuildTimeline slug={frontmatter.slug} phases={frontmatter.tokenScorecard.phases} />
-          </div>
-        </section>
-      )}
-
-      <div className="px-[var(--gutter)] pb-16">
-        <div className="mx-auto max-w-[65ch]">
-          <CaseStudyBody source={source} />
-        </div>
-      </div>
-
-      {frontmatter.supportingArtifacts && frontmatter.supportingArtifacts.length > 0 && (
-        <section className="px-[var(--gutter)] pb-12">
-          <div className="mx-auto max-w-[65ch]">
-            <ArtifactList artifacts={frontmatter.supportingArtifacts} />
-          </div>
-        </section>
-      )}
-
-      {frontmatter.devlogRefs && frontmatter.devlogRefs.length > 0 && (
-        <section className="px-[var(--gutter)] pb-32">
-          <div className="mx-auto max-w-[65ch]">
-            <DevlogRefs refs={frontmatter.devlogRefs} />
-          </div>
-        </section>
-      )}
-
-      {!frontmatter.supportingArtifacts?.length &&
-        !frontmatter.devlogRefs?.length &&
-        !frontmatter.tokenScorecard && <div className="pb-32" />}
-      </article>
+        </article>
+      </CaseReader>
     </main>
   );
 }

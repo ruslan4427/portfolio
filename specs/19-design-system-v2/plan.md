@@ -7,7 +7,7 @@
    mappings; point `@theme` radii at `var(--radius-*)`. Build + lint.
 2. **Type migration.** Map each `text-[clamp(...)]` to the nearest scale step
    (table on the artboard: 6 → xl, 7 → l, 8 → m, 5 → s). Replace
-   `text-[10px|11px|12px]` with `text-[length:var(--text-caption)]`; drop
+   `text-[10px|11px|12px]` with `text-[length:var(--type-caption)]`; drop
    `uppercase tracking-*` on labels (if §6.2 = yes).
 3. **Colour migration.** `--ink-faint` text → `--ink-muted`
    (CaseStudyVisuals.tsx:59, CaseStudySchemas.tsx:452). On-dark ramp in

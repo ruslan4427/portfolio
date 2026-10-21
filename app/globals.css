@@ -44,6 +44,52 @@
   --section-py: clamp(72px, 10vh, 128px);
   --content-max: 1200px;
   --gutter: clamp(24px, 5vw, 80px);
+
+  /* ---------- v2 additions (specs/19-design-system-v2) ---------- */
+
+  /* Inverse surface + ink on dark (panels only, not a dark mode) */
+  --bg-inverse: var(--cta);
+  --ink-on-dark: var(--cta-ink);
+  --ink-on-dark-muted: rgba(250, 250, 247, 0.72);
+  --hairline-on-dark: rgba(250, 250, 247, 0.14);
+  --fill-on-dark: rgba(250, 250, 247, 0.06);
+
+  /* Control boundary — inputs, toggles. --outline stays for card edges. */
+  --outline-strong: var(--ink-muted);
+
+  /* Type scale. 13px caption is the floor. */
+  --type-display-xl: clamp(56px, 9vw, 120px);
+  --type-display-l: clamp(44px, 7vw, 96px);
+  --type-display-m: clamp(32px, 4vw, 56px);
+  --type-display-s: clamp(24px, 2.6vw, 36px);
+  --type-title: 20px;
+  --type-body-l: 19px;
+  --type-small: 15px;
+  --type-caption: 13px;
+
+  /* Radii — named large panel + inline code */
+  --radius-panel: 24px;
+  --radius-inline: 6px;
+
+  /* Depth, focus, motion */
+  --shadow-float: 0 12px 40px rgba(17, 17, 17, 0.18);
+  --focus-ring: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--ink-primary);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 200ms;
+  --dur-reveal: 850ms;
+
+  /* Measures */
+  --measure: 65ch;
+  --measure-wide: 75ch;
+  --rail-w: 240px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-reveal: 0ms;
+  }
 }
 
 @theme inline {
@@ -58,12 +104,20 @@
   --color-cta: var(--cta);
   --color-cta-ink: var(--cta-ink);
   --color-status-live: var(--status-live);
+  --color-inverse: var(--bg-inverse);
+  --color-on-dark: var(--ink-on-dark);
+  --color-on-dark-muted: var(--ink-on-dark-muted);
+  --color-outline-strong: var(--outline-strong);
 
   --font-serif: var(--font-display);
   --font-sans: var(--font-inter);
 
+  /* Literal on purpose: same-name var() here would be self-referential.
+     Keep in sync with :root. */
+  --radius-panel: 24px;
   --radius-card: 16px;
   --radius-tile: 12px;
+  --radius-inline: 6px;
   --radius-pill: 999px;
 }
 
@@ -625,4 +679,24 @@ html.lenis body {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------- Case-study reader (Sprint 20) ---------- */
+/* Unlayered on purpose: "2-min read" must beat any display utility on the
+   hidden blocks. Each MDX ## section is wrapped by rehype-case-sections. */
+
+.case-section-more {
+  display: none;
+}
+
+[data-depth="short"] section[data-case-section]:not([data-open="true"]) > :not(h2):not(:nth-child(2)):not(.case-section-more) {
+  display: none;
+}
+
+[data-depth="short"] section[data-case-section]:not([data-open="true"]) > .case-section-more {
+  display: inline-flex;
+}
+
+section[data-case-section] {
+  scroll-margin-top: 96px;
 }

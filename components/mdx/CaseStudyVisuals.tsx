@@ -16,16 +16,16 @@ export function ValueStatement({
   eyebrow?: string;
 }) {
   return (
-    <aside className="not-prose my-12 border-y border-[color:var(--hairline)] py-10">
+    <div className="not-prose my-12 border-y border-[color:var(--hairline)] py-10">
       {eyebrow && (
-        <div className="mb-4 font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+        <div className="mb-4 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {eyebrow}
         </div>
       )}
       <div className="font-serif text-[clamp(28px,4vw,44px)] leading-[1.15] text-[color:var(--ink-primary)] [&>p]:m-0 [&>p]:text-[color:var(--ink-primary)] [&>p]:leading-[1.15]">
         {children}
       </div>
-    </aside>
+    </div>
   );
 }
 
@@ -56,7 +56,7 @@ export function NumberedCards({
           className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6"
         >
           <div className="flex items-start justify-between gap-3">
-            <div className="font-serif text-5xl leading-none text-[color:var(--ink-faint)] tabular-nums">
+            <div className="font-serif text-5xl leading-none text-[color:var(--ink-muted)] tabular-nums">
               {String(i + 1).padStart(2, "0")}
             </div>
             {item.icon && (
@@ -95,7 +95,7 @@ export function Pullquote({
         </div>
       </blockquote>
       {attribution && (
-        <figcaption className="mt-3 pl-6 font-sans text-xs uppercase tracking-wider text-[color:var(--ink-muted)]">
+        <figcaption className="mt-3 pl-6 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           — {attribution}
         </figcaption>
       )}
@@ -131,7 +131,7 @@ export function ImpactStats({
             {item.label}
           </div>
           {item.hint && (
-            <div className="mt-1 font-sans text-xs text-[color:var(--ink-muted)]">
+            <div className="mt-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
               {item.hint}
             </div>
           )}
@@ -210,7 +210,7 @@ export function Figure({
         </button>
       </div>
       {caption && (
-        <figcaption className="mt-3 text-center font-sans text-xs text-[color:var(--ink-muted)]">
+        <figcaption className="mt-3 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}

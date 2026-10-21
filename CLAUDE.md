@@ -154,8 +154,10 @@ app/                    Next.js App Router
   page.tsx              Home: Hero → SelectedWork → Services (teaser) → HowItWorks
                         → Benefits → ExperienceMini → Testimonials (Footer card
                         in layout.tsx is the sole closer — no per-page CTA)
-  globals.css           Tokens (:root) + @theme inline mapping + case-study
-                        view toggle rules ([data-view] show/hide)
+  globals.css           Tokens (:root, incl. v2 additions from
+                        specs/19-design-system-v2) + @theme inline mapping +
+                        case reader rules ([data-depth="short"] collapses
+                        each MDX section to heading + lead)
   not-found.tsx         Root 404 (SectionBadge + Playfair h1 + Home/Selected work CTAs)
   opengraph-image.tsx   Home OG (Playfair embedded via lib/og-fonts)
   sitemap.ts            Async — pulls per-study + per-blog-post lastmod
@@ -166,8 +168,11 @@ app/                    Next.js App Router
     services/page.tsx   Full 5-format engagement grid (ServicesFull) + full-time card
     work/page.tsx       Work index with WorkIndex (Role/Stack/Year filters)
     work/[slug]/
-      page.tsx          Case study (BackToWork pill → /work, Article JSON-LD,
-                        ViewToggle mounted only if hasEnhanced fields present)
+      page.tsx          Case study (Sprint 20): CaseReader (lens + depth) →
+                        hero with LensHeadline/LensStats → GlanceBento →
+                        ChapterRail + MDX body → "How it was made" receipts
+                        (TokenScorecardHero, BuildTimeline, artifacts, devlog)
+                        → LensCTA → CaseNav. Article JSON-LD.
       loading.tsx       MDX-bundle skeleton (badge/title/tagline/body pulse)
       not-found.tsx     Case study 404 (SectionBadge + Playfair h1 + Back to work CTA)
       opengraph-image.tsx  Per-slug OG (Playfair embedded)
@@ -193,8 +198,11 @@ components/
                         BlogReadTracker (IO sentinel per slug)
   blog/                 PostCard (featured grid), PostRow (chronological)
   canvas/DotGrid.tsx    Cursor-reactive canvas (mounted once in root layout)
-  case-study/           ArtifactList, DevlogRefs, ViewToggle
-                        (fixed pos, data-view flip, localStorage-persisted)
+  case-study/           CaseReader (lens founder|hiring|engineer + depth
+                        short|full, localStorage, ?for= pre-select), LensHero,
+                        ChapterRail, CaseSection, GlanceBento, LensCTA,
+                        CaseNav, ArtifactList, DevlogRefs, TokenScorecardHero,
+                        BuildTimeline, AgentReplay
   layout/               Nav (route-based, prefix match; Journal between Work +
                         About), Footer, SmoothScroll, SkipToMain, BackToWork,
                         BackToJournal
@@ -206,10 +214,11 @@ components/
                         primitives — variant primary|outline, size sm|md), FadeUp
   mdx/                  CaseStudyBody, BlogPostBody, MdxComponents,
                         BlogComponents (Artifact, Cost, PromptLog, Diff,
-                        TechnicalDetail — TechnicalDetail is CSS-hidden in
-                        case-study executive view)
+                        TechnicalDetail). CaseStudyBody runs
+                        lib/rehype-case-sections (wraps each ## in a section)
 lib/
   analytics.ts          track(event, params) — wraps window.gtag
+  rehype-case-sections.ts  Section wrapper + extractChapters (same ids)
   consent.ts            Cookie helpers (consent + geo readers/writers)
   consent-geo.ts        EU_COUNTRIES set (27 EU + GB + NO/IS/LI + CH) +
                         isEuCountry() helper
@@ -225,6 +234,8 @@ content/
                         optional recruiterSummary / supportingArtifacts / devlogRefs
                         (Artifact type imported from content/blog.ts)
   case-studies/         MDX bodies (filename must match slug — no date prefix)
+  case-lenses.ts        Per-case reading-lens copy: glance, status label,
+                        headline/stats/CTA per lens (numbers restated from MDX)
   blog.ts               Types + loader (mirror of case-studies.ts convention);
                         BlogFormat, Artifact, BlogFrontmatter, BlogPost;
                         validators throw on invalid format/date/duplicate slug/

@@ -2628,3 +2628,20 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Result:** Single-file change to `app/(marketing)/about/page.tsx`. No new colors, radii, fonts, or tokens. `tsc` clean for this file (only pre-existing `LayoutProps` typegen error in `app/layout.tsx`); eslint clean.
 
 **Lesson:** Page-level redesigns can stay token-pure by changing composition (rails, ledgers, rules) rather than surface treatment — the ink ramp + hairline give enough hierarchy without a second hue.
+
+## 2026-10-21 — Sprint 20 · case studies redesigned on the full content
+
+**Problem:** The 2026-10-18 audit (`memory/qa-iteration-1.md`) found the case studies were the weakest part of the site for a prospective client: they opened with internal metrics ("Token scorecard", "unmeasurable", "Tier 0 · naked", status "sprint-4"), ran 7–24 screens with no skim path, and ended in a dead end. Two of six had a summary; the documented ViewToggle was no longer mounted. Design canvas mockups (one template, six cases) were approved; the redesign had to cover *all* MDX content, not a condensed copy.
+
+**Decision:**
+- Method: ui-ux-pro (`ruslan4427/ui-ux-pro`) — tokens first (`extract_tokens.py` found the 19 existing tokens), contrast via `check_contrast.py`, visual check at 1440 and 390, trends applied selectively (progressive disclosure, bento overview, transparent AI disclosure). Its minimalist style file was *not* allowed to override project rules (Inter, no pastels, no mono labels).
+- Merged design system v2 tokens into `globals.css` (additive). `:root` type tokens are `--type-*`; `@theme` radii stay literal because a same-name `var()` inside `@theme` is self-referential.
+- One template for every case: hero (lens headline + 4 lens stats) → "At a glance" bento (problem, outcome, built with, timeline, Made with Claude) → chapter rail over every `##` section + the full MDX → "How it was made" receipts → lens CTA on the inverse panel → previous/next case.
+- Reading lens (Founder / Hiring manager / Engineer) changes headline, stats, the "Start here" chapter and the CTA; `?for=` pre-selects it for outreach links; persisted in localStorage via `useSyncExternalStore` (hydration-safe, no setState-in-effect).
+- Reading depth: a rehype pass wraps each `##` in a `<section>`; `[data-depth="short"]` CSS shows heading + first block, with a per-section "Read the full section". Nothing is removed from the DOM, so crawlers and full readers see everything.
+- Lens copy lives in `content/case-lenses.ts`, every number restated from the MDX or `projects.ts`.
+- Restyled case MDX components to v2: faint-ink text → muted, decorative green/red in diagrams and RaceTimeline → monochrome recipes (glyph/line style carries the state), 10–12px text → 13px caption, uppercase tracked labels → sentence case, mono labels → Inter, off-token radii → tokens, scrollable `<pre>` and AgentReplay keyboard-focusable, nested `<aside>` → `<div>`, empty table corner named.
+
+**Result:** All 6 `/work/<slug>` pages build statically and render every MDX section. axe on the 6 cases: color-contrast, scrollable-region-focusable, region, nested-landmark and empty-table-header all gone (were serious/moderate on every case). No horizontal overflow at 390px. "2-min read" pages run 7.3–9.9k px vs 7.5–22k full. Prod build: no hydration errors (the dev-only warning on hrekov-dev/lexora/smm-factory predates this sprint and does not reproduce in `next start`). tsc clean except the pre-existing `LayoutProps` typegen error; new files lint-clean (two pre-existing react-compiler errors in CaseStudySchemas remain).
+
+**Lesson:** "Redesign all the content" is a template + component-style problem, not a copy problem. Restyling the MDX primitives and wrapping sections at the rehype layer moved 2,500 lines of case content into the new system without touching a single MDX body — and the depth toggle came almost free once sections were real DOM nodes.
