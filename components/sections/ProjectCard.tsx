@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { LensView } from "@/content/case-lenses";
+import type { CaseLensData } from "@/content/case-lenses";
 import type { Project } from "@/content/projects";
 import { AnimatedCover } from "./AnimatedCover";
 import { FieldmarkCover } from "./FieldmarkCover";
@@ -73,88 +73,51 @@ const chipOnDark =
   "inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--hairline-on-dark)] bg-[color:var(--bg-inverse)]/70 px-2.5 py-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-on-dark)] backdrop-blur-md";
 
 /**
- * Case card for /work. `view` is the current reading lens for this case;
- * without one the card falls back to the project pitch and metric.
+ * Case card for /work. Every case gets the same card: number, what it is,
+ * what came out of it, how long it took and the headline result.
  */
-export function ProjectCard({
-  project,
-  view,
-  statusLabel,
-  href,
-  feature = false,
-  startHereWhy,
-}: {
-  project: Project;
-  view?: LensView;
-  statusLabel?: string;
-  href?: string;
-  feature?: boolean;
-  startHereWhy?: string;
-}) {
-  const stats = view ? view.stats.slice(0, feature ? 4 : 2) : [{ label: "Result", value: project.metric.split(" · ")[0] }];
-  const headline = view?.headline ?? project.pitch;
+export function ProjectCard({ project, total, lens }: { project: Project; total: number; lens?: CaseLensData }) {
+  const facts = [
+    lens ? { label: "Built in", value: lens.glance.time } : null,
+    { label: "Result", value: project.metric.split(" · ")[0] },
+  ].filter((f): f is { label: string; value: string } => f !== null);
 
   return (
     <Link
-      href={href ?? `/work/${project.slug}`}
+      href={`/work/${project.slug}`}
       className="group block h-full rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
     >
-      <article
-        className={`flex h-full overflow-hidden rounded-[var(--radius-card)] border bg-[color:var(--bg-elevated)] transition-transform duration-[var(--dur-fast)] group-hover:-translate-y-1 group-focus-visible:-translate-y-1 motion-reduce:transform-none ${
-          feature
-            ? "flex-col border-[color:var(--accent)] md:flex-row"
-            : "flex-col border-[color:var(--hairline)]"
-        }`}
-      >
-        <div
-          className={`relative overflow-hidden bg-[color:var(--bg-inverse)] ${
-            feature ? "aspect-[16/10] md:aspect-auto md:w-[56%] md:shrink-0" : "aspect-[16/10]"
-          }`}
-        >
+      <article className="flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] transition-transform duration-[var(--dur-fast)] group-hover:-translate-y-1 group-focus-visible:-translate-y-1 motion-reduce:transform-none">
+        <div className="relative aspect-[16/10] overflow-hidden bg-[color:var(--bg-inverse)]">
           <Cover project={project} />
-          <span className={`absolute left-4 top-4 ${chipOnDark}`}>{statusLabel ?? fallbackStatus[project.status]}</span>
-          <span className={`absolute right-4 top-4 tabular-nums ${chipOnDark}`}>{project.year}</span>
+          <span className={`absolute left-4 top-4 ${chipOnDark}`}>{lens?.statusLabel ?? fallbackStatus[project.status]}</span>
         </div>
 
-        <div className={`flex min-w-0 flex-1 flex-col gap-4 ${feature ? "p-7 md:p-9" : "p-6"}`}>
-          {feature && (
-            <span className="w-fit rounded-[var(--radius-pill)] bg-[color:var(--accent)] px-2.5 py-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--accent-ink)]">
-              Start here
-            </span>
-          )}
-          <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 p-6 md:p-7">
+          <div className="flex flex-col gap-1.5">
             <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] tabular-nums">
-              Case {project.index} · {project.role}
+              <span className="text-[color:var(--accent)]">{project.index}</span> / {String(total).padStart(2, "0")} · {project.role} · {project.year}
             </p>
-            <h3
-              className={`font-serif leading-[1.02] text-[color:var(--ink-primary)] ${
-                feature ? "text-[length:var(--type-display-m)]" : "text-[32px]"
-              }`}
-            >
-              {project.name}
-            </h3>
+            <h3 className="font-serif text-[32px] leading-[1.02] text-[color:var(--ink-primary)]">{project.name}</h3>
+            <p className="text-[length:var(--type-body-l)] leading-[1.45] text-[color:var(--ink-body)]">{project.tagline}</p>
           </div>
-          <p
-            className={`text-[color:var(--ink-body)] ${
-              feature ? "text-[length:var(--type-body-l)] leading-[1.5]" : "line-clamp-3 text-[length:var(--type-small)] leading-[1.55]"
-            }`}
-          >
-            {headline}
-          </p>
-          {feature && startHereWhy && (
-            <p className="text-[length:var(--type-small)] leading-[1.55] text-[color:var(--ink-muted)]">{startHereWhy}</p>
+          {lens && (
+            <p className="text-[length:var(--type-small)] leading-[1.55] text-[color:var(--ink-muted)]">
+              <span className="text-[color:var(--ink-primary)]">Outcome: </span>
+              {lens.glance.outcome}
+            </p>
           )}
-          <dl className={`mt-auto grid gap-x-5 gap-y-3 ${feature ? "grid-cols-2" : "grid-cols-2"}`}>
-            {stats.map((s) => (
-              <div key={s.label} className="border-t-2 border-[color:var(--accent)] pt-2">
+          <dl className="mt-auto grid grid-cols-2 gap-x-5 gap-y-3">
+            {facts.map((s) => (
+              <div key={s.label} className="border-t border-[color:var(--hairline)] pt-2">
                 <dt className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">{s.label}</dt>
-                <dd className="mt-0.5 font-serif text-[24px] leading-[1.1] text-[color:var(--ink-primary)] tabular-nums">{s.value}</dd>
+                <dd className="mt-0.5 font-sans text-[length:var(--type-small)] font-semibold leading-[1.35] text-[color:var(--ink-primary)]">{s.value}</dd>
               </div>
             ))}
           </dl>
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <ul className="flex flex-wrap gap-1.5">
-              {project.stack.slice(0, feature ? 6 : 3).map((t) => (
+              {project.stack.slice(0, 3).map((t) => (
                 <li
                   key={t}
                   className="rounded-[var(--radius-pill)] border border-[color:var(--outline)] px-2.5 py-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-body)]"

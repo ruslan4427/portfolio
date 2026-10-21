@@ -223,22 +223,6 @@ export const caseLenses: Record<string, CaseLensData> = {
   },
 };
 
-/** Which case answers each reader first on /work. */
-export const workStartHere: Record<Lens, { slug: string; why: string }> = {
-  founder: {
-    slug: "noble-saas",
-    why: "A real product with a price, a payback and live billing — the clearest picture of what a build delivers.",
-  },
-  hiring: {
-    slug: "hrekov-dev",
-    why: "How the work actually happens: every decision dated, every rule earned, in a repo you can walk.",
-  },
-  engineer: {
-    slug: "smm-factory",
-    why: "Eight agents, model stratification and a render pipeline — the most architecture per page.",
-  },
-};
-
 export function parseLens(value: string | null | undefined): Lens | null {
   return value === "founder" || value === "hiring" || value === "engineer" ? value : null;
 }

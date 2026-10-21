@@ -168,9 +168,9 @@ app/                    Next.js App Router
   (marketing)/
     about/page.tsx      Long-form bio, values, principles, full experience
     services/page.tsx   Full 5-format engagement grid (ServicesFull) + full-time card
-    work/page.tsx       Work index (Sprint 23): lens control shared with case
-                        pages → "Start here" feature card per lens → grid with
-                        lens headline/stats, role/stack chips with counts
+    work/page.tsx       Work index (Sprint 23): count in the h1 → role/stack
+                        chips with counts + "Showing N of M" → one equal grid
+                        of numbered cards (01 / 06), all cases in order
     work/[slug]/
       page.tsx          Case study (Sprint 20): CaseReader (lens + depth) →
                         hero with LensHeadline/LensStats → GlanceBento →

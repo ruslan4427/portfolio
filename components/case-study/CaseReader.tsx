@@ -135,7 +135,7 @@ function segmentClass(active: boolean) {
   }`;
 }
 
-export function LensControls({ showDepth = true }: { showDepth?: boolean }) {
+export function LensControls() {
   const { lens, depth, setLens, setDepth } = useCaseReader();
 
   return (
@@ -160,7 +160,6 @@ export function LensControls({ showDepth = true }: { showDepth?: boolean }) {
           </button>
         ))}
       </div>
-      {showDepth && (
       <div
         role="group"
         aria-label="Reading depth"
@@ -183,7 +182,6 @@ export function LensControls({ showDepth = true }: { showDepth?: boolean }) {
           Full story
         </button>
       </div>
-      )}
     </div>
   );
 }
