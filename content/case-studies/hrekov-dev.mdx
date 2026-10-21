@@ -1,7 +1,7 @@
 ---
 slug: hrekov-dev
 title: The portfolio that documents itself
-tagline: Nineteen sprints, forty-six memory files, one recursive proof.
+tagline: Twenty-one sprints, forty-six memory files, one recursive proof.
 role: Meta · solo build
 stack:
   - Next.js 16
@@ -68,10 +68,10 @@ supportingArtifacts:
     href: "https://github.com/ruslan4427/portfolio"
   - type: cost
     label: "DEVLOG → STABLE_LOGIC promotion rate"
-    detail: "11 rules graduated from 70 journal entries · 15.7%"
+    detail: "11 rules graduated from 71 journal entries · 15.5%"
   - type: timeline
     label: "Cadence to date"
-    detail: "19 sprints across 32 calendar days · ~0.6 sprints/day"
+    detail: "21 sprints across 32 calendar days · ~0.7 sprints/day"
   - type: timeline
     label: "Ramp-up saved per new session"
     detail: "~92 min · 46 memory files × ~2 min context re-hydration each"
@@ -106,8 +106,8 @@ isn't — the site is a byproduct. The actual artifact is the workflow
 that produced it, and the workflow only holds up if I can show it
 working on something. This portfolio was the something.
 
-Forty-six memory files. Seventy journal entries. Eleven of them
-promoted to durable rules. Nineteen sprints across thirty-two calendar days,
+Forty-six memory files. Seventy-one journal entries. Eleven of them
+promoted to durable rules. Twenty-one sprints across thirty-two calendar days,
 solo. Every decision is on disk, timestamped, in a public repo you can
 clone. Half the interesting ones are wrong on the first pass — the
 discipline is that the second pass catches them before they compound.
@@ -119,13 +119,13 @@ engagement, don't read a whitepaper. Read the machine that made itself.
   columns={3}
   items={[
     { value: "46", label: "memory files on disk" },
-    { value: "70", label: "DEVLOG entries" },
-    { value: "11 → 15.7%", label: "promoted to STABLE_LOGIC" },
+    { value: "71", label: "DEVLOG entries" },
+    { value: "11 → 15.5%", label: "promoted to STABLE_LOGIC" },
   ]}
 />
 
 <ActivityChart
-  title="Nineteen sprints across thirty-two calendar days — the ShipLoop pulse"
+  title="Twenty-one sprints across thirty-two calendar days — the ShipLoop pulse"
   metric="sprint entries"
   yAxisLabel="sprint entries per day"
   phases={[
@@ -365,13 +365,13 @@ required artifact.
       meta: "CLAUDE.md · ShipLoop Protocol",
       diagram: {
         width: 1100,
-        height: 240,
+        height: 280,
         nodes: [
-          { id: "msg", shape: "role", icon: "user", label: "Message", x: 90, y: 120 },
-          { id: "clf", shape: "action", icon: "bolt", label: "Classify silently", sub: "nine classes", x: 320, y: 120 },
-          { id: "haiku", shape: "event", icon: "doc", label: "Haiku tier", sub: "Q · M", x: 620, y: 50 },
-          { id: "sonnet", shape: "event", icon: "code", label: "Sonnet tier", sub: "B · S · R · T · O", x: 620, y: 120 },
-          { id: "opus", shape: "event", icon: "shield", label: "Opus tier", sub: "L · D", x: 620, y: 190 },
+          { id: "msg", shape: "role", icon: "user", label: "Message", x: 90, y: 140 },
+          { id: "clf", shape: "action", icon: "bolt", label: "Classify silently", sub: "nine classes", x: 320, y: 140 },
+          { id: "haiku", shape: "process", icon: "doc", label: "Haiku tier", sub: "Q · M", x: 620, y: 48 },
+          { id: "sonnet", shape: "process", icon: "code", label: "Sonnet tier", sub: "B · S · R · T · O", x: 620, y: 140 },
+          { id: "opus", shape: "process", icon: "shield", label: "Opus tier", sub: "L · D", x: 620, y: 232 },
         ],
         edges: [
           { from: "msg", to: "clf" },
@@ -389,9 +389,9 @@ required artifact.
         width: 1100,
         height: 200,
         nodes: [
-          { id: "disc", shape: "event", icon: "doc", label: "Discovery", sub: "project-discovery.md", x: 96, y: 100 },
+          { id: "disc", shape: "process", icon: "doc", label: "Discovery", sub: "project-discovery.md", x: 96, y: 100 },
           { id: "spec", shape: "process", icon: "pin", label: "Spec + Plan + Tasks", sub: "triple on disk", x: 312, y: 100 },
-          { id: "build", shape: "event", icon: "code", label: "Build", sub: "iteration-N.md", x: 528, y: 100 },
+          { id: "build", shape: "process", icon: "code", label: "Build", sub: "iteration-N.md", x: 528, y: 100 },
           { id: "qa", shape: "action", icon: "check", label: "QA", sub: "qa-iter-N.md", x: 752, y: 100 },
           { id: "ship", shape: "event", icon: "cloud", label: "Ship", sub: "release-N.md", x: 976, y: 100, color: "success", outcome: "approved" },
         ],
@@ -414,19 +414,19 @@ and why) live on the [About page's stack section](/about#stack). I won't
 duplicate them here; the point of the routing rules is that they're
 one lookup away, not restated everywhere.
 
-## 6. DEVLOG → STABLE\_LOGIC — the 15.7% number
+## 6. DEVLOG → STABLE\_LOGIC — the 15.5% number
 
 <ImpactStats
   columns={3}
   items={[
-    { value: "70", label: "DEVLOG entries authored" },
+    { value: "71", label: "DEVLOG entries authored" },
     { value: "11", label: "promoted to STABLE_LOGIC" },
-    { value: "15.7%", label: "promotion rate · the compounding half" },
+    { value: "15.5%", label: "promotion rate · the compounding half" },
   ]}
 />
 
-Seventy entries in `DEVLOG.md`. Eleven of them promoted to
-`STABLE_LOGIC.md`. That's 15.7%. The other 84.3% stayed in the journal.
+Seventy-one entries in `DEVLOG.md`. Eleven of them promoted to
+`STABLE_LOGIC.md`. That's 15.5%. The other 84.5% stayed in the journal.
 
 Journaling and learning are not the same thing. A journal captures what
 happened; that's cheap and worth doing. But most of what happened is
@@ -475,12 +475,12 @@ Journaling is the raw material. Promotion is the discipline.
     { shape: "action", label: "Promotion gate" },
   ]}
   nodes={[
-    { id: "session", shape: "role", icon: "user", label: "Session", x: 60, y: 210 },
-    { id: "work", shape: "event", icon: "code", label: "Work complete", sub: "feature, bug, or refactor", x: 260, y: 210 },
-    { id: "devlog", shape: "event", icon: "doc", label: "DEVLOG entry", sub: "Problem · Decision · Result", x: 500, y: 210 },
-    { id: "gate", shape: "action", icon: "check", label: "Survived re-test?", sub: "2 runs / sprint", x: 740, y: 210 },
-    { id: "promoted", shape: "event", icon: "shield", label: "STABLE_LOGIC rule", sub: "11 of 70 so far · 15.7%", x: 920, y: 90, color: "success", outcome: "approved" },
-    { id: "journal", shape: "event", icon: "doc", label: "Stays in journal", sub: "59 of 70 · dated, searchable", x: 920, y: 330, color: "faint" },
+    { id: "session", shape: "role", icon: "user", label: "Session", x: 76, y: 210 },
+    { id: "work", shape: "event", icon: "code", label: "Work complete", sub: "feature, bug, or refactor", x: 276, y: 210 },
+    { id: "devlog", shape: "event", icon: "doc", label: "DEVLOG entry", sub: "Problem · Decision · Result", x: 516, y: 210 },
+    { id: "gate", shape: "action", icon: "check", label: "Survived re-test?", sub: "2 runs / sprint", x: 756, y: 210 },
+    { id: "promoted", shape: "event", icon: "shield", label: "STABLE_LOGIC rule", sub: "11 of 71 so far · 15.5%", x: 936, y: 90, color: "success", outcome: "approved" },
+    { id: "journal", shape: "event", icon: "doc", label: "Stays in journal", sub: "60 of 71 · dated, searchable", x: 936, y: 330, color: "faint" },
   ]}
   edges={[
     { from: "session", to: "work" },
@@ -540,9 +540,9 @@ Journaling is the raw material. Promotion is the discipline.
 <MetricGrid
   columns={3}
   items={[
-    { value: "19", label: "sprints" },
+    { value: "21", label: "sprints" },
     { value: "32", label: "calendar days" },
-    { value: "~0.6", label: "sprints / day" },
+    { value: "~0.7", label: "sprints / day" },
   ]}
 />
 
@@ -771,7 +771,7 @@ more.
       label: "STABLE_LOGIC.md",
       title: "The 11 promoted rules",
       description:
-        "The 15.7% that graduated from DEVLOG — anti-drift rules that survive future refactors. Public example of the promotion pattern.",
+        "The 15.5% that graduated from DEVLOG — anti-drift rules that survive future refactors. Public example of the promotion pattern.",
       href: "https://github.com/ruslan4427/portfolio/blob/main/STABLE_LOGIC.md",
     },
     {

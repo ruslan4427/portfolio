@@ -111,8 +111,8 @@ raw divs.
 | `StackRow`         | Stack grid + `live` link tile + `dateRange`              |
 | `ValueStatement`   | Thesis block near top of body                            |
 | `BeforeAfter`      | Dated before/after panels around an iteration moment     |
-| `FlowSchema`       | BPMN-style multi-row flow (see §4 — most error-prone)    |
-| `Diagram`          | Single BPMN diagram without row scaffolding (see §6.1)   |
+| `FlowSchema`       | Multi-row flow, ISO 5807 notation (see §4 — most error-prone) |
+| `Diagram`          | Single flow / system diagram, same notation (see §6.1)   |
 | `RaceTimeline`     | Time-sequenced lanes (sessions × events) — race/arc stories (see §6.2) |
 | `ActivityChart`    | Phase-based bar chart: duration × rate across project phases (see §6.3) |
 | `PaybackBar`       | Horizontal 2-option comparison bar with % fills (see §6.4) |
@@ -153,16 +153,27 @@ clipping (viewBox too tight or node too close to edge), composition
 match shape geometry). The row card uses `overflow-hidden`, so anything that
 leaves the viewBox is sliced off.
 
-### 4.1 Shape dimensions (DO NOT change in MDX — read-only reference)
+### 4.1 Notation + shape dimensions (DO NOT change in MDX — read-only reference)
 
-Defined in `components/mdx/CaseStudySchemas.tsx:843`.
+Defined in `components/mdx/Schematic.tsx` (Sprint 21). Shapes follow
+ISO 5807 flowchart symbols, with C4 conventions for people and stores, so
+a reader who knows either notation reads the diagram without a key. Pick
+the MDX `shape` by **meaning**, never by look:
 
-| Shape     | w   | h   | Notes                                           |
-|-----------|-----|-----|-------------------------------------------------|
-| `role`    | 76  | 76  | Circle. For actors (Dev, PM, Reviewer).         |
-| `event`   | 160 | 72  | Rounded rect. Default — commits, submissions.   |
-| `action`  | 188 | 108 | Diamond. Decisions / reviews. Big to fit text.  |
-| `process` | 172 | 72  | Parallelogram. Running processes.               |
+| MDX `shape` | Renders as (standard)                  | w × h     | Use for                                  |
+|-------------|----------------------------------------|-----------|------------------------------------------|
+| `role`      | Person / role — dark box (C4 Person)   | 132 × 64  | Humans and agents acting (Dev, Me, Crew) |
+| `event`     | Data / signal — parallelogram (ISO data) | 176 × 76 | Messages, files, emails, payloads        |
+| `event` + icon `database`/`cache` | Data store — cylinder | 176 × 84 | Databases, queues, caches               |
+| `process`   | Process step — rectangle (ISO process) | 176 × 76  | Anything that *does* work: builds, APIs, submissions |
+| `action`    | Decision / gate — diamond (ISO decision) | 180 × 112 | Yes/no checks only — reviews, auth, "slot free?" |
+| any non-`action` node with `outcome` and no outgoing edge | Outcome — stadium (ISO terminator), ✓ / ✕ in the label | 176 × 64 | The flow's end state |
+
+Connectors are orthogonal (one elbow pair), arrowhead at the target only.
+`style: "dashed"` = async / optional / return path; `color: "faint"` =
+secondary path. Colour never carries meaning — shape, glyph and line style
+do. A legend for every symbol in use and a "Read as steps" text
+alternative (WCAG 1.1.1) are generated automatically.
 
 ### 4.2 viewBox margin — SYMMETRIC rule
 
@@ -225,10 +236,11 @@ reads as random noise. Use edge labels only for genuine branches
 
 ### 4.8 Outcome badges
 
-`outcome: "approved"` → green check extending +6px past node's right edge.
-`outcome: "denied"` → red cross, same offset. Only on terminal nodes of a
-flow. Compute viewBox using the −22 rule above when a terminal node has a
-badge.
+`outcome: "approved" | "denied"` prefixes the label with ✓ / ✕ (ink, no
+hue) and, on a non-decision node with no outgoing edge, renders the node as
+the stadium terminator. Use it only on the end state of a flow. The glyph is
+inside the shape, so the −22 badge allowance above no longer applies; keep
+the 16px margin.
 
 ### 4.9 Pre-ship visual check
 
@@ -354,8 +366,7 @@ Use when a flow has >6 nodes or needs two tiers (actors above, system below).
 `FlowSchema` is for a *before vs after* comparison; `Diagram` is for a single
 rich graph.
 
-- Shapes & dimensions: same table as §4.1 (`role` 76, `event` 160, `process`
-  172, `action` 188×108).
+- Shapes, notation & dimensions: same table as §4.1.
 - Canvas sizing: body column is ~695px wide, but the Diagram SVG scrolls
   horizontally and expands in the lightbox, so budget by node count.
   - ≤ 6 nodes: `width=900, height=320`, single row.
@@ -425,9 +436,12 @@ costs $Y and never recoups*. Pure 2-row horizontal bar race with %-fill.
 ### 6.5 Lightbox on every rich schema
 
 `Diagram`, `FlowSchema`, `RaceTimeline`, `ActivityChart`, `PaybackBar`,
-`WireflowMap` all ship with an `ExpandButton` top-right (opacity 0.7 →
-hover 1.0) that opens `components/ui/Lightbox.tsx` — a portal modal with
-ESC-close, backdrop-click dismiss, `max-w: min(1400px, 96vw)`.
+`WireflowMap` all ship with an `ExpandButton` top-right that opens
+`components/ui/Lightbox.tsx` — a portal modal with ESC-close,
+backdrop-click dismiss, `max-w: min(1400px, 96vw)`. On `Diagram` and
+`FlowSchema` (Sprint 21) the button is always visible, ≥44px, labelled
+"Expand", and the figure itself is no longer wrapped in a `<button>` (a
+screen reader would read the whole diagram as one button label).
 
 **Non-negotiable rule for authoring new chart primitives**:
 

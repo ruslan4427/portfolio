@@ -216,6 +216,9 @@ components/
                         BlogComponents (Artifact, Cost, PromptLog, Diff,
                         TechnicalDetail). CaseStudyBody runs
                         lib/rehype-case-sections (wraps each ## in a section)
+                        Schematic (Diagram + FlowSchema notation: ISO 5807 /
+                        C4 shapes, orthogonal connectors, auto legend,
+                        "Read as steps" text alternative)
 lib/
   analytics.ts          track(event, params) — wraps window.gtag
   rehype-case-sections.ts  Section wrapper + extractChapters (same ids)

@@ -3,9 +3,21 @@
 import { Fragment, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/motion";
 import * as simpleIcons from "simple-icons";
 import type { SimpleIcon } from "simple-icons";
 import { Lightbox } from "@/components/ui/Lightbox";
+import {
+  DiagramCanvas,
+  DiagramLegend,
+  DiagramSteps,
+  ExpandButton,
+  SchematicIconMark,
+  WideHint,
+  type DiagramEdge,
+  type DiagramNode,
+  type SchematicIcon,
+} from "./Schematic";
 import { FieldmarkFloorPlan } from "@/components/mdx/phones/FieldmarkFloorPlan";
 import { FieldmarkPlaceMarker } from "@/components/mdx/phones/FieldmarkPlaceMarker";
 import { FieldmarkPlansList } from "@/components/mdx/phones/FieldmarkPlansList";
@@ -17,6 +29,9 @@ import { LexoraWords } from "@/components/mdx/phones/LexoraWords";
 import { NobleDashboard } from "@/components/mdx/phones/NobleDashboard";
 import { NobleMarketing } from "@/components/mdx/phones/NobleMarketing";
 import { NoblePricing } from "@/components/mdx/phones/NoblePricing";
+
+export { Diagram, SchematicIconMark } from "./Schematic";
+export type { SchematicIcon } from "./Schematic";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -478,28 +493,6 @@ export function CompareGrid({
   );
 }
 
-export type SchematicIcon =
-  | "browser"
-  | "database"
-  | "cloud"
-  | "server"
-  | "lock"
-  | "shield"
-  | "warning"
-  | "check"
-  | "bolt"
-  | "doc"
-  | "user"
-  | "code"
-  | "api"
-  | "clock"
-  | "box"
-  | "sync"
-  | "cache"
-  | "pin"
-  | "mail"
-  | "bug";
-
 type FlowNode = {
   label: string;
   detail?: string;
@@ -523,257 +516,133 @@ type FlowRow = {
   meta?: string;
 };
 
-const statusDot: Record<NonNullable<FlowNode["status"]>, string> = {
+// Status is said in words as well as shape (WCAG 1.4.1): never a dot alone.
+const statusLabel: Record<NonNullable<FlowNode["status"]>, string> = {
+  ok: "Done",
+  warn: "At risk",
+  fail: "Failed",
+};
+
+const statusMark: Record<NonNullable<FlowNode["status"]>, string> = {
   ok: "bg-[color:var(--ink-primary)]",
-  warn: "bg-[color:var(--ink-faint)] ring-1 ring-[color:var(--outline)]",
-  fail: "bg-transparent ring-1 ring-[color:var(--ink-primary)]",
+  warn: "border border-[color:var(--ink-primary)] bg-[color:var(--bg-elevated)]",
+  fail: "border border-dashed border-[color:var(--ink-primary)] bg-transparent",
 };
 
-const schematicIconPaths: Record<SchematicIcon, string> = {
-  browser:
-    "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm2 4h14M7 6.5h.01M9.5 6.5h.01",
-  database:
-    "M4 6c0-1.5 3.6-3 8-3s8 1.5 8 3-3.6 3-8 3-8-1.5-8-3zm0 0v12c0 1.5 3.6 3 8 3s8-1.5 8-3V6M4 12c0 1.5 3.6 3 8 3s8-1.5 8-3",
-  cloud:
-    "M17 18H8A5 5 0 1 1 9.6 8.3a6 6 0 1 1 11.4 2.4A4 4 0 0 1 17 18z",
-  server:
-    "M4 4h16v6H4V4zm0 10h16v6H4v-6zM7 7h.01M7 17h.01M11 7h6M11 17h6",
-  lock:
-    "M6 10V7a6 6 0 0 1 12 0v3M5 10h14v10H5V10z",
-  shield:
-    "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z",
-  warning:
-    "M12 3l10 18H2L12 3zm0 7v5m0 3v.01",
-  check: "M4 12l5 5L20 6",
-  bolt: "M13 2 3 14h8l-2 8 10-12h-8l2-8z",
-  doc: "M8 3h7l5 5v13H8V3zm7 0v5h5",
-  user:
-    "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z",
-  code: "M8 7 3 12l5 5m8-10 5 5-5 5M14 4l-4 16",
-  api: "M4 10h16v6H4v-6zm3 0V6m10 4V6M7 20v-4m10 4v-4",
-  clock: "M12 7v5l3 2m-3-11a9 9 0 1 1 0 18 9 9 0 0 1 0-18z",
-  box: "M3 7h18v4H3V7zm2 4v10h14V11M10 15h4",
-  sync:
-    "M4 12a8 8 0 0 1 13.5-5.8L21 9m0-5v5h-5M20 12a8 8 0 0 1-13.5 5.8L3 15m0 5v-5h5",
-  cache:
-    "M4 6c0-1 3.5-2 8-2s8 1 8 2-3.5 2-8 2-8-1-8-2zm0 0v6c0 1 3.5 2 8 2s8-1 8-2V6m-8 10v4m-4-4v4m8-4v4",
-  pin: "M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
-  mail: "M3 7h18v12H3V7zm0 0 9 7 9-7",
-  bug: "M9 4h6m-3 2v2M5 10h14M6 14h12M7 7a5 5 0 0 1 10 0v10a5 5 0 0 1-10 0V7zm-4 7h4m14 0h4M4 20l3-2m14 2-3-2M4 10l3 2m14-2-3 2",
+// Before / after follows the monochrome state recipe (specs/19 §4.4).
+const rowFrame: Record<NonNullable<FlowRow["tone"]>, string> = {
+  before: "border-dashed border-[color:var(--outline-strong)] bg-[color:var(--bg-page)]",
+  after: "border-[color:var(--ink-primary)] bg-[color:var(--bg-elevated)]",
+  neutral: "border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]",
 };
 
-export function SchematicIconMark({
-  name,
-  className = "h-5 w-5 shrink-0 text-[color:var(--ink-primary)]",
-}: {
-  name: SchematicIcon;
-  className?: string;
-}) {
+const rowToneLabel: Record<NonNullable<FlowRow["tone"]>, string | null> = {
+  before: "Before",
+  after: "After",
+  neutral: null,
+};
+
+/** Vertical sequence connector: line + arrowhead pointing to the next step. */
+function FlowArrow({ reduced }: { reduced: boolean }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={schematicIconPaths[name]} />
+    <svg viewBox="0 0 24 40" aria-hidden="true" className="h-10 w-6 shrink-0 text-[color:var(--ink-primary)]" fill="none">
+      <motion.path
+        d="M12 2 V31"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        initial={reduced ? false : { pathLength: 0 }}
+        whileInView={{ pathLength: 1 }}
+        viewport={{ once: false, margin: "-30px" }}
+        transition={{ duration: 0.35, ease: EASE }}
+      />
+      <path d="M7 30 L12 38 L17 30 z" fill="currentColor" />
     </svg>
   );
 }
 
-const rowAccent: Record<NonNullable<FlowRow["tone"]>, string> = {
-  before: "before:bg-[color:var(--ink-faint)]",
-  after: "before:bg-[color:var(--ink-primary)]",
-  neutral: "before:bg-[color:var(--outline)]",
-};
-
-function FlowConnector({
-  orientation,
-  delay,
-}: {
-  orientation: "horizontal" | "vertical";
-  delay: number;
-}) {
-  const isH = orientation === "horizontal";
-  if (isH) {
-    return (
-      <motion.svg
-        viewBox="0 0 56 24"
-        aria-hidden="true"
-        className="h-6 w-12 shrink-0 text-[color:var(--outline)]"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.4}
-        initial="hidden"
-        whileInView="shown"
-        viewport={{ once: false, margin: "-40px" }}
-      >
-        <motion.circle
-          cx="4"
-          cy="12"
-          r="2.4"
-          fill="currentColor"
-          stroke="none"
-          variants={{ hidden: { opacity: 0 }, shown: { opacity: 1 } }}
-          transition={{ duration: 0.2, delay }}
-        />
-        <motion.path
-          d="M6 12 H50"
-          variants={{ hidden: { pathLength: 0 }, shown: { pathLength: 1 } }}
-          transition={{ duration: 0.5, delay: delay + 0.1, ease: EASE }}
-        />
-        <motion.circle
-          cx="52"
-          cy="12"
-          r="2.4"
-          fill="currentColor"
-          stroke="none"
-          variants={{ hidden: { opacity: 0 }, shown: { opacity: 1 } }}
-          transition={{ duration: 0.2, delay: delay + 0.55 }}
-        />
-      </motion.svg>
-    );
-  }
+function FlowNodeCard({ node, step }: { node: FlowNode; step: number }) {
   return (
-    <motion.svg
-      viewBox="0 0 24 44"
-      aria-hidden="true"
-      className="h-11 w-6 shrink-0 text-[color:var(--outline)]"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.4}
-      initial="hidden"
-      whileInView="shown"
-      viewport={{ once: false, margin: "-30px" }}
-    >
-      <motion.circle
-        cx="12"
-        cy="4"
-        r="2.4"
-        fill="currentColor"
-        stroke="none"
-        variants={{ hidden: { opacity: 0 }, shown: { opacity: 1 } }}
-        transition={{ duration: 0.2, delay }}
-      />
-      <motion.path
-        d="M12 6 V38"
-        variants={{ hidden: { pathLength: 0 }, shown: { pathLength: 1 } }}
-        transition={{ duration: 0.45, delay: delay + 0.1, ease: EASE }}
-      />
-      <motion.circle
-        cx="12"
-        cy="40"
-        r="2.4"
-        fill="currentColor"
-        stroke="none"
-        variants={{ hidden: { opacity: 0 }, shown: { opacity: 1 } }}
-        transition={{ duration: 0.2, delay: delay + 0.5 }}
-      />
-    </motion.svg>
-  );
-}
-
-function FlowNodeCard({
-  node,
-  delay,
-}: {
-  node: FlowNode;
-  delay: number;
-}) {
-  const pulse = node.status === "fail";
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, margin: "-50px" }}
-      transition={{ duration: 0.35, delay, ease: EASE }}
-      className={`relative flex w-full max-w-[460px] shrink-0 flex-col rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-3.5 ${
-        pulse ? "ring-1 ring-[color:var(--ink-primary)]/15" : ""
-      }`}
-    >
-      {pulse && (
-        <motion.span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[var(--radius-tile)] ring-1 ring-[color:var(--ink-primary)]/25"
-          animate={{ opacity: [0.1, 0.5, 0.1] }}
-          transition={{
-            duration: 2.4,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: delay + 0.6,
-          }}
-        />
-      )}
-      <div className="flex items-start gap-2.5">
-        {node.icon ? (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-inline)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
-            <SchematicIconMark name={node.icon} />
+    <li className="flex w-full max-w-[480px] flex-col rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-4 py-3.5">
+      <div className="flex items-start gap-3">
+        <span className="min-w-[22px] pt-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] tabular-nums">
+          {String(step).padStart(2, "0")}
+        </span>
+        {node.icon && (
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-inline)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)]">
+            <SchematicIconMark name={node.icon} className="h-4 w-4 text-[color:var(--ink-primary)]" />
           </span>
-        ) : node.status ? (
-          <span
-            aria-hidden
-            className={`mt-[6px] inline-block h-2 w-2 shrink-0 rounded-full ${statusDot[node.status]}`}
-          />
-        ) : null}
+        )}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            {node.icon && node.status && (
-              <span
-                aria-hidden
-                className={`inline-block h-2 w-2 shrink-0 rounded-full ${statusDot[node.status]}`}
-              />
-            )}
-            <span className="font-sans text-[13px] font-medium leading-tight text-[color:var(--ink-primary)]">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="font-sans text-[length:var(--type-small)] font-semibold leading-snug text-[color:var(--ink-primary)]">
               {node.label}
             </span>
+            {node.status && (
+              <span className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--outline)] px-2 py-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-primary)]">
+                <span aria-hidden className={`inline-block h-2 w-2 rounded-full ${statusMark[node.status]}`} />
+                {statusLabel[node.status]}
+              </span>
+            )}
           </div>
+          {node.detail && (
+            <p className="mt-1 font-sans text-[length:var(--type-caption)] leading-[1.5] text-[color:var(--ink-muted)]">
+              {node.detail}
+            </p>
+          )}
+          {node.bullets && node.bullets.length > 0 && (
+            <ul className="mt-2 list-disc space-y-0.5 pl-4 font-sans text-[length:var(--type-caption)] leading-[1.5] text-[color:var(--ink-body)] marker:text-[color:var(--ink-muted)]">
+              {node.bullets.map((b, i) => (
+                <li key={i}>{b}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
-      {node.detail && (
-        <div className="mt-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
-          {node.detail}
-        </div>
-      )}
-      {node.bullets && node.bullets.length > 0 && (
-        <ul className="mt-2 space-y-0.5 font-sans text-[length:var(--type-caption)] leading-[1.5] text-[color:var(--ink-body)]">
-          {node.bullets.map((b, i) => (
-            <li key={i} className="flex items-start gap-1.5">
-              <span
-                aria-hidden
-                className="mt-[6px] inline-block h-[3px] w-[3px] shrink-0 rounded-full bg-[color:var(--ink-muted)]"
-              />
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </motion.div>
+    </li>
   );
 }
 
-function FlowDiagramBody({ row }: { row: FlowRow }) {
-  const d = row.diagram!;
-  return (
-    <div className="relative -mx-2">
-      <div className="relative overflow-x-auto rounded-[var(--radius-tile)] bg-[color:var(--bg-page)]/60 p-2">
-        <DiagramCanvas
-          nodes={d.nodes}
-          edges={d.edges}
-          width={d.width ?? 900}
-          height={d.height ?? 260}
-          ariaLabel={row.label}
-          minWidth={560}
-        />
+function FlowRowBody({ row, reduced }: { row: FlowRow; reduced: boolean }) {
+  if (row.diagram) {
+    const d = row.diagram;
+    return (
+      <div>
+        <div className="mb-3">
+          <DiagramLegend nodes={d.nodes} edges={d.edges} />
+        </div>
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label={`${row.label} (scrolls sideways on small screens)`}
+          className="overflow-x-auto rounded-[var(--radius-tile)] bg-[color:var(--bg-page)] p-2 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+        >
+          <DiagramCanvas
+            nodes={d.nodes}
+            edges={d.edges}
+            width={d.width ?? 900}
+            height={d.height ?? 260}
+            ariaLabel={row.label}
+          />
+        </div>
+        <WideHint width={d.width ?? 900} />
+        <DiagramSteps nodes={d.nodes} edges={d.edges} />
       </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 rounded-r-[var(--radius-tile)] bg-gradient-to-l from-[color:var(--bg-elevated)] to-transparent md:hidden"
-      />
-    </div>
+    );
+  }
+  const nodes = row.nodes ?? [];
+  return (
+    <ol className="flex flex-col items-center" aria-label={`${row.label} — ${nodes.length} steps`}>
+      {nodes.map((node, i) => (
+        <Fragment key={node.label + i}>
+          <FlowNodeCard node={node} step={i + 1} />
+          {i < nodes.length - 1 && (
+            <li aria-hidden className="list-none">
+              <FlowArrow reduced={reduced} />
+            </li>
+          )}
+        </Fragment>
+      ))}
+    </ol>
   );
 }
 
@@ -787,581 +656,72 @@ export function FlowSchema({
   caption?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const reduced = usePrefersReducedMotion();
+  const name = title ?? "Flow";
+
   const rowsBlock = (
     <div className="space-y-5">
       {rows.map((row, rIdx) => {
         const tone = row.tone ?? "neutral";
+        const toneLabel = rowToneLabel[tone];
         return (
-          <div
+          <section
             key={row.label + rIdx}
-            className={`relative overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-5 pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] ${rowAccent[tone]}`}
+            aria-label={toneLabel ? `${toneLabel}: ${row.label}` : row.label}
+            className={`rounded-[var(--radius-tile)] border-[1.5px] p-5 ${rowFrame[tone]}`}
           >
             <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-              <div className="min-w-0 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
-                <span className="mr-2 font-serif text-[color:var(--ink-primary)]">
-                  {tone === "before" ? "◴" : tone === "after" ? "●" : "○"}
-                </span>
-                {row.label}
-              </div>
+              <p className="flex min-w-0 flex-wrap items-baseline gap-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-body)]">
+                {toneLabel && (
+                  <span
+                    className={`rounded-[var(--radius-pill)] px-2 py-0.5 ${
+                      tone === "after"
+                        ? "bg-[color:var(--bg-inverse)] text-[color:var(--ink-on-dark)]"
+                        : "border border-dashed border-[color:var(--outline-strong)] text-[color:var(--ink-primary)]"
+                    }`}
+                  >
+                    {toneLabel}
+                  </span>
+                )}
+                <span>{row.label}</span>
+              </p>
               {row.meta && (
-                <div className="shrink-0 font-sans text-[length:var(--type-caption)] tabular-nums text-[color:var(--ink-muted)]">
+                <p className="shrink-0 font-sans text-[length:var(--type-caption)] tabular-nums text-[color:var(--ink-muted)]">
                   {row.meta}
-                </div>
+                </p>
               )}
             </div>
-            {row.diagram ? (
-              <FlowDiagramBody row={row} />
-            ) : (
-              <div className="flex flex-col items-center">
-                {(row.nodes ?? []).map((node, nIdx) => {
-                  const nodeDelay = rIdx * 0.2 + nIdx * 0.15;
-                  const nodeList = row.nodes ?? [];
-                  const isLast = nIdx === nodeList.length - 1;
-                  return (
-                    <Fragment key={node.label + nIdx}>
-                      <FlowNodeCard node={node} delay={nodeDelay} />
-                      {!isLast && (
-                        <FlowConnector
-                          orientation="vertical"
-                          delay={nodeDelay + 0.15}
-                        />
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+            <FlowRowBody row={row} reduced={reduced} />
+          </section>
         );
       })}
     </div>
   );
+
   return (
     <motion.figure
       className="not-prose my-10"
-      initial={{ opacity: 0, y: 28, scale: 0.985 }}
+      initial={reduced ? false : { opacity: 0, y: 28, scale: 0.985 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: false, margin: "0px 0px -80px 0px" }}
       transition={{ duration: 0.7, ease: EASE }}
     >
-      {title && (
-        <div className="mb-4 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
-          {title}
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={title ? `Expand ${title}` : "Expand flow"}
-        className="block w-full cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
-      >
-        {rowsBlock}
-      </button>
-      {caption && (
-        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
-          {caption}
-        </figcaption>
-      )}
-      <Lightbox
-        open={open}
-        onClose={() => setOpen(false)}
-        label={title}
-        caption={caption}
-      >
-        <div className="w-full">{rowsBlock}</div>
-      </Lightbox>
-    </motion.figure>
-  );
-}
-
-/* --------------------------------------------------------------------------
- * Diagram — BPMN-style schematic for workflows, information architecture,
- * and problem→solution flows. SVG grid with 4 shape primitives, colored
- * branching edges, outcome badges, optional legend.
- * -------------------------------------------------------------------------- */
-
-type DiagramShape = "role" | "event" | "action" | "process";
-type DiagramColor = "neutral" | "success" | "danger" | "faint";
-type DiagramOutcome = "approved" | "denied";
-type DiagramEdgeStyle = "solid" | "dashed";
-
-type DiagramNode = {
-  id: string;
-  shape: DiagramShape;
-  label: string;
-  x: number;
-  y: number;
-  color?: DiagramColor;
-  outcome?: DiagramOutcome;
-  icon?: SchematicIcon;
-  sub?: string;
-};
-
-type DiagramEdge = {
-  from: string;
-  to: string;
-  color?: DiagramColor;
-  style?: DiagramEdgeStyle;
-  label?: string;
-};
-
-type DiagramLegendItem = {
-  shape: DiagramShape;
-  label: string;
-};
-
-const diagramShapeDims: Record<DiagramShape, { w: number; h: number }> = {
-  role: { w: 76, h: 76 },
-  event: { w: 160, h: 72 },
-  action: { w: 188, h: 108 },
-  process: { w: 172, h: 72 },
-};
-
-const diagramColorStroke: Record<DiagramColor, string> = {
-  neutral: "var(--ink-primary)",
-  // Monochrome state recipe (specs/19 §4.4): the badge glyph carries the
-  // outcome, not hue. Green stays reserved for availability.
-  success: "var(--ink-primary)",
-  danger: "var(--ink-primary)",
-  faint: "var(--outline)",
-};
-
-const diagramColorFill: Record<DiagramColor, string> = {
-  neutral: "var(--bg-elevated)",
-  success: "var(--bg-elevated)",
-  danger: "var(--bg-elevated)",
-  faint: "var(--bg-page)",
-};
-
-function diagramEdgeAnchor(
-  node: DiagramNode,
-  towardsX: number,
-  towardsY: number,
-) {
-  const { w, h } = diagramShapeDims[node.shape];
-  const dx = towardsX - node.x;
-  const dy = towardsY - node.y;
-  if (node.shape === "role") {
-    const r = w / 2;
-    const len = Math.hypot(dx, dy) || 1;
-    return { x: node.x + (dx / len) * r, y: node.y + (dy / len) * r };
-  }
-  const hw = w / 2;
-  const hh = h / 2;
-  const absDx = Math.abs(dx) || 0.0001;
-  const absDy = Math.abs(dy) || 0.0001;
-  if (node.shape === "action") {
-    const s = 1 / (absDx / hw + absDy / hh);
-    return { x: node.x + dx * s, y: node.y + dy * s };
-  }
-  const sx = hw / absDx;
-  const sy = hh / absDy;
-  const s = Math.min(sx, sy);
-  return { x: node.x + dx * s, y: node.y + dy * s };
-}
-
-function DiagramShapeEl({ node }: { node: DiagramNode }) {
-  const { w, h } = diagramShapeDims[node.shape];
-  const color = node.color ?? "neutral";
-  const stroke = diagramColorStroke[color];
-  const fill = diagramColorFill[color];
-  const strokeWidth = color === "faint" ? 1.1 : 1.4;
-  const common = { fill, stroke, strokeWidth };
-  if (node.shape === "role") {
-    return <circle cx={node.x} cy={node.y} r={w / 2} {...common} />;
-  }
-  if (node.shape === "event") {
-    return (
-      <rect
-        x={node.x - w / 2}
-        y={node.y - h / 2}
-        width={w}
-        height={h}
-        rx={12}
-        ry={12}
-        {...common}
-      />
-    );
-  }
-  if (node.shape === "action") {
-    const points = `${node.x},${node.y - h / 2} ${node.x + w / 2},${node.y} ${node.x},${node.y + h / 2} ${node.x - w / 2},${node.y}`;
-    return <polygon points={points} {...common} />;
-  }
-  const skew = 14;
-  const points = `${node.x - w / 2 + skew},${node.y - h / 2} ${node.x + w / 2},${node.y - h / 2} ${node.x + w / 2 - skew},${node.y + h / 2} ${node.x - w / 2},${node.y + h / 2}`;
-  return <polygon points={points} {...common} />;
-}
-
-function DiagramOutcomeBadge({ node }: { node: DiagramNode }) {
-  if (!node.outcome) return null;
-  const { w, h } = diagramShapeDims[node.shape];
-  const bx = node.x + w / 2 - 4;
-  const by = node.y - h / 2 + 4;
-  const approved = node.outcome === "approved";
-  return (
-    <g>
-      <circle
-        cx={bx}
-        cy={by}
-        r={10}
-        fill="var(--ink-primary)"
-        stroke="var(--bg-elevated)"
-        strokeWidth={2}
-      />
-      <text
-        x={bx}
-        y={by + 1}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontFamily="var(--font-sans)"
-        fontSize={11}
-        fontWeight={700}
-        fill="#FFFFFF"
-      >
-        {approved ? "✓" : "✗"}
-      </text>
-    </g>
-  );
-}
-
-function DiagramNodeLabel({ node }: { node: DiagramNode }) {
-  const { w, h } = diagramShapeDims[node.shape];
-  let padX: number;
-  let padY: number;
-  if (node.shape === "action") {
-    padY = Math.round(h * 0.26);
-    const innerHGuess = h - padY * 2;
-    const inscribedW = w * (1 - innerHGuess / h);
-    padX = Math.round((w - inscribedW) / 2);
-  } else if (node.shape === "role") {
-    padX = 10;
-    padY = 10;
-  } else {
-    padX = 12;
-    padY = 12;
-  }
-  const innerW = w - padX * 2;
-  const innerH = h - padY * 2;
-  return (
-    <foreignObject
-      x={node.x - innerW / 2}
-      y={node.y - innerH / 2}
-      width={innerW}
-      height={innerH}
-      style={{ pointerEvents: "none" }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: "100%",
-          gap: 2,
-          textAlign: "center",
-          fontFamily: "var(--font-sans)",
-          color: "var(--ink-primary)",
-          lineHeight: 1.15,
-        }}
-      >
-        {node.icon && <SchematicIconMark name={node.icon} />}
-        <span style={{ fontSize: 11, fontWeight: 500 }}>{node.label}</span>
-        {node.sub && (
-          <span
-            style={{
-              fontSize: 10,
-              color: "var(--ink-muted)",
-              fontWeight: 400,
-            }}
-          >
-            {node.sub}
-          </span>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        {title ? (
+          <p className="pt-2.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">{title}</p>
+        ) : (
+          <span />
         )}
+        <ExpandButton label={`Expand flow: ${name}`} onClick={() => setOpen(true)} />
       </div>
-    </foreignObject>
-  );
-}
-
-function DiagramEdgeEl({
-  edge,
-  nodes,
-  markerIds,
-}: {
-  edge: DiagramEdge;
-  nodes: Record<string, DiagramNode>;
-  markerIds: Record<DiagramColor, string>;
-}) {
-  const src = nodes[edge.from];
-  const dst = nodes[edge.to];
-  if (!src || !dst) return null;
-  const color = edge.color ?? "neutral";
-  const stroke = diagramColorStroke[color];
-  const style = edge.style ?? "solid";
-  const a = diagramEdgeAnchor(src, dst.x, dst.y);
-  const b = diagramEdgeAnchor(dst, src.x, src.y);
-  const lx = (a.x + b.x) / 2;
-  const ly = (a.y + b.y) / 2;
-  return (
-    <g>
-      <motion.line
-        x1={a.x}
-        y1={a.y}
-        x2={b.x}
-        y2={b.y}
-        stroke={stroke}
-        strokeWidth={color === "faint" ? 1.1 : 1.4}
-        strokeDasharray={style === "dashed" ? "5 4" : undefined}
-        markerEnd={`url(#${markerIds[color]})`}
-        initial={{ pathLength: 0, opacity: 0 }}
-        whileInView={{ pathLength: 1, opacity: 1 }}
-        viewport={{ once: false, margin: "-40px" }}
-        transition={{ duration: 0.5, ease: EASE }}
-      />
-      {edge.label && (
-        <g>
-          <rect
-            x={lx - edge.label.length * 3.1 - 6}
-            y={ly - 9}
-            width={edge.label.length * 6.2 + 12}
-            height={18}
-            rx={9}
-            ry={9}
-            fill="var(--bg-page)"
-            stroke="var(--hairline)"
-            strokeWidth={1}
-          />
-          <text
-            x={lx}
-            y={ly + 1}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontFamily="var(--font-sans)"
-            fontSize={10}
-            fontWeight={500}
-            fill="var(--ink-muted)"
-          >
-            {edge.label}
-          </text>
-        </g>
-      )}
-    </g>
-  );
-}
-
-function DiagramLegendShape({ shape }: { shape: DiagramShape }) {
-  const cx = 14;
-  const cy = 10;
-  if (shape === "role") {
-    return (
-      <circle
-        cx={cx}
-        cy={cy}
-        r={8}
-        fill="var(--bg-elevated)"
-        stroke="var(--ink-primary)"
-        strokeWidth={1.2}
-      />
-    );
-  }
-  if (shape === "event") {
-    return (
-      <rect
-        x={2}
-        y={3}
-        width={24}
-        height={14}
-        rx={4}
-        ry={4}
-        fill="var(--bg-elevated)"
-        stroke="var(--ink-primary)"
-        strokeWidth={1.2}
-      />
-    );
-  }
-  if (shape === "action") {
-    return (
-      <polygon
-        points="14,2 25,10 14,18 3,10"
-        fill="var(--bg-elevated)"
-        stroke="var(--ink-primary)"
-        strokeWidth={1.2}
-      />
-    );
-  }
-  return (
-    <polygon
-      points="6,3 26,3 22,17 2,17"
-      fill="var(--bg-elevated)"
-      stroke="var(--ink-primary)"
-      strokeWidth={1.2}
-    />
-  );
-}
-
-type DiagramCanvasProps = {
-  nodes: DiagramNode[];
-  edges: DiagramEdge[];
-  width: number;
-  height: number;
-  ariaLabel?: string;
-  minWidth?: number;
-};
-
-function DiagramCanvas({
-  nodes,
-  edges,
-  width,
-  height,
-  ariaLabel,
-  minWidth,
-}: DiagramCanvasProps) {
-  const nodeMap: Record<string, DiagramNode> = {};
-  for (const n of nodes) nodeMap[n.id] = n;
-  const markerIds: Record<DiagramColor, string> = {
-    neutral: "diagram-arrow-neutral",
-    success: "diagram-arrow-success",
-    danger: "diagram-arrow-danger",
-    faint: "diagram-arrow-faint",
-  };
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label={ariaLabel ?? "Diagram"}
-      className="block h-auto w-full"
-      style={{ minWidth: minWidth ?? Math.min(width, 640) }}
-    >
-      <defs>
-        {(Object.keys(markerIds) as DiagramColor[]).map((c) => (
-          <marker
-            key={c}
-            id={markerIds[c]}
-            viewBox="0 0 10 10"
-            refX={8}
-            refY={5}
-            markerWidth={6}
-            markerHeight={6}
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill={diagramColorStroke[c]} />
-          </marker>
-        ))}
-      </defs>
-      <g>
-        {edges.map((e, i) => (
-          <DiagramEdgeEl
-            key={`${e.from}->${e.to}-${i}`}
-            edge={e}
-            nodes={nodeMap}
-            markerIds={markerIds}
-          />
-        ))}
-      </g>
-      <g>
-        {nodes.map((n, i) => (
-          <motion.g
-            key={n.id}
-            initial={{ opacity: 0, y: 4 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, margin: "-40px" }}
-            transition={{ duration: 0.35, delay: i * 0.05, ease: EASE }}
-          >
-            <DiagramShapeEl node={n} />
-            <DiagramNodeLabel node={n} />
-            <DiagramOutcomeBadge node={n} />
-          </motion.g>
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-export function Diagram({
-  title,
-  nodes,
-  edges,
-  width = 760,
-  height = 420,
-  legend,
-  caption,
-}: {
-  title?: string;
-  nodes: DiagramNode[];
-  edges: DiagramEdge[];
-  width?: number;
-  height?: number;
-  legend?: DiagramLegendItem[];
-  caption?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <motion.figure
-      className="not-prose my-10"
-      initial={{ opacity: 0, y: 28, scale: 0.985 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: false, margin: "0px 0px -80px 0px" }}
-      transition={{ duration: 0.7, ease: EASE }}
-    >
-      {title && (
-        <div className="mb-3 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
-          {title}
-        </div>
-      )}
-      {legend && legend.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-3 py-2">
-          {legend.map((item) => (
-            <div
-              key={item.shape + item.label}
-              className="flex items-center gap-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
-            >
-              <svg
-                viewBox="0 0 28 20"
-                aria-hidden="true"
-                className="h-4 w-6 shrink-0"
-              >
-                <DiagramLegendShape shape={item.shape} />
-              </svg>
-              <span>{item.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={title ? `Expand ${title}` : "Expand diagram"}
-        className="block w-full cursor-zoom-in overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--ink-primary)]"
-      >
-        <DiagramCanvas
-          nodes={nodes}
-          edges={edges}
-          width={width}
-          height={height}
-          ariaLabel={title}
-        />
-      </button>
+      {rowsBlock}
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 font-sans text-[length:var(--type-caption)] leading-[1.6] text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
-      <Lightbox
-        open={open}
-        onClose={() => setOpen(false)}
-        label={title}
-        caption={caption}
-      >
-        <div className="w-full">
-          <DiagramCanvas
-            nodes={nodes}
-            edges={edges}
-            width={width}
-            height={height}
-            ariaLabel={title}
-            minWidth={0}
-          />
-        </div>
+      <Lightbox open={open} onClose={() => setOpen(false)} label={title} caption={caption}>
+        <div className="w-full">{rowsBlock}</div>
       </Lightbox>
     </motion.figure>
   );
