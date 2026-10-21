@@ -15,13 +15,8 @@ tags:
 featured: true
 canonical: 'https://hrekov.dev/blog/classify-before-you-code'
 heroImage:
-  src: /blog/classify-before-you-code/hero.jpg
-  alt: >-
-    Editorial ink drawing of ten traffic lanes converging into a single highway.
-    Each lane carries a different vehicle sized to its workload — a bicycle, a
-    scooter, three sedans, a van, a pickup, a lorry, and a long articulated
-    truck. The lanes are labelled with single capital letters along the kerb —
-    Q, B, S, L, R, T, D, M, O, E — and the vehicles get bigger left to right.
+  src: /blog/classify-before-you-code/hero-studio.jpg
+  alt: 'A row of white blocks sorted by size, from a tiny cube to a large box, in long diagonal shadow.'
 uiRework:
   heroRegenerations: 1
   figureRevisions:
@@ -81,11 +76,11 @@ Straight from the project's `CLAUDE.md` — the file every session reads first:
 That table sits at the top of a protocol file every session loads before the first reply. The classifying happens quietly — what you see is just the lane's action, not its name. But the routing underneath is fixed.
 
 <Figure
-  src="/blog/classify-before-you-code/lane-map.jpg"
-  alt="Editorial ink top-down map of a sorting yard. Ten short loading bays run parallel, each with a different-sized package being handled: tiny envelope at bay Q, medium parcel at B, large crate at L, oversized shipping container at D. Workers in flat silhouette carry each package to its own bay. A single conveyor belt approaches from the top and splits into ten."
-  width={1376}
-  height={768}
-  caption="Each lane does one job well. The letter on the bay tells the worker which pattern to follow — same input, ten different outcomes depending on where it lands."
+  src="/blog/classify-before-you-code/lane-map-studio.jpg"
+  alt="A white tray with parallel grooves, each groove holding objects of a different shape and size."
+  width={1264}
+  height={848}
+  caption="Each lane does one job well. The groove an item lands in decides how it gets handled — same input, ten different outcomes depending on where it lands."
 />
 
 ## Why ten and not three
@@ -150,11 +145,11 @@ D (Discovery) and Q (Quick question). These two look nearly the same in the wild
 "What does cache invalidation mean?" sounds similar. It is a question — the honest answer is three sentences and a link.
 
 <Figure
-  src="/blog/classify-before-you-code/fork-signs.jpg"
-  alt="Editorial ink drawing of a lone traveller with a laptop standing at a path fork. Two wooden signs point in similar directions, their lettering nearly identical: DISCOVERY → pointing up a long winding trail into the hills, and QUESTION → pointing to a short straight path with a bench at the end. The traveller tilts their head, confused — the signs look alike at first glance."
-  width={1376}
-  height={768}
-  caption="The signs look the same from a distance. The tell is the walk — one is a short straight path with a bench at the end; the other winds for an hour."
+  src="/blog/classify-before-you-code/fork-signs-studio.jpg"
+  alt="Two near-identical paper arrows lying on a table, pointing in different directions."
+  width={1264}
+  height={848}
+  caption="The arrows look the same at a glance. The tell is where they lead — one is a short straight answer; the other winds for an hour."
 />
 
 The tell is what the right answer looks like. If the honest answer starts with "it depends on your constraints — tell me about…", you're in D. If it starts with "it's X, which does Y," you're in Q. The question I ask myself: *does this want a conversation, or does it want an answer?*
@@ -176,10 +171,10 @@ Across the seven projects on [/tools](https://hrekov.dev/tools), one pattern hel
 Roughly ten times less rework when the classifying is in place. That ten-times gap held across every project size I tried — Flutter mobile apps, Next.js SaaS, backend pipelines. The thing that moved the number wasn't the model, wasn't the stack. It was those ninety seconds before each request.
 
 <Figure
-  src="/blog/classify-before-you-code/two-workshops.jpg"
-  alt="Editorial ink diptych. Left room: a tidy carpentry workshop with four finished chairs lined up along the wall and one broken part on the floor. A small caption below reads '0.4 rework'. Right room: the same workshop in chaos — one finished chair, four broken parts piled around a frustrated carpenter rubbing his forehead. A small caption below reads '4.5 rework'. Both rooms are the same size and layout; the only difference is the pile."
-  width={1376}
-  height={768}
+  src="/blog/classify-before-you-code/two-workshops-studio.jpg"
+  alt="Two panels: four small chairs standing in a neat row, and one chair beside a pile of broken chair parts."
+  width={1264}
+  height={848}
   caption="Same tools, same wood, same carpenter. The only difference between the two rooms is whether someone sorted the orders before cutting began."
 />
 
