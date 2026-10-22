@@ -7,24 +7,11 @@ import { BackToJournal } from "@/components/layout/BackToJournal";
 import { BlogPostBody } from "@/components/mdx/BlogPostBody";
 import { MaskReveal } from "@/components/ui/MaskReveal";
 import { Reveal } from "@/components/ui/Reveal";
-import { SectionBadge } from "@/components/ui/SectionBadge";
 import { Stagger, StaggerItem } from "@/components/ui/Stagger";
-import { getBlogPost, getBlogPosts, type BlogFormat } from "@/content/blog";
+import { formatDate, formatLabel } from "@/components/blog/format";
+import { getBlogPost, getBlogPosts } from "@/content/blog";
 
 type Params = { slug: string };
-
-const formatLabel: Record<BlogFormat, string> = {
-  "case-study": "Case Study",
-  "build-log": "Build Log",
-  skeptic: "Field Note",
-  pattern: "Pattern",
-};
-
-function formatDate(iso: string): string {
-  const [year, month, day] = iso.split("-");
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${months[Number(month) - 1]} ${Number(day)}, ${year}`;
-}
 
 export async function generateStaticParams(): Promise<Params[]> {
   const posts = await getBlogPosts();
@@ -97,41 +84,29 @@ export default async function BlogPostPage({
       />
       <article>
         <BackToJournal />
-        <header className="px-[var(--gutter)] pt-40 pb-16">
-          <div className="mx-auto max-w-[65ch]">
-            <Reveal className="mb-8 flex justify-center">
-              <SectionBadge label={formatLabel[frontmatter.format]} />
+        <header className="px-[var(--gutter)] pt-36 pb-12">
+          <div className="mx-auto flex max-w-[65ch] flex-col gap-6">
+            <Reveal>
+              <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] tabular-nums">
+                {formatLabel[frontmatter.format]} · <time dateTime={frontmatter.publishedAt}>{formatDate(frontmatter.publishedAt)}</time> ·{" "}
+                {frontmatter.readingTime} min read
+              </p>
             </Reveal>
-            <h1 className="text-center font-serif text-[clamp(48px,8vw,96px)] leading-[0.98] text-[color:var(--ink-primary)]">
-              <MaskReveal mode="mount" delay={0.15}>
+            <h1 className="font-serif text-[length:var(--type-display-l)] leading-[0.98] text-[color:var(--ink-primary)]">
+              <MaskReveal mode="mount" delay={0.1}>
                 {frontmatter.title}
               </MaskReveal>
             </h1>
-            <Reveal delay={0.25}>
-              <p className="mt-8 text-center text-xl leading-[1.55] text-[color:var(--ink-body)]">
+            <Reveal delay={0.2}>
+              <p className="text-[length:var(--type-title)] leading-[1.55] text-[color:var(--ink-body)]">
                 {frontmatter.tagline}
               </p>
             </Reveal>
-            <Reveal delay={0.35}>
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-3 font-sans text-xs text-[color:var(--ink-muted)] tabular-nums">
-                <time dateTime={frontmatter.publishedAt}>
-                  {formatDate(frontmatter.publishedAt)}
-                </time>
-                <span aria-hidden>·</span>
-                <span>{frontmatter.readingTime} min read</span>
-                <span aria-hidden>·</span>
-                <span>{formatLabel[frontmatter.format]}</span>
-              </div>
-            </Reveal>
             {frontmatter.tags.length > 0 && (
-              <Stagger
-                className="mt-6 flex flex-wrap justify-center gap-2"
-                delayChildren={0.45}
-                stagger={0.06}
-              >
+              <Stagger as="ul" aria-label="Tags" className="flex flex-wrap gap-2" delayChildren={0.3} stagger={0.05}>
                 {frontmatter.tags.map((tag) => (
-                  <StaggerItem key={tag} y={12} duration={0.6}>
-                    <span className="rounded-full border border-[color:var(--hairline)] px-3 py-1 font-sans text-xs text-[color:var(--ink-body)]">
+                  <StaggerItem as="li" key={tag} y={8} duration={0.5}>
+                    <span className="inline-flex rounded-[var(--radius-pill)] border border-[color:var(--outline)] px-3 py-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-body)]">
                       {tag}
                     </span>
                   </StaggerItem>
@@ -144,7 +119,7 @@ export default async function BlogPostPage({
         {frontmatter.heroImage && (
           <Reveal delay={0.1} className="px-[var(--gutter)] pb-16">
             <figure className="mx-auto max-w-[1100px]">
-              <div className="relative aspect-[16/7] overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
+              <div className="relative aspect-[3/2] overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--bg-elevated)]">
                 <Image
                   src={frontmatter.heroImage.src}
                   alt={frontmatter.heroImage.alt}
@@ -165,8 +140,8 @@ export default async function BlogPostPage({
 
         {(frontmatter.distribution?.linkedin?.publishedUrl ||
           frontmatter.distribution?.devto?.publishedUrl) && (
-          <aside className="px-[var(--gutter)] pb-10">
-            <div className="mx-auto flex max-w-[65ch] flex-wrap items-center gap-x-5 gap-y-2 font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          <section className="px-[var(--gutter)] pb-10">
+            <div className="mx-auto flex max-w-[65ch] flex-wrap items-center gap-x-5 gap-y-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
               <span>Also on</span>
               {frontmatter.distribution?.linkedin?.publishedUrl && (
                 <a
@@ -191,13 +166,13 @@ export default async function BlogPostPage({
                 </a>
               )}
             </div>
-          </aside>
+          </section>
         )}
 
         {frontmatter.artifacts && frontmatter.artifacts.length > 0 && (
-          <aside className="px-[var(--gutter)] pb-16">
-            <div className="mx-auto max-w-[65ch] rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8">
-              <h2 className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+          <section className="px-[var(--gutter)] pb-16">
+            <div className="mx-auto max-w-[65ch] border-t border-[color:var(--hairline)] pt-6">
+              <h2 className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
                 Artifacts
               </h2>
               <ul className="mt-4 space-y-2">
@@ -230,13 +205,13 @@ export default async function BlogPostPage({
                 ))}
               </ul>
             </div>
-          </aside>
+          </section>
         )}
 
         {related.length > 0 && (
           <section className="px-[var(--gutter)] pb-32">
             <div className="mx-auto max-w-[65ch]">
-              <h2 className="font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+              <h2 className="font-serif text-[length:var(--type-display-s)] text-[color:var(--ink-primary)]">
                 Related notes
               </h2>
               <ul className="mt-4 space-y-3">
@@ -246,7 +221,7 @@ export default async function BlogPostPage({
                       href={`/blog/${r.frontmatter.slug}`}
                       className="group inline-flex flex-col gap-1"
                     >
-                      <span className="font-serif text-lg text-[color:var(--ink-primary)] transition-colors group-hover:text-black">
+                      <span className="font-serif text-lg text-[color:var(--ink-primary)] transition-colors group-hover:underline group-hover:decoration-[color:var(--accent)] group-hover:underline-offset-4">
                         {r.frontmatter.title}
                       </span>
                       <span className="text-sm text-[color:var(--ink-muted)]">

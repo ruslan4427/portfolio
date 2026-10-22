@@ -33,7 +33,7 @@ export const mdxComponents = {
   ),
   a: (props: ComponentPropsWithoutRef<"a">) => (
     <a
-      className="text-[color:var(--ink-primary)] underline underline-offset-4 decoration-[color:var(--outline)] hover:decoration-[color:var(--ink-primary)] transition-colors"
+      className="text-[color:var(--ink-primary)] underline underline-offset-4 decoration-[color:var(--outline)] hover:decoration-[color:var(--accent)] transition-colors"
       {...props}
     />
   ),
@@ -45,13 +45,16 @@ export const mdxComponents = {
   ),
   code: (props: ComponentPropsWithoutRef<"code">) => (
     <code
-      className="font-sans text-[0.9em] bg-[color:var(--bg-elevated)] border border-[color:var(--hairline)] rounded px-1.5 py-0.5 text-[color:var(--ink-primary)]"
+      className="font-sans text-[max(0.9em,13px)] bg-[color:var(--bg-elevated)] border border-[color:var(--hairline)] rounded-[var(--radius-inline)] px-1.5 py-0.5 text-[color:var(--ink-primary)]"
       {...props}
     />
   ),
+  // Focusable so keyboard users can scroll wide code (axe
+  // scrollable-region-focusable).
   pre: (props: ComponentPropsWithoutRef<"pre">) => (
     <pre
-      className="my-6 overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-4 font-sans text-sm text-[color:var(--ink-primary)]"
+      tabIndex={0}
+      className="my-6 overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-4 font-sans text-sm text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
       {...props}
     />
   ),
@@ -68,18 +71,21 @@ export const mdxComponents = {
     <em className="italic" {...props} />
   ),
   table: (props: ComponentPropsWithoutRef<"table">) => (
-    <div className="my-8 overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)]">
+    <div tabIndex={0} role="region" aria-label="Table" className="my-8 overflow-x-auto rounded-[var(--radius-tile)] border border-[color:var(--hairline)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]">
       <table
         className="w-full border-collapse text-sm text-[color:var(--ink-body)]"
         {...props}
       />
     </div>
   ),
-  th: (props: ComponentPropsWithoutRef<"th">) => (
+  // An empty corner cell (`| | A | B |`) still needs a name for screen readers.
+  th: ({ children, ...props }: ComponentPropsWithoutRef<"th">) => (
     <th
-      className="border-b border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-3 text-left font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)]"
+      className="border-b border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-3 text-left font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]"
       {...props}
-    />
+    >
+      {children ?? <span className="sr-only">Item</span>}
+    </th>
   ),
   td: (props: ComponentPropsWithoutRef<"td">) => (
     <td

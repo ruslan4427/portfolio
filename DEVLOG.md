@@ -2612,3 +2612,96 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 - **Vendored-vs-canonical is a pattern, not a mandate.** Sprint 15 set up the mirror discipline for scorecard parsing. Sprint 17 skipped it because the aggregator is tied to a surface only hrekov-dev has. Scope-matched abstraction over doctrinal fidelity — the OSS consumers would have gotten dead code.
 
 ---
+
+## 2026-10-18 — /about redesign · editorial ledger variant
+
+**Problem:** `/about` was a centered stack of card sections (Experience cards, Values cards) that read like the home page repeated. Brief: one variant, strictly inside the `:root` tokens, monochrome + green status only, Playfair upright + Inter only.
+
+**Decision:**
+- Hero splits 7/5: Playfair h1 left, an elevated "At a glance" card right carrying the `StatusPill` (the only green) and a hairline `<dl>` of facts restated from `content/about.ts` + page metadata (no new claims).
+- Numbered section rails (`01 — Bio`, `02 — The path`, `03 — How I work`) sticky on `md+`, content in the right 9 columns.
+- Bio lead paragraph set in Playfair (upright, 400); remaining paragraphs Inter.
+- Timeline inlined as a hairline ledger (`content/experience.ts`) instead of the `Experience` card component; Values inlined as numbered rules with an ink top rule instead of cards.
+- `AiStack` + `Credentials` reused unchanged. Closer moved into an elevated `--radius-card` card.
+- Motion only via existing `Reveal` / `MaskReveal` / `Stagger` (all reduced-motion aware); sticky is static positioning.
+
+**Result:** Single-file change to `app/(marketing)/about/page.tsx`. No new colors, radii, fonts, or tokens. `tsc` clean for this file (only pre-existing `LayoutProps` typegen error in `app/layout.tsx`); eslint clean.
+
+**Lesson:** Page-level redesigns can stay token-pure by changing composition (rails, ledgers, rules) rather than surface treatment — the ink ramp + hairline give enough hierarchy without a second hue.
+
+## 2026-10-21 — Sprint 20 · case studies redesigned on the full content
+
+**Problem:** The 2026-10-18 audit (`memory/qa-iteration-1.md`) found the case studies were the weakest part of the site for a prospective client: they opened with internal metrics ("Token scorecard", "unmeasurable", "Tier 0 · naked", status "sprint-4"), ran 7–24 screens with no skim path, and ended in a dead end. Two of six had a summary; the documented ViewToggle was no longer mounted. Design canvas mockups (one template, six cases) were approved; the redesign had to cover *all* MDX content, not a condensed copy.
+
+**Decision:**
+- Method: ui-ux-pro (`ruslan4427/ui-ux-pro`) — tokens first (`extract_tokens.py` found the 19 existing tokens), contrast via `check_contrast.py`, visual check at 1440 and 390, trends applied selectively (progressive disclosure, bento overview, transparent AI disclosure). Its minimalist style file was *not* allowed to override project rules (Inter, no pastels, no mono labels).
+- Merged design system v2 tokens into `globals.css` (additive). `:root` type tokens are `--type-*`; `@theme` radii stay literal because a same-name `var()` inside `@theme` is self-referential.
+- One template for every case: hero (lens headline + 4 lens stats) → "At a glance" bento (problem, outcome, built with, timeline, Made with Claude) → chapter rail over every `##` section + the full MDX → "How it was made" receipts → lens CTA on the inverse panel → previous/next case.
+- Reading lens (Founder / Hiring manager / Engineer) changes headline, stats, the "Start here" chapter and the CTA; `?for=` pre-selects it for outreach links; persisted in localStorage via `useSyncExternalStore` (hydration-safe, no setState-in-effect).
+- Reading depth: a rehype pass wraps each `##` in a `<section>`; `[data-depth="short"]` CSS shows heading + first block, with a per-section "Read the full section". Nothing is removed from the DOM, so crawlers and full readers see everything.
+- Lens copy lives in `content/case-lenses.ts`, every number restated from the MDX or `projects.ts`.
+- Restyled case MDX components to v2: faint-ink text → muted, decorative green/red in diagrams and RaceTimeline → monochrome recipes (glyph/line style carries the state), 10–12px text → 13px caption, uppercase tracked labels → sentence case, mono labels → Inter, off-token radii → tokens, scrollable `<pre>` and AgentReplay keyboard-focusable, nested `<aside>` → `<div>`, empty table corner named.
+
+**Result:** All 6 `/work/<slug>` pages build statically and render every MDX section. axe on the 6 cases: color-contrast, scrollable-region-focusable, region, nested-landmark and empty-table-header all gone (were serious/moderate on every case). No horizontal overflow at 390px. "2-min read" pages run 7.3–9.9k px vs 7.5–22k full. Prod build: no hydration errors (the dev-only warning on hrekov-dev/lexora/smm-factory predates this sprint and does not reproduce in `next start`). tsc clean except the pre-existing `LayoutProps` typegen error; new files lint-clean (two pre-existing react-compiler errors in CaseStudySchemas remain).
+
+**Lesson:** "Redesign all the content" is a template + component-style problem, not a copy problem. Restyling the MDX primitives and wrapping sections at the rehype layer moved 2,500 lines of case content into the new system without touching a single MDX body — and the depth toggle came almost free once sections were real DOM nodes.
+
+## 2026-10-21 — Sprint 21 · diagrams and flows rebuilt on standard notation
+
+**Problem:** The case-study `Diagram` and `FlowSchema` primitives drew shapes whose meanings contradict the notations readers already know (circle for a person — BPMN's event symbol; parallelogram for server work — ISO 5807's data symbol), connected nodes with diagonal centre-to-centre lines, set node text at 10–11px in viewBox units (≈5–9px rendered on wide canvases), drew sequence connectors without arrowheads, offered no text alternative, and wrapped each figure in a `<button>`.
+
+**Decision:** New `components/mdx/Schematic.tsx` owns the notation: ISO 5807 symbols (process rectangle, decision diamond, data parallelogram, terminator stadium, stored-data cylinder) with C4's dark "Person" box. MDX `shape` names are unchanged; rendering maps them to the standard symbols, an `event` with a database/cache icon becomes a store, and a non-decision node with `outcome` and no outgoing edge becomes the terminator. Orthogonal routed connectors with rounded elbows and target-only arrowheads; dashed = async/optional. Auto legend for symbols and line styles in use; "Read as steps" list in breadth-first reading order (WCAG 1.1.1); keyboard-focusable scroll region; ≥0.8 render floor with a "wide diagram" hint; always-visible Expand button. FlowSchema: arrowed connectors, numbered steps, status in words (Done / At risk / Failed) instead of a dot, before/after framed with the Sprint 19 recipe (dashed vs solid). Shape props corrected where meaning was wrong (PM, builds, submissions, tiers → process; Supabase → store). The replay-on-scroll animation contract (§7 of the case rulebook) is kept.
+
+**Result:** All 14 diagram rows across the six cases render in the standard notation; axe reports no violations inside any figure; production build clean, no runtime errors. Overlaps found by a bounds script against the new shape sizes (hrekov-dev tiers, ShipLoop session row, Lexora builds) were fixed by shifting siblings per rulebook §4.4. Rulebook §4.1/§4.8/§6.5 updated.
+
+**Lesson:** A notation is only useful if the shapes keep the meaning readers bring with them. Inventing a private shape vocabulary costs every reader a legend lookup; borrowing ISO 5807 + C4 costs nothing and makes the authoring rule ("pick the shape by meaning") checkable.
+
+## 2026-10-21 — Sprint 22 · brick accent, self-laying-out diagrams, figures always open
+
+**Problem:** Ruslan found the monochrome site flat and asked for a brick accent he had seen work with the palette; diagrams and screenshots hid behind a separate Expand button (and behind "Read the full section" in the 2-min read); wide diagrams scrolled sideways inside the text column; and several diagrams had edge labels sitting on nodes.
+
+**Decision:**
+- Rule change, owner's call: a single emphasis hue, brick `--accent` `#A94427` (5.38:1 on paper, 5.67:1 under `--accent-ink`), alongside the functional green. Used for key paths/outcomes in diagrams, the hero stat rules, reading progress, "Start here", "After" rows and link hover — never large fills, never alone. STABLE_LOGIC and CLAUDE.md updated.
+- Diagrams lay themselves out for the measured column width (layered top-to-bottom for branching graphs, snake rows for chains). Column gap grows to the widest edge label; row-skipping edges use a left corridor and return paths a right corridor, labels inside the corridor; node height follows wrapped text. Node text stays 14px at every width; MDX coordinates are ignored.
+- The diagram itself opens full screen on click (div with button semantics, keyboard operable); the Expand button is gone. In the 2-min read, figures stay visible and only prose collapses.
+- WireflowMap no longer forces a 480px minimum width on phones.
+
+**Result:** An overlap/clip sweep over every figure on the six cases at 1440 and 390 (node boxes, text, label pills, foreignObject overflow) reports zero issues outside the SVG phone reconstructions, whose tight line boxes are intentional. tsc clean (pre-existing LayoutProps typegen error aside); new code lint-clean.
+
+**Lesson:** Hand-placed coordinates were the root cause of every spacing complaint — each fix was a local shift that the next width undid. Moving layout into the component turned "keep the frames apart" from a review checklist into a property of the system.
+
+## 2026-10-21 — Sprint 23 · /work index rebuilt around the reading lens
+
+**Problem:** `/work` still used the pre-redesign layout: centred badge hero, copy claiming "Five case studies" while six exist, a Year filter with a single value, cards showing only name, role and one metric, a pre-launch project labelled "Active", white/black overlay chips, 11px text and an italic display numeral.
+
+**Decision:** Left-aligned hero with the count derived from `projects.ts`; the same "Reading as" lens control as the case pages (shared localStorage key, no depth toggle here). A full-width "Start here" card picks the case that answers that reader first (founder → Noble, hiring → hrekov-dev, engineer → smm-factory) with the lens headline and four stats; the grid shows the other cases with lens headline, two stats on accent rules, stack tags and plain-language status. Card links carry `?for=` so the case opens in the same view. Filters collapse to one row of role/stack chips with live counts; zero-match and all-match options are dropped. ProjectCard moved to v2 tokens (on-dark chips, 13px floor, no italic numeral, panel radius). Animated covers are now `role="img"` with the scene `aria-hidden`; the Lexora cover's decorative `<button>` (focusable inside a link) became a span.
+
+**Result:** /work renders at 1440 and 390 with no overflow; lens switch changes the start pick and card copy; Flutter filter → Lexora, Fieldmark. axe: no violations on mobile; on desktop only the Noble cover's struck-through "done" rows (app colours reproduced verbatim per case rulebook §10 — incidental text inside an image, WCAG 1.4.3 exception).
+
+**Lesson:** An index page is a router, not a gallery. Once the case pages knew who was reading, the index had to answer the same question first — "where should *I* start?" — or the lens would reset at the door.
+
+**Follow-up, same day (owner review):** Ruslan found the lens-driven index confusing — the count of cases was not visible at a glance, and one case got a large card with no obvious reason why. Reverted to one equal grid: the h1 states the count ("Six case studies."), every card carries `01 / 06`, status, one line of what it is, the outcome, time and headline result. The lens control, the "Start here" card and `workStartHere` are gone from /work (lens stays on the case pages); filter row shows "Showing N of 6 cases". Lesson: personalisation on an index page hides the inventory; readers first need to see how much there is and that every item gets the same treatment.
+
+## 2026-10-21 — Sprint 24 · /tools rebuilt: count first, details on demand
+
+**Problem:** /tools printed everything at once — two giant tool cards with why, systematizes, three impact tiles with method and baseline, measured/unmeasured lists and a conclusion, then a scorecard, a four-panel methodology and seven skill cards. No way to tell at a glance how many tools there are or what each one buys. Styling predated design system v2 (10–11px uppercase labels, mono as a third family, the green status dot as a "pass" mark). The "Inside ShipLoop." heading was invisible for reduced-motion visitors.
+
+**Decision:** Same rule as the /work follow-up: inventory first, equal treatment, details on demand (spec `specs/24-tools-page`). H1 states the count ("Two open-source tools."); two equal overview cards (`01 / 02`, tagline, lead number, jump link); one section per tool with identity, GitHub and copyable install on the left (sticky on desktop), description, why/what, three impact numbers on accent rules and a "Bottom line" on the right; method, baseline and measured/unmeasured lists in a native `<details>`. ShipLoop's commands are compact rows grouped by stage. Scorecard gets a question-led heading, ✓/✕/— marks with screen-reader words, and the methodology collapses under `<details>`. Code set in Inter like MDX `code`. Root cause of the missing headings: `MaskReveal` reads reduced motion as false on first render, starts the y-mask, then switches to an opacity-only target and leaves the text parked at 110% behind the mask — the settled state now always includes `y: 0%`. This fixes every MaskReveal heading on the site for reduced-motion visitors.
+
+**Result:** /tools at 1440 and 390: no overflow, axe clean (definition-list and heading-order issues fixed along the way). Page is ~26% shorter on desktop with every number still reachable. Production build passes.
+
+**Lesson:** A hook that reads a media query after mount can change an animation target mid-flight. When the "reduced" variant drops a property, the animated value doesn't reset — it freezes. Settle every animated property in the final state, whatever the variant.
+
+## 2026-10-21 — Sprint 25 · Journal redesign, studio-photo pipeline
+
+**Problem:** Ruslan asked for a Journal redesign and for every post illustration to move from ink line art to the look of four reference photos (white earbuds, case and keyboard on white, window-light shadows). /blog showed no images at all, every post was `featured: true` so all five sat under "Start here" with "All entries" empty, and the index and post header still used the pre-v2 centered-badge layout with 11px uppercase labels.
+
+**Decision:** Spec `specs/25-journal-studio`. /blog follows the /work and /tools rule: the h1 states the count ("Five working notes."), format chips with counts and "Showing N of M", the newest entry leads as a wide photo card, the rest sit in an equal two-column grid with the photo on top; `featured` no longer drives the index. Post pages get a left-aligned header on the reading column and a frameless 3:2 hero; MDX `Figure` renders a fixed 3:2 crop so a regenerated image of any size keeps the layout. New `studio` preset in `scripts/gen-blog-hero.mjs` (high-key white-on-white still life, one daylight source, long diagonal shadows, no text or people) and `scripts/gen-journal-studio.mjs`, which holds one physical-object metaphor and the replacement alt text for each of the 11 images. Alt text changes only together with the image. Also fixed: MDX table wrapper keyboard-scrollable, BackToJournal in a `nav` landmark and off set-state-in-effect.
+
+**Result:** /blog and a post at 1440 and 390: no overflow, axe clean. Production build passes. The photos themselves are **not generated yet** — `GEMINI_API_KEY` is not available in the cloud environment; the current ink images render in the new frames until `node scripts/gen-journal-studio.mjs` runs with a key.
+
+**Lesson:** Fix the frame before the picture. With a fixed crop in the component, swapping eleven images becomes a content change instead of eleven layout checks.
+
+**Follow-up, same day (owner review):** While the studio photos wait on a key, the image grid read as five ink drawings competing. Back to the pre-redesign text tiles (format pill, date, title, tagline, two tags, minutes) on v2 tokens; only the newest entry overall keeps its picture, as the wide lead card at the top. A filtered view is all tiles. Post pages unchanged.
+
+**Follow-up, same day — photos generated:** All 11 Journal images regenerated with the `studio` preset (Gemini, one pass each, no retries needed) and checked on a contact sheet. Object counts drifted from the prompts (six boxes, fewer than ten grooves, nine blocks), so alt text describes what is in the frame instead of the prompt's numbers; three captions that described the old drawings (bay letters and workers, signposts with a bench, a ledger with three numbered rows) were rewritten to match. Files are renamed `*-studio.jpg`: the first local render still showed the ink drawing because the image optimizer cache is keyed by URL — a new URL is the only invalidation that also covers the CDN.

@@ -63,7 +63,7 @@ export function Lightbox({ open, onClose, label, caption, children }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-3 border-b border-[color:var(--hairline)] px-4 py-3 sm:px-5">
-              <div className="truncate font-sans text-[11px] uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
+              <div className="truncate font-sans text-[13px] text-[color:var(--ink-muted)]">
                 {label ?? "Expanded view"}
               </div>
               <button

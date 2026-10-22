@@ -15,9 +15,14 @@ two sessions or one full sprint.
   SaaS feel of pure white.
 - **Ink** is a monochrome ramp: `#111` primary → `#2A2A28` body → `#6B6B66`
   muted → `#A8A8A2` faint (decorative only, never text).
-- **Green `#22C55E` is the only chromatic accent** and is functional — it
-  signals "available for work" on the status dot. Never used decoratively.
-  If a second signal is needed, it comes from ink weight/opacity, not a hue.
+- **Two hues, two jobs (changed 2026-10-21, Sprint 22, by Ruslan's call).**
+  Green `#22C55E` is functional — it signals "available for work" on the
+  status dot and is never used decoratively. Brick `--accent` `#A94427`
+  (5.38:1 on paper, 5.67:1 for `--accent-ink` on it) is the single emphasis
+  hue: key paths and outcomes in diagrams, reading progress, the "Start
+  here" marker, key numbers, link hover. It is never a large fill, never on
+  the inverse panel, and never carries meaning alone (shape, glyph or label
+  goes with it). A third hue needs a fresh discussion.
 - **Radii** come from tokens: `--radius-card` (16px), `--radius-tile` (12px),
   `--radius-pill` (999px). No arbitrary `rounded-[Npx]`. If a shape wants
   something else, add a token or reshape the composition.

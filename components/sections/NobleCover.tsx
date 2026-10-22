@@ -185,8 +185,9 @@ export function NobleCover({ src, alt, sizes }: Props) {
         sizes={sizes}
         className="object-cover nb-cover-fallback"
       />
-      <div className="nb-cover-wrap" aria-label={alt}>
+      <div className="nb-cover-wrap" role="img" aria-label={alt}>
         <div
+          aria-hidden="true"
           className="nb-cover-scene"
           dangerouslySetInnerHTML={{ __html: SCENE_HTML }}
         />

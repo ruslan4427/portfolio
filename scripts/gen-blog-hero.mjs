@@ -68,6 +68,18 @@ const STYLES = {
     "reference aesthetic: Apple keynote press renders, minimal studio catalog shots",
   ].join(". "),
 };
+// Journal photography (Sprint 25): white-on-white still life in window light.
+STYLES.studio = [
+  "High-key monochrome studio still-life photograph, 3:2 horizontal frame",
+  "white and off-white matte objects resting on a seamless warm off-white surface (#F5F4EF tone), the surface fills the frame edge to edge",
+  "one soft natural daylight source from the upper left, casting long crisp diagonal shadows across the surface with a gentle gradient falloff into soft grey",
+  "minimal composition: one subject, tight considered crop, generous negative space, the subject slightly off-center",
+  "strictly desaturated — whites, warm greys and charcoal shadow only, no colour accents",
+  "shallow depth of field, matte finishes, faint film grain, calm and quiet",
+  "no people, no hands, no text, no letters, no numbers, no logos, no watermarks",
+  "reference aesthetic: Apple product photography of white earbuds and keyboards on white, minimalist editorial still life",
+].join(". ");
+
 const style = flags.style ?? "fabric";
 const STYLE = STYLES[style] ?? STYLES.fabric;
 

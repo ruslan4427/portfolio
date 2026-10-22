@@ -136,8 +136,9 @@ export function HrekovDevCover({ src, alt, sizes }: Props) {
         sizes={sizes}
         className="object-cover hd-cover-fallback"
       />
-      <div className="hd-cover-wrap" aria-label={alt}>
+      <div className="hd-cover-wrap" role="img" aria-label={alt}>
         <div
+          aria-hidden="true"
           className="hd-cover-scene"
           dangerouslySetInnerHTML={{ __html: SCENE_HTML }}
         />

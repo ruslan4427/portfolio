@@ -7,29 +7,22 @@ export function Figure({
   src,
   alt,
   caption,
-  width,
-  height,
 }: {
   src: string;
   alt: string;
   caption?: string;
+  /** Source size; kept for MDX compatibility — the frame is a fixed 3:2 crop. */
   width: number;
   height: number;
 }) {
   return (
     <figure className="not-prose my-10">
-      <div className="overflow-hidden rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
-        <Image
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          sizes="(min-width: 768px) 70ch, 92vw"
-          className="block h-auto w-full"
-        />
+      {/* Fixed 3:2 crop: a regenerated image of any size keeps the layout. */}
+      <div className="relative aspect-[3/2] overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--bg-elevated)]">
+        <Image src={src} alt={alt} fill sizes="(min-width: 768px) 70ch, 92vw" className="object-cover" />
       </div>
       {caption && (
-        <figcaption className="mt-4 text-center font-sans text-xs leading-relaxed text-[color:var(--ink-muted)]">
+        <figcaption className="mt-4 font-sans text-[length:var(--type-caption)] leading-relaxed text-[color:var(--ink-muted)]">
           {caption}
         </figcaption>
       )}
@@ -81,7 +74,7 @@ export function Artifact({
       href={href}
       target={href.startsWith("http") ? "_blank" : undefined}
       rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-      className="no-underline transition-transform hover:-translate-y-px focus-visible:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 focus-visible:rounded-sm"
+      className="no-underline transition-transform hover:-translate-y-px focus-visible:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 focus-visible:rounded-[var(--radius-inline)]"
     >
       {inner}
     </a>
@@ -113,7 +106,7 @@ export function PromptLog({
           ❝
         </span>
         {title}
-        <span className="ml-2 text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <span className="ml-2 text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           prompt
         </span>
       </summary>
@@ -136,7 +129,7 @@ export function Diff({
   return (
     <div className="my-6 grid grid-cols-1 gap-3 md:grid-cols-2">
       <div className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
-        <div className="border-b border-[color:var(--hairline)] px-4 py-2 font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <div className="border-b border-[color:var(--hairline)] px-4 py-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           before {language ? `· ${language}` : ""}
         </div>
         <pre className="overflow-x-auto px-4 py-3 font-sans text-[13px] leading-[1.55] text-[color:var(--ink-primary)]">
@@ -144,7 +137,7 @@ export function Diff({
         </pre>
       </div>
       <div className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
-        <div className="border-b border-[color:var(--hairline)] px-4 py-2 font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <div className="border-b border-[color:var(--hairline)] px-4 py-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           after {language ? `· ${language}` : ""}
         </div>
         <pre className="overflow-x-auto px-4 py-3 font-sans text-[13px] leading-[1.55] text-[color:var(--ink-primary)]">
@@ -183,11 +176,11 @@ export function MetricGrid({
           <div className="font-serif text-[clamp(28px,3.5vw,44px)] leading-none text-[color:var(--ink-primary)] tabular-nums">
             {item.value}
           </div>
-          <div className="mt-2 font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)]">
+          <div className="mt-2 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
             {item.label}
           </div>
           {item.hint && (
-            <div className="mt-1 font-sans text-[12px] leading-snug text-[color:var(--ink-muted)]">
+            <div className="mt-1 font-sans text-[length:var(--type-caption)] leading-snug text-[color:var(--ink-muted)]">
               {item.hint}
             </div>
           )}
@@ -234,12 +227,12 @@ function BeforeAfterPanel({
         href={commitHref}
         target={commitHref.startsWith("http") ? "_blank" : undefined}
         rel={commitHref.startsWith("http") ? "noopener noreferrer" : undefined}
-        className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2 py-0.5 font-sans text-[11px] text-[color:var(--ink-primary)] no-underline transition-colors hover:border-[color:var(--outline)]"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2 py-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-primary)] no-underline transition-colors hover:border-[color:var(--outline)]"
       >
         {chipInner}
       </a>
     ) : (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2 py-0.5 font-sans text-[11px] text-[color:var(--ink-primary)]">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-2 py-0.5 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-primary)]">
         {chipInner}
       </span>
     )
@@ -247,7 +240,7 @@ function BeforeAfterPanel({
   return (
     <div className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[color:var(--hairline)] px-4 py-2">
-        <span className="font-sans text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <span className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           {label}
           {date ? <span className="ml-1.5 normal-case tracking-normal text-[color:var(--ink-muted)]"> · {date}</span> : null}
         </span>
@@ -285,7 +278,7 @@ export function TechnicalDetail({
           ›
         </span>
         <span className="flex-1">{summary}</span>
-        <span className="text-[11px] uppercase tracking-wide text-[color:var(--ink-muted)]">
+        <span className="text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
           technical
         </span>
       </summary>

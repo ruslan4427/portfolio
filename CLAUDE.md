@@ -112,7 +112,9 @@ Single source of truth: `app/globals.css` `:root { ... }` block and the
 - Page: `#F5F4EF` (warm paper) · Elevated: `#FFFFFF`
 - Ink: `#111` primary · `#2A2A28` body · `#6B6B66` muted · `#A8A8A2` faint (decorative only)
 - CTA: `#0A0A0A` on `#FAFAF7` ink
-- Status: `#22C55E` (available dot — the only chromatic accent, functional not decorative)
+- Status: `#22C55E` (available dot — functional, never decorative)
+- Accent: `#A94427` brick (`--accent`, `--accent-ink`, `--accent-soft`) — the one
+  emphasis hue: diagram key paths, reading progress, key numbers. Small doses only.
 - Hairline: `rgba(17,17,17,0.08)` · Outline: `rgba(17,17,17,0.14)`
 - Serif (display, upright): Playfair Display via `--font-serif` (backed by `--font-display`)
 - Sans (body, nav, chrome): Inter via `--font-sans`
@@ -154,8 +156,10 @@ app/                    Next.js App Router
   page.tsx              Home: Hero → SelectedWork → Services (teaser) → HowItWorks
                         → Benefits → ExperienceMini → Testimonials (Footer card
                         in layout.tsx is the sole closer — no per-page CTA)
-  globals.css           Tokens (:root) + @theme inline mapping + case-study
-                        view toggle rules ([data-view] show/hide)
+  globals.css           Tokens (:root, incl. v2 additions from
+                        specs/19-design-system-v2) + @theme inline mapping +
+                        case reader rules ([data-depth="short"] collapses
+                        each MDX section to heading + lead)
   not-found.tsx         Root 404 (SectionBadge + Playfair h1 + Home/Selected work CTAs)
   opengraph-image.tsx   Home OG (Playfair embedded via lib/og-fonts)
   sitemap.ts            Async — pulls per-study + per-blog-post lastmod
@@ -164,15 +168,21 @@ app/                    Next.js App Router
   (marketing)/
     about/page.tsx      Long-form bio, values, principles, full experience
     services/page.tsx   Full 5-format engagement grid (ServicesFull) + full-time card
-    work/page.tsx       Work index with WorkIndex (Role/Stack/Year filters)
+    work/page.tsx       Work index (Sprint 23): count in the h1 → role/stack
+                        chips with counts + "Showing N of M" → one equal grid
+                        of numbered cards (01 / 06), all cases in order
     work/[slug]/
-      page.tsx          Case study (BackToWork pill → /work, Article JSON-LD,
-                        ViewToggle mounted only if hasEnhanced fields present)
+      page.tsx          Case study (Sprint 20): CaseReader (lens + depth) →
+                        hero with LensHeadline/LensStats → GlanceBento →
+                        ChapterRail + MDX body → "How it was made" receipts
+                        (TokenScorecardHero, BuildTimeline, artifacts, devlog)
+                        → LensCTA → CaseNav. Article JSON-LD.
       loading.tsx       MDX-bundle skeleton (badge/title/tagline/body pulse)
       not-found.tsx     Case study 404 (SectionBadge + Playfair h1 + Back to work CTA)
       opengraph-image.tsx  Per-slug OG (Playfair embedded)
-    blog/page.tsx       Journal index (featured grid + chronological list;
-                        empty state ships too)
+    blog/page.tsx       Journal index (Sprint 25): count in the h1 → format
+                        chips + "Showing N of M" → newest entry wide, the rest
+                        as 2-col text tiles (JournalIndex); empty state
     blog/[slug]/
       page.tsx          Blog post (BlogPosting JSON-LD, BackToJournal pill,
                         per-format container width, Receipts aside,
@@ -191,10 +201,18 @@ components/
                         PageViews (route-change gtag config),
                         ExternalLinkTracker (delegated document click),
                         BlogReadTracker (IO sentinel per slug)
-  blog/                 PostCard (featured grid), PostRow (chronological)
+  blog/                 JournalIndex (format filter), PostCard (photo card,
+                        `lead` = wide with photo, else text tile), format.ts
   canvas/DotGrid.tsx    Cursor-reactive canvas (mounted once in root layout)
-  case-study/           ArtifactList, DevlogRefs, ViewToggle
-                        (fixed pos, data-view flip, localStorage-persisted)
+  tools/                /tools (Sprint 24): ToolSection (identity + install |
+                        impact numbers + Disclosure for method), InstallBlock,
+                        SkillGrid (command rows by stage), ScorecardTable,
+                        ScorecardMethodology
+  case-study/           CaseReader (lens founder|hiring|engineer + depth
+                        short|full, localStorage, ?for= pre-select), LensHero,
+                        ChapterRail, CaseSection, GlanceBento, LensCTA,
+                        CaseNav, ArtifactList, DevlogRefs, TokenScorecardHero,
+                        BuildTimeline, AgentReplay
   layout/               Nav (route-based, prefix match; Journal between Work +
                         About), Footer, SmoothScroll, SkipToMain, BackToWork,
                         BackToJournal
@@ -206,10 +224,14 @@ components/
                         primitives — variant primary|outline, size sm|md), FadeUp
   mdx/                  CaseStudyBody, BlogPostBody, MdxComponents,
                         BlogComponents (Artifact, Cost, PromptLog, Diff,
-                        TechnicalDetail — TechnicalDetail is CSS-hidden in
-                        case-study executive view)
+                        TechnicalDetail). CaseStudyBody runs
+                        lib/rehype-case-sections (wraps each ## in a section)
+                        Schematic (Diagram + FlowSchema notation: ISO 5807 /
+                        C4 shapes, orthogonal connectors, auto legend,
+                        "Read as steps" text alternative)
 lib/
   analytics.ts          track(event, params) — wraps window.gtag
+  rehype-case-sections.ts  Section wrapper + extractChapters (same ids)
   consent.ts            Cookie helpers (consent + geo readers/writers)
   consent-geo.ts        EU_COUNTRIES set (27 EU + GB + NO/IS/LI + CH) +
                         isEuCountry() helper
@@ -225,6 +247,8 @@ content/
                         optional recruiterSummary / supportingArtifacts / devlogRefs
                         (Artifact type imported from content/blog.ts)
   case-studies/         MDX bodies (filename must match slug — no date prefix)
+  case-lenses.ts        Per-case reading-lens copy: glance, status label,
+                        headline/stats/CTA per lens (numbers restated from MDX)
   blog.ts               Types + loader (mirror of case-studies.ts convention);
                         BlogFormat, Artifact, BlogFrontmatter, BlogPost;
                         validators throw on invalid format/date/duplicate slug/
@@ -234,8 +258,9 @@ content/
 
 ## Contribution rules
 
-1. Never invent new color values. Extend `globals.css` `:root`. **Monochrome
-   is the rule**; green `#22C55E` is functional (availability), not decorative.
+1. Never invent new color values. Extend `globals.css` `:root`. **Ink-led
+   palette**: green `#22C55E` is functional (availability); brick `--accent`
+   is the single emphasis hue, used sparingly (see STABLE_LOGIC).
 2. Two font families only: `--font-serif` (Playfair Display, upright for
    display) and `--font-sans` (Inter, everything else). Do not add a third,
    and don't reintroduce italic display without a fresh design spec.

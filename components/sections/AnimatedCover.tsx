@@ -94,9 +94,9 @@ const SCENE_HTML = `
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"></path></svg>
               <div style="position:relative;width:34px;height:34px">
                 <span class="lx-ring-pulse" style="position:absolute;inset:0;border-radius:50%;background:#1677ff"></span>
-                <button aria-label="Play" style="position:relative;width:34px;height:34px;border:0;border-radius:50%;background:#1677ff;display:flex;align-items:center;justify-content:center;padding:0">
+                <span style="position:relative;width:34px;height:34px;border-radius:50%;background:#1677ff;display:flex;align-items:center;justify-content:center">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M7 4v16l13-8z"></path></svg>
-                </button>
+                </span>
               </div>
             </div>
 
@@ -167,8 +167,9 @@ export function AnimatedCover({ src, alt, sizes }: Props) {
         sizes={sizes}
         className="object-cover lx-cover-fallback"
       />
-      <div className="lx-cover-wrap" aria-label={alt}>
+      <div className="lx-cover-wrap" role="img" aria-label={alt}>
         <div
+          aria-hidden="true"
           className="lx-cover-scene"
           dangerouslySetInnerHTML={{ __html: SCENE_HTML }}
         />

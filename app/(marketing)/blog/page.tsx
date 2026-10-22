@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { getBlogPosts, getFeaturedBlogPosts, type BlogPost } from "@/content/blog";
-import { PostCard } from "@/components/blog/PostCard";
-import { PostRow } from "@/components/blog/PostRow";
+import { JournalIndex } from "@/components/blog/JournalIndex";
 import { MaskReveal } from "@/components/ui/MaskReveal";
 import { Reveal } from "@/components/ui/Reveal";
-import { SectionBadge } from "@/components/ui/SectionBadge";
+import { getBlogPosts } from "@/content/blog";
 
 export const metadata: Metadata = {
   title: "Journal",
@@ -12,108 +10,52 @@ export const metadata: Metadata = {
     "Case studies, build logs, and field notes on shipping software with AI as a collaborator — for people who read commit histories.",
 };
 
+const COUNT_WORDS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+
 export default async function BlogIndexPage() {
-  const [featured, all] = await Promise.all([
-    getFeaturedBlogPosts(),
-    getBlogPosts(),
-  ]);
-  const featuredSlugs = new Set(featured.map((p) => p.frontmatter.slug));
-  const chronological = all.filter((p) => !featuredSlugs.has(p.frontmatter.slug));
-  const grouped = groupByYear(chronological);
-  const isEmpty = all.length === 0;
+  const posts = (await getBlogPosts()).map((p) => p.frontmatter);
+  const count = COUNT_WORDS[posts.length] ?? String(posts.length);
 
   return (
-    <main id="main" className="relative min-h-screen">
-      <section className="px-[var(--gutter)] pt-40 pb-16">
-        <div className="mx-auto flex max-w-[var(--content-max)] flex-col items-center text-center">
-          <Reveal>
-            <SectionBadge label="Journal" />
-          </Reveal>
-          <h1 className="mt-8 max-w-[14ch] font-serif text-[clamp(48px,7vw,88px)] leading-[0.98] text-[color:var(--ink-primary)]">
-            <MaskReveal mode="mount" delay={0.15}>
-              Working notes.
+    <main id="main" className="relative min-h-screen px-[var(--gutter)]">
+      <div className="mx-auto flex max-w-[var(--content-max)] flex-col">
+        <header className="flex flex-col gap-5 pt-36 pb-12">
+          <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+            Journal ·{" "}
+            <a
+              href="/rss.xml"
+              className="underline decoration-[color:var(--outline)] underline-offset-4 hover:text-[color:var(--ink-primary)] hover:decoration-[color:var(--accent)]"
+            >
+              RSS
+            </a>
+          </p>
+          <h1 className="font-serif text-[length:var(--type-display-l)] leading-[0.98] text-[color:var(--ink-primary)]">
+            <MaskReveal mode="mount" delay={0.1}>
+              {posts.length === 1 ? "One working note." : `${count} working notes.`}
             </MaskReveal>
           </h1>
-          <Reveal delay={0.25}>
-            <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-[color:var(--ink-body)]">
-              Case studies, build logs, and field notes on shipping software
-              with AI as a collaborator — for people who read commit histories.
+          <Reveal delay={0.2}>
+            <p className="max-w-[56ch] text-[length:var(--type-body-l)] leading-[1.55] text-[color:var(--ink-body)]">
+              Case studies, build logs and field notes on shipping software with AI as a collaborator —
+              for people who read commit histories.
             </p>
           </Reveal>
-        </div>
-      </section>
+        </header>
 
-      {isEmpty ? (
-        <section className="px-[var(--gutter)] pb-40">
-          <div className="mx-auto max-w-[var(--content-max)] py-16 text-center">
-            <p className="text-[15px] text-[color:var(--ink-muted)]">
+        <div className="pb-[var(--section-py)]">
+          {posts.length === 0 ? (
+            <p className="border-t border-[color:var(--hairline)] pt-8 text-[length:var(--type-small)] text-[color:var(--ink-muted)]">
               First post lands soon. Subscribe via{" "}
-              <a
-                href="/rss.xml"
-                className="underline decoration-[color:var(--hairline)] underline-offset-4 transition-colors hover:text-[color:var(--ink-primary)]"
-              >
+              <a href="/rss.xml" className="underline decoration-[color:var(--outline)] underline-offset-4">
                 RSS
               </a>
               .
             </p>
-          </div>
-        </section>
-      ) : (
-        <>
-          {featured.length > 0 && (
-            <section className="px-[var(--gutter)] pb-16">
-              <div className="mx-auto max-w-[var(--content-max)]">
-                <h2 className="mb-8 font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-                  Start here
-                </h2>
-                <div
-                  className={`grid grid-cols-1 gap-6 ${
-                    featured.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"
-                  }`}
-                >
-                  {featured.map((post) => (
-                    <PostCard key={post.frontmatter.slug} post={post} />
-                  ))}
-                </div>
-              </div>
-            </section>
+          ) : (
+            <JournalIndex posts={posts} />
           )}
-
-          {chronological.length > 0 && (
-            <section className="px-[var(--gutter)] pb-40">
-              <div className="mx-auto max-w-[var(--content-max)]">
-                <h2 className="mb-8 font-sans text-xs uppercase tracking-[0.14em] text-[color:var(--ink-muted)]">
-                  All entries
-                </h2>
-                {grouped.map(([year, posts]) => (
-                  <div key={year} className="mb-12 last:mb-0">
-                    {grouped.length > 1 && (
-                      <h3 className="mb-4 font-serif text-2xl text-[color:var(--ink-primary)] tabular-nums">
-                        {year}
-                      </h3>
-                    )}
-                    <ul>
-                      {posts.map((post) => (
-                        <PostRow key={post.frontmatter.slug} post={post} />
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </>
-      )}
+        </div>
+      </div>
     </main>
   );
-}
-
-function groupByYear(posts: BlogPost[]): Array<[string, BlogPost[]]> {
-  const groups = new Map<string, BlogPost[]>();
-  for (const post of posts) {
-    const year = post.frontmatter.publishedAt.slice(0, 4);
-    if (!groups.has(year)) groups.set(year, []);
-    groups.get(year)!.push(post);
-  }
-  return Array.from(groups.entries());
 }
