@@ -12,10 +12,13 @@ import { CTAButton } from "@/components/ui/CTAButton";
 import { track } from "@/lib/analytics";
 
 const INTENT_OPTIONS = [
-  { value: "fractional", label: "Fractional / consulting" },
-  { value: "full-time", label: "Full-time role" },
-  { value: "other", label: "Other / just saying hi" },
+  { value: "fractional", label: "Fractional / consulting", hint: "A project, an audit or a few weeks of help." },
+  { value: "full-time", label: "Full-time role", hint: "You are hiring for a permanent position." },
+  { value: "other", label: "Something else", hint: "A question, an idea, or just hi." },
 ] as const;
+
+const inputClass =
+  "min-h-11 rounded-[var(--radius-tile)] border border-[color:var(--outline-strong)] bg-[color:var(--bg-elevated)] px-3.5 py-2.5 font-sans text-[length:var(--type-small)] text-[color:var(--ink-primary)] transition-shadow placeholder:text-[color:var(--ink-muted)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]";
 
 type IntentValue = (typeof INTENT_OPTIONS)[number]["value"];
 
@@ -53,23 +56,23 @@ export function ContactForm() {
   if (state.status === "success") {
     return (
       <div
-        className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-8 py-12 text-center shadow-[var(--shadow-card)]"
+        className="flex flex-col items-start gap-4 rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-8 shadow-[var(--shadow-card)] md:p-10"
         role="status"
         aria-live="polite"
       >
         <h2
           ref={successHeadingRef}
           tabIndex={-1}
-          className="font-serif text-[clamp(28px,3.5vw,40px)] text-[color:var(--ink-primary)] outline-none"
+          className="font-serif text-[length:var(--type-display-s)] leading-[1.1] text-[color:var(--ink-primary)] outline-none"
         >
           Thanks — I got it.
         </h2>
-        <p className="mx-auto mt-4 max-w-sm text-[color:var(--ink-body)]">
+        <p className="max-w-sm text-[length:var(--type-small)] leading-[1.6] text-[color:var(--ink-body)]">
           I read every message and reply within two business days.
         </p>
         <Link
           href="/"
-          className="mt-8 inline-flex items-center gap-2 rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-4 py-2 font-sans text-sm text-[color:var(--ink-primary)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+          className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--outline)] px-4 font-sans text-sm text-[color:var(--ink-primary)] transition-transform duration-[var(--dur-fast)] hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] motion-reduce:transform-none"
         >
           <span aria-hidden>←</span>
           <span>Back to home</span>
@@ -85,9 +88,45 @@ export function ContactForm() {
     <form
       action={formAction}
       noValidate
-      className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-6 py-8 shadow-[var(--shadow-card)] md:px-8 md:py-10"
+      aria-labelledby="contact-form-heading"
+      className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6 shadow-[var(--shadow-card)] md:p-9"
     >
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
+        <h2 id="contact-form-heading" className="font-serif text-[length:var(--type-display-s)] leading-[1.1] text-[color:var(--ink-primary)]">
+          Write to me
+        </h2>
+        <fieldset className="flex flex-col gap-2.5">
+          <legend className="mb-2.5 font-sans text-sm font-semibold text-[color:var(--ink-primary)]">
+            What is this about?
+          </legend>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {INTENT_OPTIONS.map((opt) => (
+              <label
+                key={opt.value}
+                className="group relative flex cursor-pointer flex-col gap-1 rounded-[var(--radius-tile)] border border-[color:var(--outline)] bg-[color:var(--bg-page)] p-3.5 transition-colors has-[:checked]:border-[color:var(--ink-primary)] has-[:checked]:bg-[color:var(--bg-elevated)] has-[:focus-visible]:shadow-[var(--focus-ring)]"
+              >
+                <input
+                  type="radio"
+                  name="intent"
+                  value={opt.value}
+                  defaultChecked={currentIntent === opt.value}
+                  className="sr-only"
+                />
+                <span className="flex items-center gap-2 font-sans text-sm font-semibold text-[color:var(--ink-primary)]">
+                  <span
+                    aria-hidden
+                    className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[var(--radius-pill)] border border-[color:var(--outline-strong)] after:h-2 after:w-2 after:rounded-[var(--radius-pill)] after:bg-[color:var(--accent)] after:opacity-0 group-has-[:checked]:border-[color:var(--accent)] group-has-[:checked]:after:opacity-100"
+                  />
+                  {opt.label}
+                </span>
+                <span className="font-sans text-[length:var(--type-caption)] leading-[1.45] text-[color:var(--ink-muted)]">
+                  {opt.hint}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <div className="grid gap-5 sm:grid-cols-2">
         <Field
           label="Name"
           name="name"
@@ -104,27 +143,13 @@ export function ContactForm() {
           required
           defaultValue={fieldValue(state, "email")}
         />
+        </div>
         <label className="flex flex-col gap-2">
-          <span className="font-sans text-sm text-[color:var(--ink-primary)]">
-            I&rsquo;m reaching out about
-          </span>
-          <select
-            name="intent"
-            defaultValue={currentIntent}
-            className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-3.5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] transition-colors focus-visible:border-[color:var(--ink-primary)] focus-visible:outline-none"
-          >
-            {INTENT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="font-sans text-sm text-[color:var(--ink-primary)]">
+          <span className="font-sans text-sm font-semibold text-[color:var(--ink-primary)]">
             Message
           </span>
           <textarea
+            aria-describedby="message-hint"
             name="message"
             rows={6}
             required
@@ -132,8 +157,11 @@ export function ContactForm() {
             maxLength={5000}
             defaultValue={fieldValue(state, "message")}
             placeholder="What are you building, and how could I help?"
-            className="resize-y rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-3.5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] transition-colors placeholder:text-[color:var(--ink-muted)] focus-visible:border-[color:var(--ink-primary)] focus-visible:outline-none"
+            className={`${inputClass} resize-y`}
           />
+          <span id="message-hint" className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]">
+            At least 20 characters. Links to a repo, a doc or a live site help.
+          </span>
         </label>
 
         <Honeypot />
@@ -142,17 +170,17 @@ export function ContactForm() {
           <p
             role="alert"
             aria-live="assertive"
-            className="rounded-[var(--radius-tile)] border border-[color:var(--ink-primary)] bg-[color:var(--bg-page)] px-3.5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)]"
+            className="rounded-[var(--radius-tile)] border border-[color:var(--accent)] bg-[color:var(--accent-soft)] px-3.5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)]"
           >
             {errorMessage}
           </p>
         ) : null}
 
-        <div className="flex items-center justify-between gap-4 pt-2">
-          <p className="font-sans text-xs text-[color:var(--ink-muted)]" aria-live="polite">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[color:var(--hairline)] pt-5">
+          <p className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)]" aria-live="polite">
             {pending ? "Sending your message…" : "Usually replies within two business days."}
           </p>
-          <CTAButton type="submit" disabled={pending}>
+          <CTAButton type="submit" size="md" disabled={pending}>
             {pending ? "Sending…" : "Send message"}
             <span aria-hidden>→</span>
           </CTAButton>
@@ -174,7 +202,7 @@ type FieldProps = {
 function Field({ label, name, type, autoComplete, required, defaultValue }: FieldProps) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="font-sans text-sm text-[color:var(--ink-primary)]">
+      <span className="font-sans text-sm font-semibold text-[color:var(--ink-primary)]">
         {label}
       </span>
       <input
@@ -183,7 +211,7 @@ function Field({ label, name, type, autoComplete, required, defaultValue }: Fiel
         autoComplete={autoComplete}
         required={required}
         defaultValue={defaultValue}
-        className="rounded-[var(--radius-tile)] border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-3.5 py-2.5 font-sans text-sm text-[color:var(--ink-primary)] transition-colors placeholder:text-[color:var(--ink-muted)] focus-visible:border-[color:var(--ink-primary)] focus-visible:outline-none"
+        className={inputClass}
       />
     </label>
   );

@@ -1,6 +1,4 @@
-import { SectionBadge } from "@/components/ui/SectionBadge";
-import { Reveal } from "@/components/ui/Reveal";
-import { MaskReveal } from "@/components/ui/MaskReveal";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Stagger, StaggerItem } from "@/components/ui/Stagger";
 
 type Testimonial = {
@@ -16,7 +14,7 @@ const testimonials: Testimonial[] = [
   {
     name: "Yurii Honcharuk",
     role: "Product Practice Lead · ex-PIMU Services",
-    date: "MAY 2023",
+    date: "May 2023",
     initials: "YH",
     linkedinUrl: "https://www.linkedin.com/in/yuriihoncharuk/",
     quote:
@@ -25,7 +23,7 @@ const testimonials: Testimonial[] = [
   {
     name: "Svetlana Kostenko",
     role: "Project Owner · ex-PIMU Services",
-    date: "MAY 2023",
+    date: "May 2023",
     initials: "SK",
     linkedinUrl: "https://www.linkedin.com/in/svetlana-kostenko1/",
     quote:
@@ -35,15 +33,15 @@ const testimonials: Testimonial[] = [
 
 function TestimonialCard({ t }: { t: Testimonial }) {
   return (
-    <article className="rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6 shadow-[var(--shadow-card)]">
+    <article className="flex h-full flex-col rounded-[var(--radius-card)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] p-6 shadow-[var(--shadow-card)] md:p-8">
       <div className="flex items-start justify-between gap-4">
         <div
           aria-hidden
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-[color:var(--ink-primary)] font-sans text-xs font-semibold text-[color:var(--bg-page)]"
+          className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-pill)] bg-[color:var(--bg-inverse)] font-sans text-[length:var(--type-caption)] font-semibold text-[color:var(--ink-on-dark)]"
         >
           {t.initials}
         </div>
-        <span className="rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-page)] px-3 py-1 font-sans text-[11px] uppercase tracking-wider text-[color:var(--ink-muted)] tabular-nums">
+        <span className="font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] tabular-nums">
           {t.date}
         </span>
       </div>
@@ -56,7 +54,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`Verify ${t.name} on LinkedIn`}
-              className="inline-flex h-5 w-5 items-center justify-center rounded-[4px] border border-[color:var(--hairline)] text-[color:var(--ink-muted)] transition-colors duration-200 hover:border-[color:var(--ink-primary)] hover:text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40"
+              className="inline-flex h-6 w-6 items-center justify-center rounded-[var(--radius-inline)] border border-[color:var(--outline)] text-[color:var(--ink-muted)] transition-colors duration-[var(--dur-fast)] hover:border-[color:var(--ink-primary)] hover:text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
             >
               <svg
                 aria-hidden
@@ -75,7 +73,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         </div>
       </div>
       <p
-        className="mt-5 text-[15px] leading-relaxed text-[color:var(--ink-body)]"
+        className="mt-5 font-serif text-[length:var(--type-title)] leading-[1.5]! text-[color:var(--ink-primary)]"
         dangerouslySetInnerHTML={{ __html: t.quote }}
       />
     </article>
@@ -84,32 +82,19 @@ function TestimonialCard({ t }: { t: Testimonial }) {
 
 export function Testimonials() {
   return (
-    <section
-      id="voices"
-      className="relative px-[var(--gutter)] py-[var(--section-py)]"
-    >
+    <section id="voices" aria-labelledby="voices-heading" className="relative px-[var(--gutter)] py-[var(--section-py)]">
       <div className="mx-auto max-w-[var(--content-max)]">
-        <header className="mb-14 flex flex-col items-center gap-6 text-center">
-          <Reveal>
-            <SectionBadge label="Voices" />
-          </Reveal>
-          <h2 className="font-serif text-[clamp(36px,4.5vw,64px)] text-[color:var(--ink-primary)]">
-            <MaskReveal delay={0.15}>Senior stakeholders on how</MaskReveal>
-            <br />
-            <MaskReveal delay={0.32}>I collaborate.</MaskReveal>
-          </h2>
-        </header>
-
-        <Stagger
-          className="mx-auto grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-2"
-          stagger={0.08}
-        >
-          <StaggerItem>
-            <TestimonialCard t={testimonials[0]} />
-          </StaggerItem>
-          <StaggerItem>
-            <TestimonialCard t={testimonials[1]} />
-          </StaggerItem>
+        <SectionHeader
+          id="voices-heading"
+          eyebrow={`Voices · ${testimonials.length}`}
+          title="Senior stakeholders on how I collaborate."
+        />
+        <Stagger as="ul" className="grid grid-cols-1 gap-4 md:grid-cols-2" stagger={0.08}>
+          {testimonials.map((t) => (
+            <StaggerItem as="li" key={t.name} className="h-full">
+              <TestimonialCard t={t} />
+            </StaggerItem>
+          ))}
         </Stagger>
       </div>
     </section>

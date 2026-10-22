@@ -2,6 +2,9 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { CTALink } from "@/components/ui/CTAButton";
+import { HeroDots } from "@/components/canvas/HeroDots";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { DateTime } from "@/components/ui/DateTime";
 import { MaskReveal } from "@/components/ui/MaskReveal";
@@ -10,13 +13,14 @@ import { easeSmooth, usePrefersReducedMotion } from "@/lib/motion";
 
 const socials = [
   { label: "GitHub", href: "https://github.com/ruslan4427", short: "GH" },
-  { label: "X", href: "https://x.com/ruslan4427", short: "X" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/", short: "IN" },
   { label: "Dev.to", href: "https://dev.to/hrekov", short: "DEV" },
   { label: "Email", href: "mailto:rusgrekovua@gmail.com", short: "@" },
 ] as const;
 
-export function Hero() {
+export type HeroCount = { value: number; label: string; href: string };
+
+export function Hero({ counts }: { counts: HeroCount[] }) {
   const reduced = usePrefersReducedMotion();
   const [videoOpen, setVideoOpen] = useState(false);
   const hoverVideoRef = useRef<HTMLVideoElement>(null);
@@ -65,6 +69,7 @@ export function Hero() {
       id="top"
       className="relative px-[var(--gutter)] pb-[var(--section-py)] pt-24 md:pt-28"
     >
+      <HeroDots className="absolute right-0 top-0 -z-10 h-[360px] w-[72%] md:h-[600px] md:w-[min(70vw,960px)]" />
       <div className="mx-auto flex max-w-[var(--content-max)] items-start justify-between">
         <motion.div {...fade(D.chrome)}>
           <DateTime />
@@ -164,21 +169,42 @@ export function Hero() {
         <div className="flex flex-col gap-5">
           <motion.p
             {...fade(D.tagline)}
-            className="max-w-md text-base leading-relaxed text-[color:var(--ink-body)]"
+            className="max-w-md text-[length:var(--type-body-l)] leading-[1.55] text-[color:var(--ink-body)]"
           >
             I&rsquo;m Ruslan Hrekov, a solo builder based in the US. I
             collaborate with Claude to ship production software that&rsquo;s
             honest about how it was made — commit hashes, DEVLOGs, locked
             files. The usual.
           </motion.p>
-          <motion.a
+          <motion.div {...fade(D.cta)} className="flex flex-wrap gap-3">
+            <CTALink href="/work" size="md">
+              See the work <span aria-hidden>→</span>
+            </CTALink>
+            <CTALink href="/contact" variant="outline" size="md">
+              Start a project
+            </CTALink>
+          </motion.div>
+          <motion.ul
             {...fade(D.cta)}
-            href="#work"
-            className="inline-flex items-center gap-2 font-sans text-sm text-[color:var(--ink-primary)]"
+            aria-label="On this site"
+            className="mt-2 flex flex-wrap gap-x-8 gap-y-3 border-t border-[color:var(--hairline)] pt-5"
           >
-            Discover
-            <span aria-hidden>↓</span>
-          </motion.a>
+            {counts.map((c) => (
+              <li key={c.label}>
+                <Link
+                  href={c.href}
+                  className="group flex flex-col rounded-[var(--radius-inline)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+                >
+                  <span className="font-serif text-[length:var(--type-display-s)] leading-none text-[color:var(--ink-primary)] tabular-nums">
+                    {c.value}
+                  </span>
+                  <span className="mt-1 font-sans text-[length:var(--type-caption)] text-[color:var(--ink-muted)] underline decoration-transparent underline-offset-4 group-hover:decoration-[color:var(--accent)]">
+                    {c.label}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </motion.ul>
         </div>
       </div>
 

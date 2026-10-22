@@ -76,18 +76,18 @@ export const caseLenses: Record<string, CaseLensData> = {
       problem:
         "A language model doesn’t remember. Every session starts blank, so multi-session work either burns the first half hour re-explaining, or needs a memory around the model.",
       outcome: "A site that is its own proof: every decision dated, every rule earned, all of it public.",
-      time: "25 sprints",
+      time: "28 sprints",
       timeNote: "27 active days · live at hrekov.dev",
     },
     lenses: {
       founder: {
         headline: "How work on your project would actually happen — written down, dated and walkable.",
-        stats: [s("Sprints", "25"), s("Memory files", "47"), s("Rules promoted", "11"), s("Ramp-up saved", "~94 min")],
+        stats: [s("Sprints", "28"), s("Memory files", "47"), s("Rules promoted", "12"), s("Ramp-up saved", "~94 min")],
         cta: { title: "Want this workflow on your project?", label: "Book a fractional call" },
       },
       hiring: {
         headline: "A solo build that keeps its own memory: every decision dated, every rule earned.",
-        stats: [s("DEVLOG entries", "75"), s("Promoted", "14.7%"), s("Active days", "27"), s("Case studies", "6")],
+        stats: [s("DEVLOG entries", "78"), s("Promoted", "15.4%"), s("Active days", "27"), s("Case studies", "6")],
       },
       engineer: {
         headline: "A persistence layer for a stateless model: typed memory, a one-line index, a promotion gate.",

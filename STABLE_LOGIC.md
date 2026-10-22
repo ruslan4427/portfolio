@@ -35,8 +35,8 @@ two sessions or one full sprint.
 
 - `prefers-reduced-motion` fallback is a **hard requirement** on every
   animated component. Not a stretch goal.
-- `SmoothScroll` early-returns under reduce-motion. `DotGrid` renders the
-  static radial-gradient fallback. Framer respects
+- `SmoothScroll` early-returns under reduce-motion. `HeroDots` stays static
+  (no pointer reaction). Framer respects
   `MotionConfig reducedMotion="user"` (opacity only).
 - **Cursor-reactive effects also gate on `matchMedia("(hover: hover)")`** —
   no pointer-following animation on touch devices, regardless of
@@ -305,3 +305,11 @@ two sessions or one full sprint.
   fresh spec; the `/tools` page, meta case study `/work/claude-shiploop`,
   and the blog post `/blog/shipping-claude-shiploop` all point at the
   repo and must move in sync.
+
+## Ambient effects (changed 2026-10-22, Sprint 28, by Ruslan's call)
+
+- One ambient effect, in one place: the halftone dot field in the home hero.
+  No full-page canvas, no dot layer under reading content — an effect that
+  moves while someone reads is competing with the text.
+- Cursor response is a smooth radial falloff. No per-dot randomness in the
+  response; variety lives in the static pattern instead.

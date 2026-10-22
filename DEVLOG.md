@@ -2705,3 +2705,39 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Follow-up, same day (owner review):** While the studio photos wait on a key, the image grid read as five ink drawings competing. Back to the pre-redesign text tiles (format pill, date, title, tagline, two tags, minutes) on v2 tokens; only the newest entry overall keeps its picture, as the wide lead card at the top. A filtered view is all tiles. Post pages unchanged.
 
 **Follow-up, same day — photos generated:** All 11 Journal images regenerated with the `studio` preset (Gemini, one pass each, no retries needed) and checked on a contact sheet. Object counts drifted from the prompts (six boxes, fewer than ten grooves, nine blocks), so alt text describes what is in the frame instead of the prompt's numbers; three captions that described the old drawings (bay letters and workers, signposts with a bench, a ledger with three numbered rows) were rewritten to match. Files are renamed `*-studio.jpg`: the first local render still showed the ink drawing because the image optimizer cache is keyed by URL — a new URL is the only invalidation that also covers the CDN.
+
+## 2026-10-22 — Sprint 26 · /contact redesign
+
+**Problem:** /contact was the last page on the pre-v2 layout: centered badge hero, an 11px uppercase "Prefer email?" label, social links as 36px initials-only circles (GH, X, IN, DEV), the reason for writing hidden in a `<select>`, and nothing on what happens after Send beyond one muted line.
+
+**Decision:** Spec `specs/26-contact-page`. Two columns on desktop. Left (sticky): availability pill, "Let's talk.", one-line lede with the Ohio / EST-CST fact from the footer, "What happens next" as three numbered steps built only from statements already on the site, then direct channels as labelled 44px rows (name + handle, email first). Right: the form with a heading, the intent as three radio cards (label + one-line hint, `has-[:checked]` styling, accent dot), name and email side by side, a message hint tied by `aria-describedby`, error in an accent-soft box. Server action, validation, honeypot and `?intent=` pre-selection unchanged.
+
+**Result:** 1440 and 390 without overflow; axe clean; `?intent=full-time` pre-selects the right card, clicking switches it, an empty submit shows "Please enter your name." Production build passes.
+
+**Lesson:** A `<select>` hides the one choice that tells me how to read the message. Three visible cards cost one row and make the sender pick consciously.
+
+**Follow-up, same day (owner review):** The footer's "Ready to ship without rewrites?" card is a CTA to /contact, so on /contact it pointed at itself. Moved it into a client `FooterCta` that renders nothing on `/contact*`; the rest of the footer (copyright, privacy, socials) stays. Page bottom padding trimmed so the footer's own top padding is the only gap.
+
+**Follow-up — X removed:** Ruslan has no X account. Removed the x.com link from the hero socials, the footer, the /contact channel list and the Person JSON-LD `sameAs` (which now lists GitHub, LinkedIn and Dev.to — the profiles that exist).
+
+## 2026-10-22 — Sprint 27 · home page redesign, MaskReveal in-view fix
+
+**Problem:** The home page still carried the pre-v2 pattern the other pages had left: "Four case studies" over rows numbered 01, 04, 05, 06 with no word that six exist (the confusion Ruslan flagged on /work), "Three formats" showing three of five without saying so, six sections opening with the same centered sparkle badge and centered heading, a 2-col "How it works" grid with the fifth card stretched, 10–12px uppercase labels, and "Discover ↓" as the only hero action.
+
+**Decision:** Spec `specs/27-home-page`. New `components/ui/SectionHeader` — left-aligned eyebrow with a count, h2, optional lede, optional link — used by every home section. Hero copy kept; added a counts row computed from content (cases, open-source tools, journal entries, each a link) and two actions (See the work / Start a project). Selected work uses the /work `ProjectCard` 2×2 under "Cases · 4 of 6" with "All 6 cases"; services say "3 of 5" with "All 5 formats"; the five stages sit in one row on a hairline track; benefits in three equal columns; experience as page-level rows; testimonials as v2 cards. Owner copy unchanged except counts and labels. `ProjectAccordionRow` deleted (unused, and it carried a set-state-in-effect lint error).
+
+Root cause found on the way: `MaskReveal` in-view mode watched the inner span, which starts translated 110% below an `overflow: hidden` wrapper — fully clipped, so the observer never reported it and the heading stayed invisible. It only "worked" before on short single-line headings. The trigger now sits on the wrapper and drives the inner span through variants; a scroll sweep on /, /about, /services, /work, a case, /tools, /blog and /contact finds no MaskReveal left at opacity 0.
+
+**Result:** Home at 1440 and 390: no overflow, axe clean, production build passes; every count on the page derives from `content/*`.
+
+**Lesson:** Global `.font-serif` in globals.css is unlayered and sets `line-height: 1.02`, so it beats any `leading-*` utility on serif text — the testimonial quotes rendered at 20.4px line height until forced with `leading-[1.5]!`. Moving that rule into a layer is the real fix, but it would shift every serif heading that relies on it; leave it for a dedicated pass with screenshots.
+
+## 2026-10-22 — Sprint 28 · dot effect moved into the hero, after its reference
+
+**Problem:** The global `DotGrid` canvas covered every page: a faint 30px grid behind all content that lit up around the cursor. With `CHAOS_MIX` at 0.65 the lit area read as a ring with a hole in the middle — a glitch rather than an aura. It moved under case-study prose, the scorecard table and blog posts while people read, it added a third dot motif next to the CSS dot texture and the diagram backgrounds, and touch visitors never saw it at all. Ruslan agreed with that read and shared the original reference: Nizar Ali's hero, where the dots are a bounded halftone cloud in the top-right of the hero only, fading out at the edges, with a scattering of darker dots.
+
+**Decision:** Deleted `components/canvas/DotGrid.tsx` and its mount in the root layout. New `components/canvas/HeroDots.tsx`, rendered only in the home hero: 20px pitch, per-dot base alpha from a seeded hash (most ~0.05, a few up to ~0.6) so the pattern is halftone and stable across visits, CSS radial mask for the soft edge, cursor brightening with a smooth squared falloff and ~0.7s settle, rAF only while something is changing. Static field still renders on touch and under reduced motion; pointer reaction gated as before. Motion contract in CLAUDE.md rewritten; STABLE_LOGIC gains "one ambient effect, in one place".
+
+**Result:** Home at 1440 and 390 without overflow; no canvas on any other route; the hover spot is darkest at the centre with no ring; the field is visible on mobile for the first time.
+
+**Lesson:** A reference is a constraint on placement as much as on look. The original grid copied the dots and dropped the boundary, and the boundary was what made the effect calm.

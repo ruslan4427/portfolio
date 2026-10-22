@@ -1,46 +1,30 @@
+import { Stagger, StaggerItem } from "@/components/ui/Stagger";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { caseLenses } from "@/content/case-lenses";
 import { projects } from "@/content/projects";
-import { ProjectAccordionRow } from "./ProjectAccordionRow";
-import { SectionBadge } from "@/components/ui/SectionBadge";
-import { CTALink } from "@/components/ui/CTAButton";
-import { Reveal } from "@/components/ui/Reveal";
-import { MaskReveal } from "@/components/ui/MaskReveal";
+import { ProjectCard } from "./ProjectCard";
 
 const featured = projects.filter((p) => p.featured);
+const WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
 
 export function SelectedWork() {
   return (
-    <section
-      id="work"
-      className="relative px-[var(--gutter)] py-[var(--section-py)]"
-    >
+    <section id="work" aria-labelledby="work-heading" className="relative px-[var(--gutter)] py-[var(--section-py)]">
       <div className="mx-auto max-w-[var(--content-max)]">
-        <header className="mb-14 flex flex-col items-center gap-6 text-center">
-          <Reveal>
-            <SectionBadge label="Selected cases" />
-          </Reveal>
-          <h2 className="font-serif text-[clamp(36px,4.5vw,64px)] leading-[1.02] text-[color:var(--ink-primary)]">
-            <MaskReveal delay={0.15}>Four case studies,</MaskReveal>
-            <br />
-            <MaskReveal delay={0.32}>commit hashes attached.</MaskReveal>
-          </h2>
-        </header>
-
-        <ul className="border-t border-[color:var(--hairline)]">
-          {featured.map((project, i) => (
-            <ProjectAccordionRow
-              key={project.slug}
-              project={project}
-              order={i}
-            />
+        <SectionHeader
+          id="work-heading"
+          eyebrow={`Cases · ${featured.length} of ${projects.length}`}
+          title={`${WORDS[featured.length] ?? featured.length} builds, receipts attached.`}
+          lede="Commit hashes, DEVLOGs and the decisions that made or broke each build."
+          link={{ href: "/work", label: `All ${projects.length} cases` }}
+        />
+        <Stagger as="ul" className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {featured.map((project) => (
+            <StaggerItem as="li" key={project.slug} className="h-full">
+              <ProjectCard project={project} total={projects.length} lens={caseLenses[project.slug]} />
+            </StaggerItem>
           ))}
-        </ul>
-
-        <Reveal delay={0.1} className="mt-14 flex justify-center">
-          <CTALink href="/work" variant="outline">
-            View all work
-            <span aria-hidden>→</span>
-          </CTALink>
-        </Reveal>
+        </Stagger>
       </div>
     </section>
   );

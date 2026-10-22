@@ -9,7 +9,6 @@ import { ConsentProvider } from "@/components/analytics/ConsentContext";
 import { ExternalLinkTracker } from "@/components/analytics/ExternalLinkTracker";
 import { GA4 } from "@/components/analytics/GA4";
 import { PageViews } from "@/components/analytics/PageViews";
-import { DotGrid } from "@/components/canvas/DotGrid";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { FloatingEmailCTA } from "@/components/layout/FloatingEmailCTA";
 import { Footer } from "@/components/layout/Footer";
@@ -67,7 +66,8 @@ const personJsonLd = {
     "Solo builder shipping AI-collaborative software. Five case studies with commit hashes and honest numbers.",
   sameAs: [
     "https://github.com/ruslan4427",
-    "https://x.com/ruslan4427",
+    "https://www.linkedin.com/in/ruslan-hrekov-b21996315/",
+    "https://dev.to/hrekov",
   ],
   email: "mailto:rusgrekovua@gmail.com",
 };
@@ -79,7 +79,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ConsentProvider>
           <SkipToMain />
           <SmoothScroll>
-            <DotGrid />
             <Nav />
             <div className="relative z-10">
               {children}

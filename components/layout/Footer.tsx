@@ -1,9 +1,8 @@
 import { ConsentResetLink } from "@/components/analytics/ConsentResetLink";
-import { CTALink } from "@/components/ui/CTAButton";
+import { FooterCta } from "./FooterCta";
 
 const socials = [
   { label: "GitHub", href: "https://github.com/ruslan4427", short: "GH" },
-  { label: "X", href: "https://x.com/ruslan4427", short: "X" },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/",
@@ -23,21 +22,9 @@ export function Footer() {
   return (
     <footer className="relative px-[var(--gutter)] pb-16 pt-[var(--section-py)]">
       <div className="mx-auto max-w-[var(--content-max)]">
-        <div className="relative overflow-hidden rounded-[calc(var(--radius-card)+8px)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-6 py-16 shadow-[var(--shadow-card)] md:py-24">
-          <div className="relative flex flex-col items-center gap-6 text-center">
-            <h2 className="font-serif text-[clamp(40px,6vw,88px)] text-[color:var(--ink-primary)]">
-              Ready to ship
-              <br />
-              without rewrites?
-            </h2>
-            <CTALink href="/contact">Let&rsquo;s spec your next project</CTALink>
-            <p className="font-sans text-sm text-[color:var(--ink-muted)]">
-              Based in Ohio. EST/CST sync hours, by default.
-            </p>
-          </div>
-        </div>
+        <FooterCta />
 
-        <div className="mt-12 grid grid-cols-1 items-center gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-2 font-sans text-sm text-[color:var(--ink-muted)] md:text-left">
             <span>© Ruslan Hrekov {year}. All rights reserved.</span>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
