@@ -25,7 +25,7 @@ export default function WorkPage() {
           </p>
           <h1 className="font-serif text-[length:var(--type-display-l)] leading-[0.98] text-[color:var(--ink-primary)]">
             <MaskReveal mode="mount" delay={0.1}>
-              {count} case studies.
+              Case studies.
             </MaskReveal>
           </h1>
           <Reveal delay={0.2}>
