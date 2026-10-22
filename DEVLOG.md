@@ -2731,3 +2731,13 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 **Result:** Home at 1440 and 390: no overflow, axe clean, production build passes; every count on the page derives from `content/*`.
 
 **Lesson:** Global `.font-serif` in globals.css is unlayered and sets `line-height: 1.02`, so it beats any `leading-*` utility on serif text — the testimonial quotes rendered at 20.4px line height until forced with `leading-[1.5]!`. Moving that rule into a layer is the real fix, but it would shift every serif heading that relies on it; leave it for a dedicated pass with screenshots.
+
+## 2026-10-22 — Sprint 28 · dot effect moved into the hero, after its reference
+
+**Problem:** The global `DotGrid` canvas covered every page: a faint 30px grid behind all content that lit up around the cursor. With `CHAOS_MIX` at 0.65 the lit area read as a ring with a hole in the middle — a glitch rather than an aura. It moved under case-study prose, the scorecard table and blog posts while people read, it added a third dot motif next to the CSS dot texture and the diagram backgrounds, and touch visitors never saw it at all. Ruslan agreed with that read and shared the original reference: Nizar Ali's hero, where the dots are a bounded halftone cloud in the top-right of the hero only, fading out at the edges, with a scattering of darker dots.
+
+**Decision:** Deleted `components/canvas/DotGrid.tsx` and its mount in the root layout. New `components/canvas/HeroDots.tsx`, rendered only in the home hero: 20px pitch, per-dot base alpha from a seeded hash (most ~0.05, a few up to ~0.6) so the pattern is halftone and stable across visits, CSS radial mask for the soft edge, cursor brightening with a smooth squared falloff and ~0.7s settle, rAF only while something is changing. Static field still renders on touch and under reduced motion; pointer reaction gated as before. Motion contract in CLAUDE.md rewritten; STABLE_LOGIC gains "one ambient effect, in one place".
+
+**Result:** Home at 1440 and 390 without overflow; no canvas on any other route; the hover spot is darkest at the centre with no ring; the field is visible on mobile for the first time.
+
+**Lesson:** A reference is a constraint on placement as much as on look. The original grid copied the dots and dropped the boundary, and the boundary was what made the effect calm.

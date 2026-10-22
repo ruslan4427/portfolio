@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { CTALink } from "@/components/ui/CTAButton";
+import { HeroDots } from "@/components/canvas/HeroDots";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { DateTime } from "@/components/ui/DateTime";
 import { MaskReveal } from "@/components/ui/MaskReveal";
@@ -68,6 +69,7 @@ export function Hero({ counts }: { counts: HeroCount[] }) {
       id="top"
       className="relative px-[var(--gutter)] pb-[var(--section-py)] pt-24 md:pt-28"
     >
+      <HeroDots className="absolute right-0 top-0 -z-10 h-[360px] w-[72%] md:h-[600px] md:w-[min(70vw,960px)]" />
       <div className="mx-auto flex max-w-[var(--content-max)] items-start justify-between">
         <motion.div {...fade(D.chrome)}>
           <DateTime />

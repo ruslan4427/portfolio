@@ -86,9 +86,9 @@ Ruslan Hrekov's personal portfolio. Single-page scroll experience showcasing
 five AI-collaboration case studies. **Minimalist editorial** direction (as of
 Sprint 7, 2026-09-23; font pivot 2026-09-24): warm off-white paper, charcoal
 ink, monochrome + a single green availability dot, oversized upright Playfair
-Display display headings, generous whitespace, rounded cards. A dot-grid
-`<canvas>` provides ambient motion — dots always breathe on a slow travelling
-sine wave, and cursor movement lights them up locally.
+Display display headings, generous whitespace, rounded cards. A bounded
+halftone dot field in the home hero (`HeroDots`) is the one ambient effect;
+the cursor brightens it locally (Sprint 28).
 
 Reference: Nizar Ali "Personal Website & Portfolio" (Dribbble shot 24766210).
 
@@ -124,25 +124,22 @@ Single source of truth: `app/globals.css` `:root { ... }` block and the
 
 ## Motion contract
 
-- Ambient: `<DotGrid />` canvas — **strictly monochrome, cursor-only**.
-  Idle base is a very faint ink dot grid (`rgba(17,17,17,0.05)`, ~30px
-  pitch, ~1.6px dots) and is fully static when the cursor is still — no
-  breathing wave, no idle animation of any kind. Within ~170px of the
-  cursor each dot lights up (grows to ~4px, alpha up to 0.35) with a
-  squared falloff multiplied by a per-dot temporal wobble (`CHAOS_MIX`,
-  `CHAOS_TIME_HZ`) so activation reads as an organic aura rather than a
-  clean radial disc; per-dot intensity decays over ~0.9s so the cursor
-  path stays briefly visible. No colour — pure ink over the paper
-  background. All tunables live in the `CONFIG` object at the top of
-  `DotGrid.tsx`. Gated by `matchMedia("(hover: hover)")` and
-  `prefers-reduced-motion`; fallback is a static CSS radial-gradient
-  dot grid.
+- Ambient: `<HeroDots />` canvas in the home hero only (Sprint 28, after the
+  Nizar Ali reference) — **strictly monochrome**. A bounded 20px-pitch field
+  behind the top-right of the hero, faded to nothing at its edges with a CSS
+  radial mask; most dots faint (alpha ~0.05) with a seeded scattering of
+  darker ones, so it reads as halftone and is the same on every visit. Static
+  until the cursor comes near: dots within ~140px brighten and grow with a
+  smooth squared falloff (no per-dot chaos) and settle over ~0.7s. No idle
+  animation. Pointer reactivity gated by `matchMedia("(hover: hover)")` and
+  `prefers-reduced-motion`; the static field still renders on touch and under
+  reduced motion. No dot layer anywhere else — reading pages stay plain paper.
 - Reveals: `FadeUp` (Framer `whileInView`, ~400ms).
 - Cards/buttons: subtle `-translate-y-0.5` on hover/focus-visible.
 - `prefers-reduced-motion`:
   - `SmoothScroll` early-returns (native scroll)
   - Framer respects `MotionConfig reducedMotion="user"` (opacity only)
-  - `DotGrid` renders the static fallback
+  - `HeroDots` renders static (no pointer reaction)
 
 ## File layout
 
@@ -150,7 +147,7 @@ Single source of truth: `app/globals.css` `:root { ... }` block and the
 proxy.ts                Edge proxy (Next.js 16 convention, was middleware.ts)
                         — sets `geo-eu=1|0` cookie from x-vercel-ip-country
 app/                    Next.js App Router
-  layout.tsx            Fonts + ConsentProvider + GLOBAL chrome (DotGrid, Nav,
+  layout.tsx            Fonts + ConsentProvider + GLOBAL chrome (Nav,
                         Footer) + GA4/PageViews/ConsentBanner/ExternalLinkTracker
                         — children wrapped in `<div class="relative z-10">`
   page.tsx              Home (Sprint 27): Hero (counts row from content +
@@ -208,7 +205,7 @@ components/
                         BlogReadTracker (IO sentinel per slug)
   blog/                 JournalIndex (format filter), PostCard (photo card,
                         `lead` = wide with photo, else text tile), format.ts
-  canvas/DotGrid.tsx    Cursor-reactive canvas (mounted once in root layout)
+  canvas/HeroDots.tsx   Bounded halftone dot field, home hero only
   tools/                /tools (Sprint 24): ToolSection (identity + install |
                         impact numbers + Disclosure for method), InstallBlock,
                         SkillGrid (command rows by stage), ScorecardTable,
