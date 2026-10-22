@@ -159,6 +159,7 @@ export default function AboutPage() {
             </CTALink>
             <a
               href="/resume.pdf"
+              download="Ruslan-Hrekov-Resume.pdf"
               className="inline-flex min-h-11 items-center gap-2 px-2 font-sans text-sm text-[color:var(--ink-primary)] underline decoration-[color:var(--outline)] underline-offset-4 hover:decoration-[color:var(--accent)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
             >
               Résumé (PDF) <span aria-hidden>↓</span>
