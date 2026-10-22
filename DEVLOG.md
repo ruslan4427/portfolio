@@ -2751,3 +2751,13 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 **Result:** One style, written down in the four places someone making an image would look. No images regenerated in this block.
 
 **Lesson:** A style that lives only in a preset is a suggestion. It becomes a rule when the default, the docs and the skill that drafts posts all say the same thing.
+
+## 2026-10-22 — Sprint 30 · résumé page and PDF from site content
+
+**Problem:** Ruslan wanted a résumé PDF. The obvious route — a hand-made document — would drift from the site the first time experience, a case or a certificate changed.
+
+**Decision:** Spec `specs/30-resume-pdf`. New `/resume`: an A4 sheet in the site's type, built only from `content/*` — name and contact, summary (`bio[0]`, `bio[3]`), all seven experience entries, the six cases with tagline, headline metric, stack and link, certifications, and a stack list derived from the cases (versions dropped, aliases merged, "Claude Opus" folded into "Claude Opus/Sonnet/Haiku"). `scripts/build-resume-pdf.mjs` (`npm run resume:pdf`) renders it with Playwright `page.pdf` under print media into `public/resume.pdf`: selectable, ATS-readable text and live links. Site chrome (nav, footer, floating CTA, back-to-top, consent banner, skip link) is wrapped in `print:hidden`; `@page` sets A4 with 14mm margins. Links added on /about (next to the two CTAs) and /contact (channel list).
+
+**Result:** `public/resume.pdf` — 2 A4 pages, 170 KB. `/resume` at 1440 and 390 without overflow, axe clean. Production build passes.
+
+**Lesson:** Generate the document from the same data as the site and the PDF can never be the stale copy. The cost is one rule: the PDF is regenerated, never edited.

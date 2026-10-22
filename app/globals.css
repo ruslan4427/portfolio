@@ -711,3 +711,18 @@ html.lenis body {
 section[data-case-section] {
   scroll-margin-top: 96px;
 }
+
+/* ---------- Print (résumé, Sprint 30) ---------- */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+  .resume-sheet a {
+    color: inherit;
+  }
+}

@@ -11,7 +11,8 @@
     "verify:numbers": "node scripts/verify-case-study-numbers.mjs",
     "scorecard": "node scripts/scorecard-src/scorecard.mjs --out scorecard.json",
     "scorecard:snapshot": "node scripts/scorecard-src/scorecard.mjs --out scripts/__fixtures__/scorecard.expected.json",
-    "scorecard:check": "node scripts/scorecard-src/snapshot-check.mjs"
+    "scorecard:check": "node scripts/scorecard-src/snapshot-check.mjs",
+    "resume:pdf": "node scripts/build-resume-pdf.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.27.0",

@@ -16,6 +16,7 @@ const CHANNELS = [
   { label: "LinkedIn", handle: "Ruslan Hrekov", href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/" },
   { label: "GitHub", handle: "ruslan4427", href: "https://github.com/ruslan4427" },
   { label: "Dev.to", handle: "hrekov", href: "https://dev.to/hrekov" },
+  { label: "Résumé", handle: "PDF", href: "/resume.pdf" },
 ] as const;
 
 const NEXT_STEPS = [
