@@ -12,6 +12,7 @@ const SITE = "https://hrekov.dev";
 const CONTACT = [
   { label: "Ohio, US · remote" },
   { label: "rusgrekovua@gmail.com", href: "mailto:rusgrekovua@gmail.com" },
+  { label: "(303) 210-1850", href: "tel:+13032101850" },
   { label: "hrekov.dev", href: SITE },
   { label: "linkedin.com/in/ruslan-hrekov-b21996315", href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/" },
   { label: "github.com/ruslan4427", href: "https://github.com/ruslan4427" },
