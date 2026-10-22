@@ -669,6 +669,22 @@ Ship the PNG via a normal PhoneRow item (no `kind`):
 Rule of thumb: if redrawing takes more than ~90 min for one screen, ship the
 PNG. The animation payoff isn't worth the pixel-chase.
 
+### 10.2 Mockups and illustrations — studio style only
+
+A device mockup or a conceptual illustration in a case follows STABLE_LOGIC
+"Imagery": white device or objects on warm off-white, side daylight, long
+shadows, no people, no text in the scene. For a mockup, generate it with the
+real screen on the device:
+
+```bash
+node scripts/gen-blog-hero.mjs <slug> "a white phone lying on the surface" \
+  --screen=public/case-studies/<slug>/<screen>.webp \
+  --out=public/case-studies/<slug>/<name>-studio.jpg
+```
+
+Raw screenshots (PNG/WebP via `Figure` or `PhoneRow`) and SVG reconstructions
+are evidence, not illustration — they stay exactly as captured.
+
 **Visual-language audit — do this BEFORE writing any SVG.** The reconstructed
 screen must match the *real app's* design identity verbatim, not inherit the
 portfolio's own tokens. Open the reference PNG first and copy from it:

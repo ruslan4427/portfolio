@@ -52,7 +52,7 @@ export function InstallBlock({ command, caption, source = "install_block" }: { c
         </div>
         <pre
           tabIndex={0}
-          className="overflow-x-auto px-4 py-3 font-sans text-[length:var(--type-caption)] leading-relaxed text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+          className="whitespace-pre-wrap break-all px-4 py-3 font-sans text-[length:var(--type-caption)] leading-relaxed text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
         >
           <code id={id} className="font-sans">{command}</code>
         </pre>

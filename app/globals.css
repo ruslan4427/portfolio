@@ -691,22 +691,7 @@ html.lenis body {
 }
 
 /* ---------- Case-study reader (Sprint 20) ---------- */
-/* Unlayered on purpose: "2-min read" must beat any display utility on the
-   hidden blocks. Each MDX ## section is wrapped by rehype-case-sections. */
-
-.case-section-more {
-  display: none;
-}
-
-/* Figures (diagrams, flows, screenshots, charts) stay visible in the 2-min
-   read: they are the skim path. Only prose and secondary blocks collapse. */
-[data-depth="short"] section[data-case-section]:not([data-open="true"]) > :not(h2):not(:nth-child(2)):not(.case-section-more):not(figure) {
-  display: none;
-}
-
-[data-depth="short"] section[data-case-section]:not([data-open="true"]) > .case-section-more {
-  display: inline-flex;
-}
+/* Each MDX ## section is wrapped by rehype-case-sections for anchor links. */
 
 section[data-case-section] {
   scroll-margin-top: 96px;

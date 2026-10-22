@@ -12,12 +12,11 @@ import { useCaseReader } from "./CaseReader";
  * small screens.
  */
 export function ChapterRail({ chapters }: { chapters: CaseChapter[] }) {
-  const { lens, depth } = useCaseReader();
+  const { lens } = useCaseReader();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // Active = the last section whose top has passed 30% of the viewport;
-  // none before the first one is reached. Recomputed on scroll and resize
-  // because "2-min read" changes section heights.
+  // none before the first one is reached.
   useEffect(() => {
     let frame = 0;
     const update = () => {
@@ -86,7 +85,7 @@ export function ChapterRail({ chapters }: { chapters: CaseChapter[] }) {
     </ol>
   );
 
-  const label = `${chapters.length} chapters · ${depth === "short" ? "2-min read" : "full story"}`;
+  const label = `${chapters.length} chapters`;
 
   return (
     <nav aria-label="Chapters">

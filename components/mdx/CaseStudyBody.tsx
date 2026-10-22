@@ -1,7 +1,6 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { AgentReplayFor } from "@/components/case-study/AgentReplay";
-import { CaseSection } from "@/components/case-study/CaseSection";
 import { rehypeCaseSections } from "@/lib/rehype-case-sections";
 import { blogComponents } from "./BlogComponents";
 import {
@@ -48,7 +47,6 @@ export function CaseStudyBody({ source }: { source: string }) {
         StackRow,
         TechNotes,
         WireflowMap,
-        section: CaseSection,
       }}
       options={{
         mdxOptions: {
