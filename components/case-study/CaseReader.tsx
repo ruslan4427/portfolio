@@ -11,23 +11,17 @@ import {
 import { LENSES, lensLabel, parseLens, type Lens } from "@/content/case-lenses";
 import { track } from "@/lib/analytics";
 
-export type Depth = "short" | "full";
-
 type ReaderState = {
   slug: string;
   lens: Lens;
-  depth: Depth;
   setLens: (lens: Lens) => void;
-  setDepth: (depth: Depth) => void;
 };
 
 const ReaderContext = createContext<ReaderState | null>(null);
 
 const LENS_KEY = "case-lens";
-const DEPTH_KEY = "case-depth";
 const CHANGE_EVENT = "case-reader-change";
 const DEFAULT_LENS: Lens = "founder";
-const DEFAULT_DEPTH: Depth = "short";
 
 function readStorage(key: string): string | null {
   try {
@@ -61,11 +55,6 @@ function lensSnapshot(): Lens {
   return fromUrl ?? parseLens(readStorage(LENS_KEY)) ?? DEFAULT_LENS;
 }
 
-function depthSnapshot(): Depth {
-  const stored = readStorage(DEPTH_KEY);
-  return stored === "short" || stored === "full" ? stored : DEFAULT_DEPTH;
-}
-
 export function useCaseReader(): ReaderState {
   const ctx = useContext(ReaderContext);
   if (!ctx) throw new Error("useCaseReader must be used inside <CaseReader>");
@@ -73,9 +62,9 @@ export function useCaseReader(): ReaderState {
 }
 
 /**
- * Holds the reading lens (who is reading) and depth (2-min vs full) for a
- * case page, persisted in localStorage. Exposes both as data attributes so
- * CSS can collapse sections without re-rendering the MDX body.
+ * Holds the reading lens (who is reading) for a case page, persisted in
+ * localStorage. Exposes it as a data attribute so CSS/children can react
+ * without re-rendering the MDX body.
  */
 export function CaseReader({
   slug,
@@ -87,7 +76,6 @@ export function CaseReader({
   className?: string;
 }) {
   const lens = useSyncExternalStore(subscribe, lensSnapshot, () => DEFAULT_LENS);
-  const depth = useSyncExternalStore(subscribe, depthSnapshot, () => DEFAULT_DEPTH);
 
   const setLens = useCallback(
     (next: Lens) => {
@@ -102,22 +90,14 @@ export function CaseReader({
     [slug],
   );
 
-  const setDepth = useCallback(
-    (next: Depth) => {
-      writeStorage(DEPTH_KEY, next);
-      track("case_depth", { slug, depth: next });
-    },
-    [slug],
-  );
-
   const value = useMemo(
-    () => ({ slug, lens, depth, setLens, setDepth }),
-    [slug, lens, depth, setLens, setDepth],
+    () => ({ slug, lens, setLens }),
+    [slug, lens, setLens],
   );
 
   return (
     <ReaderContext.Provider value={value}>
-      <div data-lens={lens} data-depth={depth} className={className}>
+      <div data-lens={lens} className={className}>
         {children}
       </div>
     </ReaderContext.Provider>
@@ -136,7 +116,7 @@ function segmentClass(active: boolean) {
 }
 
 export function LensControls() {
-  const { lens, depth, setLens, setDepth } = useCaseReader();
+  const { lens, setLens } = useCaseReader();
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -159,28 +139,6 @@ export function LensControls() {
             {lensLabel[l]}
           </button>
         ))}
-      </div>
-      <div
-        role="group"
-        aria-label="Reading depth"
-        className="inline-flex gap-1 rounded-[var(--radius-pill)] border border-[color:var(--outline-strong)] bg-[color:var(--bg-elevated)] p-0.5"
-      >
-        <button
-          type="button"
-          aria-pressed={depth === "short"}
-          onClick={() => setDepth("short")}
-          className={segmentClass(depth === "short")}
-        >
-          2-min read
-        </button>
-        <button
-          type="button"
-          aria-pressed={depth === "full"}
-          onClick={() => setDepth("full")}
-          className={segmentClass(depth === "full")}
-        >
-          Full story
-        </button>
       </div>
     </div>
   );
