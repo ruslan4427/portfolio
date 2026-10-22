@@ -28,7 +28,7 @@ const NEXT_STEPS = [
 export default function ContactPage() {
   return (
     <main id="main" className="relative min-h-screen px-[var(--gutter)]">
-      <div className="mx-auto grid max-w-[var(--content-max)] gap-12 pt-36 pb-[var(--section-py)] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+      <div className="mx-auto grid max-w-[var(--content-max)] gap-12 pt-36 pb-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
         <div className="flex min-w-0 flex-col gap-10 lg:sticky lg:top-28 lg:self-start">
           <header className="flex flex-col items-start gap-5">
             <StatusPill status="available" label="Available for new projects" />

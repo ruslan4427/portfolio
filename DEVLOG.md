@@ -2715,3 +2715,5 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Result:** 1440 and 390 without overflow; axe clean; `?intent=full-time` pre-selects the right card, clicking switches it, an empty submit shows "Please enter your name." Production build passes.
 
 **Lesson:** A `<select>` hides the one choice that tells me how to read the message. Three visible cards cost one row and make the sender pick consciously.
+
+**Follow-up, same day (owner review):** The footer's "Ready to ship without rewrites?" card is a CTA to /contact, so on /contact it pointed at itself. Moved it into a client `FooterCta` that renders nothing on `/contact*`; the rest of the footer (copyright, privacy, socials) stays. Page bottom padding trimmed so the footer's own top padding is the only gap.

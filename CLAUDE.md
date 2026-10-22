@@ -216,8 +216,8 @@ components/
                         CaseNav, ArtifactList, DevlogRefs, TokenScorecardHero,
                         BuildTimeline, AgentReplay
   layout/               Nav (route-based, prefix match; Journal between Work +
-                        About), Footer, SmoothScroll, SkipToMain, BackToWork,
-                        BackToJournal
+                        About), Footer (+ FooterCta card, hidden on /contact),
+                        SmoothScroll, SkipToMain, BackToWork, BackToJournal
   sections/             Hero, SelectedWork, ProjectCard, Services (teaser),
                         ServicesFull, WorkIndex, HowItWorks, Benefits,
                         Experience, ExperienceMini, Testimonials,
