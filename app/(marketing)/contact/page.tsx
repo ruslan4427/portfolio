@@ -16,6 +16,7 @@ const CHANNELS = [
   { label: "LinkedIn", handle: "Ruslan Hrekov", href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/" },
   { label: "GitHub", handle: "ruslan4427", href: "https://github.com/ruslan4427" },
   { label: "Dev.to", handle: "hrekov", href: "https://dev.to/hrekov" },
+  { label: "Résumé", handle: "Download PDF", href: "/resume.pdf" },
 ] as const;
 
 const NEXT_STEPS = [
@@ -70,12 +71,14 @@ export default function ContactPage() {
             </h2>
             <ul className="flex flex-col">
               {CHANNELS.map((c) => {
-                const external = !c.href.startsWith("mailto:");
+                const file = c.href.endsWith(".pdf");
+                const external = !file && !c.href.startsWith("mailto:");
                 return (
                   <li key={c.label} className="border-t border-[color:var(--hairline)] last:border-b">
                     <a
                       href={c.href}
                       {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+                      {...(file ? { download: "Ruslan-Hrekov-Resume.pdf" } : {})}
                       className="group flex min-h-11 items-center justify-between gap-4 rounded-[var(--radius-inline)] py-2.5 font-sans text-[length:var(--type-small)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
                     >
                       <span className="text-[color:var(--ink-muted)]">{c.label}</span>
@@ -84,7 +87,7 @@ export default function ContactPage() {
                           {c.handle}
                         </span>
                         <span aria-hidden className="text-[color:var(--ink-muted)]">
-                          {external ? "↗" : "→"}
+                          {external ? "↗" : file ? "↓" : "→"}
                         </span>
                         {external && <span className="sr-only">(opens in new tab)</span>}
                       </span>

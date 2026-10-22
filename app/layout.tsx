@@ -77,17 +77,27 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body suppressHydrationWarning>
         <ConsentProvider>
-          <SkipToMain />
+          <div className="print:hidden">
+            <SkipToMain />
+          </div>
           <SmoothScroll>
-            <Nav />
+            <div className="print:hidden">
+              <Nav />
+            </div>
             <div className="relative z-10">
               {children}
-              <Footer />
+              <div className="print:hidden">
+                <Footer />
+              </div>
             </div>
-            <FloatingEmailCTA />
-            <BackToTop />
+            <div className="print:hidden">
+              <FloatingEmailCTA />
+              <BackToTop />
+            </div>
           </SmoothScroll>
-          <ConsentBanner />
+          <div className="print:hidden">
+            <ConsentBanner />
+          </div>
           <ExternalLinkTracker />
           <GA4 />
           <Suspense fallback={null}>
