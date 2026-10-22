@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArtifactList } from "@/components/case-study/ArtifactList";
 import { BuildTimeline } from "@/components/case-study/BuildTimeline";
@@ -12,6 +11,7 @@ import { GlanceBento } from "@/components/case-study/GlanceBento";
 import { LensCTA } from "@/components/case-study/LensCTA";
 import { LensHeadline, LensStats } from "@/components/case-study/LensHero";
 import { TokenScorecardHero } from "@/components/case-study/TokenScorecardHero";
+import { BackToWork } from "@/components/layout/BackToWork";
 import { CaseStudyBody } from "@/components/mdx/CaseStudyBody";
 import { MaskReveal } from "@/components/ui/MaskReveal";
 import { Reveal } from "@/components/ui/Reveal";
@@ -89,17 +89,10 @@ export default async function CaseStudyPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
+      <BackToWork />
       <CaseReader slug={slug} className="px-[var(--gutter)]">
         <article data-slug={frontmatter.slug} className="mx-auto flex max-w-[var(--content-max)] flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-28">
-            <nav aria-label="Breadcrumb">
-              <Link
-                href="/work"
-                className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] px-4 font-sans text-sm text-[color:var(--ink-primary)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-              >
-                <span aria-hidden>←</span> All cases
-              </Link>
-            </nav>
+          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-3 pt-28">
             <LensControls />
           </div>
 
