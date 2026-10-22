@@ -67,7 +67,8 @@ const personJsonLd = {
     "Solo builder shipping AI-collaborative software. Five case studies with commit hashes and honest numbers.",
   sameAs: [
     "https://github.com/ruslan4427",
-    "https://x.com/ruslan4427",
+    "https://www.linkedin.com/in/ruslan-hrekov-b21996315/",
+    "https://dev.to/hrekov",
   ],
   email: "mailto:rusgrekovua@gmail.com",
 };

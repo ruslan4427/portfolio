@@ -15,7 +15,6 @@ const CHANNELS = [
   { label: "Email", handle: "rusgrekovua@gmail.com", href: "mailto:rusgrekovua@gmail.com" },
   { label: "LinkedIn", handle: "Ruslan Hrekov", href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/" },
   { label: "GitHub", handle: "ruslan4427", href: "https://github.com/ruslan4427" },
-  { label: "X", handle: "@ruslan4427", href: "https://x.com/ruslan4427" },
   { label: "Dev.to", handle: "hrekov", href: "https://dev.to/hrekov" },
 ] as const;
 

@@ -3,7 +3,6 @@ import { FooterCta } from "./FooterCta";
 
 const socials = [
   { label: "GitHub", href: "https://github.com/ruslan4427", short: "GH" },
-  { label: "X", href: "https://x.com/ruslan4427", short: "X" },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/in/ruslan-hrekov-b21996315/",
