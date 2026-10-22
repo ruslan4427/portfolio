@@ -33,11 +33,13 @@ export function MaskReveal({
   // the text stays parked at 110% behind the mask.
   const rest = { y: "0%", opacity: 1 };
 
+  // The trigger lives on the wrapper: the inner span starts parked below
+  // the mask, fully clipped, so an observer on it would never fire.
   const viewport = { once: true, margin: "-80px" };
-  const inViewProps =
+  const trigger =
     mode === "in-view"
-      ? { whileInView: rest, viewport }
-      : { animate: rest };
+      ? { initial: "hidden", whileInView: "shown", viewport }
+      : { initial: "hidden", animate: "shown" };
 
   const Wrapper = as === "div" ? motion.div : motion.span;
   const Inner = as === "div" ? motion.div : motion.span;
@@ -46,11 +48,11 @@ export function MaskReveal({
     <Wrapper
       className={`inline-block overflow-hidden align-baseline ${className}`.trim()}
       style={{ paddingBottom: "0.12em" }}
+      {...trigger}
     >
       <Inner
         className="inline-block will-change-transform"
-        initial={inner}
-        {...inViewProps}
+        variants={{ hidden: inner, shown: rest }}
         transition={{
           duration,
           delay,

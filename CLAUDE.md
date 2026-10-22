@@ -153,9 +153,12 @@ app/                    Next.js App Router
   layout.tsx            Fonts + ConsentProvider + GLOBAL chrome (DotGrid, Nav,
                         Footer) + GA4/PageViews/ConsentBanner/ExternalLinkTracker
                         — children wrapped in `<div class="relative z-10">`
-  page.tsx              Home: Hero → SelectedWork → Services (teaser) → HowItWorks
-                        → Benefits → ExperienceMini → Testimonials (Footer card
-                        in layout.tsx is the sole closer — no per-page CTA)
+  page.tsx              Home (Sprint 27): Hero (counts row from content +
+                        See the work / Start a project) → SelectedWork
+                        (ProjectCard 2×2, "4 of 6") → Services → HowItWorks
+                        (5 steps in a row) → Benefits → ExperienceMini →
+                        Testimonials. Every section uses ui/SectionHeader.
+                        Footer card in layout.tsx is the sole closer.
   globals.css           Tokens (:root, incl. v2 additions from
                         specs/19-design-system-v2) + @theme inline mapping +
                         case reader rules ([data-depth="short"] collapses
@@ -222,8 +225,10 @@ components/
                         ServicesFull, WorkIndex, HowItWorks, Benefits,
                         Experience, ExperienceMini, Testimonials,
                         ContactForm, AboutStack, AiStack, Values
-  ui/                   SectionBadge, StatusPill, CTAButton (CTALink + CTAButton
-                        primitives — variant primary|outline, size sm|md), FadeUp
+  ui/                   SectionHeader (left-aligned eyebrow + h2 + link),
+                        SectionBadge, StatusPill, CTAButton (CTALink + CTAButton
+                        primitives — variant primary|outline, size sm|md),
+                        FadeUp, MaskReveal (trigger on the wrapper)
   mdx/                  CaseStudyBody, BlogPostBody, MdxComponents,
                         BlogComponents (Artifact, Cost, PromptLog, Diff,
                         TechnicalDetail). CaseStudyBody runs

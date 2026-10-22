@@ -2719,3 +2719,15 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Follow-up, same day (owner review):** The footer's "Ready to ship without rewrites?" card is a CTA to /contact, so on /contact it pointed at itself. Moved it into a client `FooterCta` that renders nothing on `/contact*`; the rest of the footer (copyright, privacy, socials) stays. Page bottom padding trimmed so the footer's own top padding is the only gap.
 
 **Follow-up — X removed:** Ruslan has no X account. Removed the x.com link from the hero socials, the footer, the /contact channel list and the Person JSON-LD `sameAs` (which now lists GitHub, LinkedIn and Dev.to — the profiles that exist).
+
+## 2026-10-22 — Sprint 27 · home page redesign, MaskReveal in-view fix
+
+**Problem:** The home page still carried the pre-v2 pattern the other pages had left: "Four case studies" over rows numbered 01, 04, 05, 06 with no word that six exist (the confusion Ruslan flagged on /work), "Three formats" showing three of five without saying so, six sections opening with the same centered sparkle badge and centered heading, a 2-col "How it works" grid with the fifth card stretched, 10–12px uppercase labels, and "Discover ↓" as the only hero action.
+
+**Decision:** Spec `specs/27-home-page`. New `components/ui/SectionHeader` — left-aligned eyebrow with a count, h2, optional lede, optional link — used by every home section. Hero copy kept; added a counts row computed from content (cases, open-source tools, journal entries, each a link) and two actions (See the work / Start a project). Selected work uses the /work `ProjectCard` 2×2 under "Cases · 4 of 6" with "All 6 cases"; services say "3 of 5" with "All 5 formats"; the five stages sit in one row on a hairline track; benefits in three equal columns; experience as page-level rows; testimonials as v2 cards. Owner copy unchanged except counts and labels. `ProjectAccordionRow` deleted (unused, and it carried a set-state-in-effect lint error).
+
+Root cause found on the way: `MaskReveal` in-view mode watched the inner span, which starts translated 110% below an `overflow: hidden` wrapper — fully clipped, so the observer never reported it and the heading stayed invisible. It only "worked" before on short single-line headings. The trigger now sits on the wrapper and drives the inner span through variants; a scroll sweep on /, /about, /services, /work, a case, /tools, /blog and /contact finds no MaskReveal left at opacity 0.
+
+**Result:** Home at 1440 and 390: no overflow, axe clean, production build passes; every count on the page derives from `content/*`.
+
+**Lesson:** Global `.font-serif` in globals.css is unlayered and sets `line-height: 1.02`, so it beats any `leading-*` utility on serif text — the testimonial quotes rendered at 20.4px line height until forced with `leading-[1.5]!`. Moving that rule into a layer is the real fix, but it would shift every serif heading that relies on it; leave it for a dedicated pass with screenshots.
