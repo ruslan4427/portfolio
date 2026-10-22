@@ -116,6 +116,11 @@ Single source of truth: `app/globals.css` `:root { ... }` block and the
 - Accent: `#A94427` brick (`--accent`, `--accent-ink`, `--accent-soft`) — the one
   emphasis hue: diagram key paths, reading progress, key numbers. Small doses only.
 - Hairline: `rgba(17,17,17,0.08)` · Outline: `rgba(17,17,17,0.14)`
+- Imagery: every illustration and device mockup in the **studio** look —
+  white objects on warm off-white, side daylight, long shadows, no people or
+  text; mockups put the real UI on a device's screen (the only colour). Made
+  with `scripts/gen-blog-hero.mjs` (default `--style=studio`). Rules in
+  STABLE_LOGIC "Imagery". Screenshots, diagrams and animated covers excluded.
 - Serif (display, upright): Playfair Display via `--font-serif` (backed by `--font-display`)
 - Sans (body, nav, chrome): Inter via `--font-sans`
 - Radii: `--radius-card 16px` · `--radius-tile 12px` · `--radius-pill 999px`
@@ -274,7 +279,9 @@ content/
    additionally gate on `matchMedia("(hover: hover)")`.
 5. Contrast check every new fg/bg pair with
    `python3 /Users/ruslan/.claude/skills/ui-ux-pro/scripts/check_contrast.py`.
-6. When you finish a work block, append a `Problem/Decision/Result/Lesson`
+6. New illustrations and mockups follow STABLE_LOGIC "Imagery" (studio
+   style). No ink drawings, drapes or scenes with people.
+7. When you finish a work block, append a `Problem/Decision/Result/Lesson`
    entry to `DEVLOG.md`. When a rule crystallizes, promote it to
    `STABLE_LOGIC.md`.
 

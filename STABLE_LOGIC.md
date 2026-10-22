@@ -313,3 +313,28 @@ two sessions or one full sprint.
   moves while someone reads is competing with the text.
 - Cursor response is a smooth radial falloff. No per-dot randomness in the
   response; variety lives in the static pattern instead.
+
+## Imagery (changed 2026-10-22, Sprint 29, by Ruslan's call)
+
+- **Every illustration and every device mockup uses the `studio` look** — the
+  one the Journal photos set in Sprint 25: high-key monochrome still life,
+  white and off-white matte objects on a seamless warm off-white surface
+  (paper tone), one soft daylight source from the side, long crisp diagonal
+  shadows, one subject, generous negative space. No people, no hands, no
+  text, letters, numbers or logos in the scene.
+- **Ideas become objects.** A concept is shown as a physical arrangement
+  (blocks sorted by size, a padlock on an envelope, a forked paper strip) —
+  never as a drawing, a diagram or a scene with characters.
+- **Mockups are the same scene with a device in it.** The device rests on the
+  surface like the other white objects; the real UI goes on its screen
+  (`--screen=`), verbatim. The screen is the only colour in the frame.
+- **Tooling:** `scripts/gen-blog-hero.mjs` (default `--style=studio`);
+  batch manifests like `scripts/gen-journal-studio.mjs`. Files carry a
+  `-studio` suffix so a cached older image is never served under the same
+  URL. Frames crop at 3:2.
+- **Alt text describes what is in the frame,** checked against the result —
+  generated object counts drift from the prompt.
+- **Not imagery, stays as is:** real UI screenshots and SVG-reconstructed
+  screens (they are evidence), diagrams (Schematic notation), the animated
+  case covers. `ink`, `fabric` and `flat` presets stay in the script only to
+  reproduce images made before this rule.

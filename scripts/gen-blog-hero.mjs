@@ -1,12 +1,15 @@
 #!/usr/bin/env node
-// Generate an editorial hero image for a blog post via Gemini (nano-banana).
+// Generate an editorial image (illustration or device mockup) via Gemini
+// (nano-banana). House style is `studio` — see STABLE_LOGIC "Imagery".
 //
 // Usage:
-//   node scripts/gen-blog-hero.mjs <slug> "<subject>" [--model=<name>] [--out=<path>]
+//   node scripts/gen-blog-hero.mjs <slug> "<subject>" [--style=studio] [--screen=<png>] [--model=<name>] [--out=<path>]
 //
-// Example:
+// Examples:
 //   node scripts/gen-blog-hero.mjs no-company-no-api \
-//     "a tall closed metal gate seen from the outside, with a slot in the lock bearing an empty ID-badge placeholder; a solo developer stands small to the left holding a laptop"
+//     "a small closed white padlock resting on top of a sealed plain white envelope"
+//   node scripts/gen-blog-hero.mjs noble-saas "a white phone lying on the surface" \
+//     --screen=public/case-studies/noble-saas/dashboard-mobile.webp --out=public/case-studies/noble-saas/mockup-studio.jpg
 //
 // Default model: gemini-3.1-flash-image (Nano Banana 2 GA).
 // Output lands in public/blog/<slug>/hero.<ext> where ext matches Gemini's
@@ -39,6 +42,9 @@ const flags = Object.fromEntries(
 );
 const model = flags.model ?? "gemini-3.1-flash-image";
 
+// `studio` is the house style for every illustration and device mockup
+// (STABLE_LOGIC "Imagery", Sprint 29). ink / fabric / flat are kept only to
+// reproduce images made before that rule.
 const STYLES = {
   ink: [
     "Editorial black-and-white illustration",
@@ -80,22 +86,27 @@ STYLES.studio = [
   "reference aesthetic: Apple product photography of white earbuds and keyboards on white, minimalist editorial still life",
 ].join(". ");
 
-const style = flags.style ?? "fabric";
+const style = flags.style ?? "studio";
 const STYLE = STYLES[style] ?? STYLES.fabric;
 
 const screenPath = flags.screen ? path.resolve(flags.screen) : null;
 const screenInline = screenPath
   ? {
       inlineData: {
-        mimeType: screenPath.endsWith(".jpg") || screenPath.endsWith(".jpeg") ? "image/jpeg" : "image/png",
+        mimeType: /\.jpe?g$/.test(screenPath) ? "image/jpeg" : screenPath.endsWith(".webp") ? "image/webp" : "image/png",
         data: (await readFile(screenPath)).toString("base64"),
       },
     }
   : null;
 
-const subjectSuffix = screenInline
+const mockupSuffix =
+  style === "studio" && screenInline
+    ? " The device rests on the surface like the other white objects; its screen is the only colour in the frame."
+    : "";
+
+const subjectSuffix = mockupSuffix + (screenInline
   ? " Place the exact UI from the attached reference screenshot onto the device screen with pixel fidelity — do not redraw, retype, or paraphrase its text; crop/scale to fit the screen but preserve all content, typography and layout verbatim."
-  : "";
+  : "");
 
 const prompt = `${STYLE}. Subject: ${subject}.${subjectSuffix}`;
 

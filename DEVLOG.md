@@ -2741,3 +2741,13 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 **Result:** Home at 1440 and 390 without overflow; no canvas on any other route; the hover spot is darkest at the centre with no ring; the field is visible on mobile for the first time.
 
 **Lesson:** A reference is a constraint on placement as much as on look. The original grid copied the dots and dropped the boundary, and the boundary was what made the effect calm.
+
+## 2026-10-22 — Sprint 29 · studio style becomes the rule for all imagery
+
+**Problem:** The studio look (white objects on warm off-white, side daylight, long shadows) existed only as a preset Sprint 25 used for Journal photos. The generator still defaulted to `fabric`, its header example put a person in the frame, the blog-drafter skill said media was "manual", and the case-study rulebook had no rule for mockups — so the next illustration or device mockup could come out in any of four styles.
+
+**Decision:** Ruslan's call: every illustration and every device mockup uses the studio look. Promoted to STABLE_LOGIC "Imagery" (ideas become physical objects; mockups are the same scene with the real UI on a device's screen, the only colour in the frame; no people, hands or text; `-studio` file suffix; 3:2 crop; alt written against the result). Screenshots, SVG reconstructions, diagrams and the animated case covers are explicitly out of scope. `gen-blog-hero.mjs` now defaults to `studio`, adds the mockup sentence when `--screen` is passed, accepts `.webp` screens, and its examples follow the rule. CLAUDE.md (tokens + contribution rule 6), the case rulebook (§10.2) and the blog-drafter skill point to the same rule.
+
+**Result:** One style, written down in the four places someone making an image would look. No images regenerated in this block.
+
+**Lesson:** A style that lives only in a preset is a suggestion. It becomes a rule when the default, the docs and the skill that drafts posts all say the same thing.

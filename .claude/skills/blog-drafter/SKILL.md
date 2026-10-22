@@ -60,7 +60,11 @@ polish + tagline + tags + scheduling — not scaffolding.
 
 - Publishing (Sprint 14 cron `scripts/publish-due.mjs` handles).
 - MDX → LinkedIn/dev.to plaintext rendering (`lib/distribution/render.ts`).
-- Media (hero images, screenshots) — manual for now.
+- Media generation. When the draft needs a hero or figure, propose one
+  physical-object subject per image in the **studio** style (STABLE_LOGIC
+  "Imagery") and the command to make it:
+  `node scripts/gen-blog-hero.mjs <slug> "<subject>" --out=public/blog/<slug>/<name>-studio.jpg`.
+  Write `alt` only after the image exists.
 
 ## Failure modes
 
