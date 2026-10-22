@@ -192,7 +192,9 @@ app/                    Next.js App Router
       opengraph-image.tsx  Per-slug OG with format label in eyebrow
     blog/opengraph-image.tsx  Journal index OG
     contact/
-      page.tsx          Contact form (ContactForm)
+      page.tsx          Contact (Sprint 26): sticky left column (status pill,
+                        h1, "What happens next" steps, direct channels as
+                        labelled rows) | ContactForm with intent radio cards
       actions.ts        Resend server action
       types.ts          Form types
 components/

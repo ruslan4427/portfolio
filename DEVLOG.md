@@ -2705,3 +2705,13 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 **Follow-up, same day (owner review):** While the studio photos wait on a key, the image grid read as five ink drawings competing. Back to the pre-redesign text tiles (format pill, date, title, tagline, two tags, minutes) on v2 tokens; only the newest entry overall keeps its picture, as the wide lead card at the top. A filtered view is all tiles. Post pages unchanged.
 
 **Follow-up, same day — photos generated:** All 11 Journal images regenerated with the `studio` preset (Gemini, one pass each, no retries needed) and checked on a contact sheet. Object counts drifted from the prompts (six boxes, fewer than ten grooves, nine blocks), so alt text describes what is in the frame instead of the prompt's numbers; three captions that described the old drawings (bay letters and workers, signposts with a bench, a ledger with three numbered rows) were rewritten to match. Files are renamed `*-studio.jpg`: the first local render still showed the ink drawing because the image optimizer cache is keyed by URL — a new URL is the only invalidation that also covers the CDN.
+
+## 2026-10-22 — Sprint 26 · /contact redesign
+
+**Problem:** /contact was the last page on the pre-v2 layout: centered badge hero, an 11px uppercase "Prefer email?" label, social links as 36px initials-only circles (GH, X, IN, DEV), the reason for writing hidden in a `<select>`, and nothing on what happens after Send beyond one muted line.
+
+**Decision:** Spec `specs/26-contact-page`. Two columns on desktop. Left (sticky): availability pill, "Let's talk.", one-line lede with the Ohio / EST-CST fact from the footer, "What happens next" as three numbered steps built only from statements already on the site, then direct channels as labelled 44px rows (name + handle, email first). Right: the form with a heading, the intent as three radio cards (label + one-line hint, `has-[:checked]` styling, accent dot), name and email side by side, a message hint tied by `aria-describedby`, error in an accent-soft box. Server action, validation, honeypot and `?intent=` pre-selection unchanged.
+
+**Result:** 1440 and 390 without overflow; axe clean; `?intent=full-time` pre-selects the right card, clicking switches it, an empty submit shows "Please enter your name." Production build passes.
+
+**Lesson:** A `<select>` hides the one choice that tells me how to read the message. Three visible cards cost one row and make the sender pick consciously.
