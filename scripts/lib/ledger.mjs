@@ -3,11 +3,13 @@ import path from "node:path";
 
 const LEDGER_PATH = path.join(process.cwd(), ".distribution-ledger.jsonl");
 
+// Map<`${slug}::${channel}`, boolean> — latest state per key.
+// Append-only ledger is replayed in order; later entries win.
 let cache = null;
 
 async function load() {
   if (cache) return cache;
-  cache = new Set();
+  cache = new Map();
   try {
     const raw = await readFile(LEDGER_PATH, "utf8");
     for (const line of raw.split("\n")) {
@@ -16,7 +18,7 @@ async function load() {
       try {
         const entry = JSON.parse(trimmed);
         if (entry.slug && entry.channel) {
-          cache.add(`${entry.slug}::${entry.channel}`);
+          cache.set(`${entry.slug}::${entry.channel}`, entry.action !== "unpublish");
         }
       } catch {
         // skip malformed lines; ledger is append-only so history is preserved
@@ -30,8 +32,8 @@ async function load() {
 }
 
 export async function hasBeenPublished(slug, channel) {
-  const set = await load();
-  return set.has(`${slug}::${channel}`);
+  const map = await load();
+  return map.get(`${slug}::${channel}`) === true;
 }
 
 export async function recordPublish({ slug, channel, publishedUrl, remoteId }) {
@@ -43,8 +45,8 @@ export async function recordPublish({ slug, channel, publishedUrl, remoteId }) {
     ts: new Date().toISOString(),
   };
   await appendFile(LEDGER_PATH, JSON.stringify(entry) + "\n", "utf8");
-  const set = await load();
-  set.add(`${slug}::${channel}`);
+  const map = await load();
+  map.set(`${slug}::${channel}`, true);
 }
 
 export const LEDGER_RELPATH = ".distribution-ledger.jsonl";
