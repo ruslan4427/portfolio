@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "primary" | "outline";
+type Variant = "primary" | "outline" | "accent";
 type Size = "sm" | "md";
 
 type CommonProps = {
@@ -31,6 +31,8 @@ const variants: Record<Variant, string> = {
   primary: "bg-[color:var(--cta)] text-[color:var(--cta-ink)]",
   outline:
     "border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)]",
+  // Brick emphasis — one per view at most (STABLE_LOGIC "Two hues, two jobs").
+  accent: "bg-[color:var(--accent)] text-[color:var(--accent-ink)]",
 };
 
 const sizes: Record<Size, string> = {
