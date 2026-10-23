@@ -183,8 +183,9 @@ export function Hero({ counts }: { counts: HeroCount[] }) {
             <CTALink href="/contact" variant="outline" size="md">
               Start a project
             </CTALink>
-            <CTALink href="/resume.pdf" download="Ruslan-Hrekov-Resume.pdf" variant="outline" size="md">
-              Download résumé <span aria-hidden>↓</span>
+            <CTALink href="/resume.pdf" download="Ruslan-Hrekov-Resume.pdf" variant="accent" size="md">
+              <svg aria-hidden width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2.5v8m0 0L4.5 7M8 10.5 11.5 7M3 13h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              Download résumé
             </CTALink>
           </motion.div>
           <motion.ul
