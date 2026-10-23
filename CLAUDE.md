@@ -196,11 +196,13 @@ app/                    Next.js App Router
       not-found.tsx     Blog 404 (Back to journal CTA)
       opengraph-image.tsx  Per-slug OG with format label in eyebrow
     blog/opengraph-image.tsx  Journal index OG
-    resume/page.tsx     Résumé (Sprint 30): A4 sheet built only from content/*
-                        (bio, experience, projects, credentials). Source for
-                        public/resume.pdf — regenerate with `npm run resume:pdf`
-                        (scripts/build-resume-pdf.mjs) against `next start`;
-                        never edit the PDF by hand
+    resume/page.tsx     Résumé source (Sprint 30): A4 sheet built only from
+                        content/* (bio, experience, projects, credentials).
+                        Unlinked + noindex — users get the PDF via "Download
+                        résumé" buttons (home hero, /about) and footer/contact
+                        links. Regenerate public/resume.pdf with
+                        `npm run resume:pdf` against `next start`; never edit
+                        the PDF by hand
     contact/
       page.tsx          Contact (Sprint 26): sticky left column (status pill,
                         h1, "What happens next" steps, direct channels as
