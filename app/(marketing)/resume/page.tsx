@@ -6,6 +6,8 @@ import { projects } from "@/content/projects";
 export const metadata: Metadata = {
   title: "Résumé",
   description: "Ruslan Hrekov — software engineer and product designer. Experience, selected work, certifications.",
+  // Source for public/resume.pdf only; the site links to the PDF, not this page.
+  robots: { index: false, follow: false },
 };
 
 const SITE = "https://hrekov.dev";

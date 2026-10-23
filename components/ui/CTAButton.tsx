@@ -13,6 +13,8 @@ type CommonProps = {
 type LinkProps = CommonProps & {
   href: string;
   external?: boolean;
+  /** Suggested file name — makes the link download the file instead of opening it. */
+  download?: string;
 };
 
 type ButtonProps = CommonProps & {
@@ -44,6 +46,7 @@ export function CTALink({
   children,
   href,
   external,
+  download,
   variant = "primary",
   size = "sm",
   className = "",
@@ -53,6 +56,7 @@ export function CTALink({
     <a
       href={href}
       {...(external && !isMail ? { target: "_blank", rel: "noreferrer" } : {})}
+      {...(download ? { download } : {})}
       className={classes(variant, size, className)}
     >
       {children}
