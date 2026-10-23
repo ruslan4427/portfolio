@@ -34,6 +34,13 @@ export function Footer() {
               >
                 Privacy
               </a>
+              <a
+                href="/resume.pdf"
+                download="Ruslan-Hrekov-Resume.pdf"
+                className="underline decoration-[color:var(--hairline)] underline-offset-4 transition-colors hover:text-[color:var(--ink-primary)]"
+              >
+                Résumé (PDF)
+              </a>
               <ConsentResetLink />
             </div>
           </div>

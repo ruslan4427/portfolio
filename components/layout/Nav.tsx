@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: "/blog", label: "Journal" },
   { href: "/tools", label: "Tools" },
   { href: "/about", label: "About" },
+  { href: "/resume", label: "Résumé" },
   { href: "/services", label: "Services" },
   { href: "/contact", label: "Contact" },
 ] as const;
@@ -23,7 +24,16 @@ function isActive(pathname: string, href: string) {
 export function Nav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // The menu belongs to the page it was opened on: navigating closes it
+  // without an effect, because `open` is derived from the current path.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn !== null && openOn === pathname;
+  const setOpen = (next: boolean | ((o: boolean) => boolean)) =>
+    setOpenOn((prev) => {
+      const wasOpen = prev !== null && prev === pathname;
+      const value = typeof next === "function" ? next(wasOpen) : next;
+      return value ? pathname : null;
+    });
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,7 +61,7 @@ export function Nav() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        setOpen(false);
+        setOpenOn(null);
         toggleRef.current?.focus();
         return;
       }
@@ -73,10 +83,6 @@ export function Nav() {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   const closeMenu = () => {
     setOpen(false);
