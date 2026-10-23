@@ -2767,3 +2767,15 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 **Follow-up — buttons, not a page:** Ruslan didn't want the résumé as a separate destination. "Résumé" is out of the nav; the home hero and /about (top, under the h1, and the closing CTA row) carry a `Download résumé ↓` outline button that downloads the PDF directly (`CTALink` gained a `download` prop). The footer and /contact keep their download links. `/resume` stays only as the source page for `npm run resume:pdf` — unlinked and `noindex, nofollow`.
 
 **Follow-up — résumé button contrast:** the white outline résumé button read as secondary and got missed. `CTALink` gained `variant="accent"` (brick `--accent` fill, `--accent-ink` text, 5.67:1) and the résumé buttons on the home hero and /about now use it with a download icon — one brick emphasis per view, per "Two hues, two jobs".
+
+## 2026-10-23 — cron · cross-post batch
+
+**Problem:** 2 scheduled cross-post(s) reached publish time.
+
+**Decision:** publish-due.mjs fired via GH Actions hourly cron.
+
+**Result:** Published: shipping-claude-shiploop/linkedin → https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7519250111554732033/; shipping-claude-shiploop/devto → https://dev.to/hrekov/shipping-claude-shiploop-g2e. Failures: 0.
+
+**Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
+
+---

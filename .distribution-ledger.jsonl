@@ -17,3 +17,5 @@
 {"slug":"shipping-claude-shiploop","channel":"linkedin","publishedUrl":"https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7517356529302462464/","remoteId":"urn:li:share:7517356529302462464","note":"republish — superseded urn:li:share:7517353530270269440","ts":"2026-10-17T22:51:03.053Z"}
 {"slug":"shipping-claude-shiploop","channel":"linkedin","action":"unpublish","remoteId":"urn:li:share:7517356529302462464","note":"fast-track rollback — UGC post deleted","ts":"2026-10-17T23:00:36.114Z"}
 {"slug":"shipping-claude-shiploop","channel":"devto","action":"unpublish","remoteId":"4869272","note":"fast-track rollback — article unpublished (draft)","ts":"2026-10-17T23:01:31.581Z"}
+{"slug":"shipping-claude-shiploop","channel":"linkedin","publishedUrl":"https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7519250111554732033/","remoteId":"urn:li:share:7519250111554732033","ts":"2026-10-23T04:15:28.271Z"}
+{"slug":"shipping-claude-shiploop","channel":"devto","publishedUrl":"https://dev.to/hrekov/shipping-claude-shiploop-g2e","remoteId":"4902735","ts":"2026-10-23T04:15:32.910Z"}
