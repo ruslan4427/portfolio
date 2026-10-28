@@ -2768,7 +2768,7 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 
 **Follow-up — résumé button contrast:** the white outline résumé button read as secondary and got missed. `CTALink` gained `variant="accent"` (brick `--accent` fill, `--accent-ink` text, 5.67:1) and the résumé buttons on the home hero and /about now use it with a download icon — one brick emphasis per view, per "Two hues, two jobs".
 
-## 2026-10-23 — cron · cross-post batch
+### 2026-10-23 — cron · cross-post batch
 
 **Problem:** 2 scheduled cross-post(s) reached publish time.
 
@@ -2779,3 +2779,16 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 **Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
 
 ---
+
+### 2026-10-27 — publish: two-claudes-one-app/linkedin
+
+**Problem:** `two-claudes-one-app` build-log drafted and requested for release on the site and LinkedIn.
+
+**Decision:** Pushed to `main` for Vercel deployment; published live to LinkedIn via `/v2/ugcPosts` with studio hero image.
+
+**Result:** Live on site at https://hrekov.dev/blog/two-claudes-one-app (200 OK); live on LinkedIn at https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7521080800813973506/.
+
+**Lesson:** Frontmatter status updated to posted; distribution ledger entry appended.
+
+---
+
