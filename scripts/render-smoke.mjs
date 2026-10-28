@@ -48,6 +48,24 @@ assert(
   capped.endsWith("Full post: https://x"),
 );
 
+const { formatLinkedInHashtag } = _internals;
+assert(
+  "formatLinkedInHashtag PascalCase conversion",
+  formatLinkedInHashtag("claude-code") === "#ClaudeCode" &&
+    formatLinkedInHashtag("ai-workflow") === "#AIWorkflow",
+);
+
+const withTags = renderPlainTextForLinkedIn(
+  "Brief post body.",
+  { tags: ["claude-code", "workflow", "meta"] },
+  "https://example.com/post",
+);
+assert(
+  "LinkedIn output appends PascalCase hashtags",
+  withTags.endsWith("Full post: https://example.com/post\n\n#ClaudeCode #Workflow #Meta"),
+  withTags,
+);
+
 const COST_JSX = `<Cost label="AI cost" value="$0.30/wk" />`;
 const dev = renderMarkdownForDevto(COST_JSX, {});
 assert("dev.to Cost JSX → bold markdown", dev.includes("**AI cost:** $0.30/wk"), dev);
