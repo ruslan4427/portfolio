@@ -1,0 +1,102 @@
+---
+slug: two-claudes-one-app
+title: Two Claudes, one app, and me as the postman
+tagline: >-
+  One Claude ran in the cloud with GitHub but no simulator. The other ran on
+  my Mac with the simulator but no reviewer. Getting them to work on the same
+  iOS app took four channels, and only the last one didn't need me.
+format: build-log
+publishedAt: '2026-11-04'
+readingTime: 9
+tags:
+  - claude-code
+  - process
+  - mobile
+  - build-log
+featured: false
+canonical: 'https://hrekov.dev/blog/two-claudes-one-app'
+---
+
+FieldMark is my iOS app for installation crews: a foreman drops pins on a floor plan, installers mark each pin done or blocked. I wanted a real usability pass on it — not "does it compile", but "can a tired installer on an iPhone SE block a pin and tell the foreman why".
+
+I ended up with two Claudes on the job, and for the first day they couldn't talk to each other.
+
+## Two sessions that can't see each other
+
+The first one ran in the cloud. I'd opened it from the Design page on claude.ai, so in my head it was "Claude Design"; under the hood it's a Claude Code session in a disposable Linux container. It had my GitHub repos, a shell, a browser, the ability to read screenshots and video frames — and no way to reach my Mac. No iOS simulator, no Xcode, no access to the folder the app lives in.
+
+The second one was Claude Code in a terminal on my Mac. It had everything the first lacked: the iPhone simulator, [Maestro](https://maestro.mobile.dev) for scripted taps, my Gmail through MCP for one-time codes, the Supabase database. What it lacked was a second pair of eyes. It ran the tests, it graded the tests, it wrote the report about the tests.
+
+Neither could message the other. The cloud session said so plainly when I asked: it runs in a container and can't reach the computer it's talking about. So for a while the architecture was me.
+
+## Channel 1: me, copying and pasting
+
+The first round looked like this. The local session proposed five test scenarios; I pasted them into the cloud session. The cloud session sharpened them — run login first as a smoke test, use `+alias` emails so every signup is unique, never write the OTP into the report — and I pasted that back. The local session asked whether it could read the code from Gmail; I relayed the answer.
+
+It worked, and it was miserable. I was a human message queue with a two-minute latency and a habit of losing context. At one point I pasted a screenful of the local session's terminal and asked the cloud one "what is it doing?" — and the honest answer was "I can only see what you paste me".
+
+## Channel 2: a file both can read (rejected)
+
+The local session suggested a fix: a shared `ux-chat.md`, with me telling Claude Desktop to read it and append replies. The cloud session talked me out of it in one paragraph. Every exchange would still need me to switch apps and say "read it again", and Claude Desktop added nothing — the local session already had a terminal, the simulator and the screenshots. Better to let one session do the whole test and have the other review the result.
+
+That was the first useful rule: **don't build a relay for work one agent can do alone. Bring the second agent in where a second opinion is the point.**
+
+## Channel 3: git as shared memory
+
+So the local session ran the audit end to end: Maestro flows, screenshots at every step, OTPs pulled from Gmail, a `report.md` scored against Nielsen's heuristics. Then it pushed everything to a `ux-test` branch, and the cloud session cloned it.
+
+This is where the second opinion started paying for itself, because the cloud session didn't trust the report. It read the screenshots and the code and found:
+
+- "Project card shows 0 plans after the installer joins" was filed as a stale-cache bug. The code had `'plan_count': 0` hardcoded. Every project, for every user, always said zero.
+- "No hint that long-press drops a pin" — the hint was there, 12-pixel grey text in a black bar, easy to miss but not missing.
+- Every time the test harness gave up on a text selector and fell back to tapping coordinates, that was an accessibility finding: VoiceOver couldn't find the element either. The report had quietly patched around them.
+
+The branch also carried the next steps back. A consolidated `fix-list.md` (30 items, P0 to P3), a round-two plan, a script for testing with real people — all committed by the cloud session, all read by the local one with `git show`.
+
+## Channel 4: the pull request
+
+The fix-list was useful but still needed me to say "go read it". The pull request removed that.
+
+The local session fixed the first batch and opened PR #1. The cloud session subscribed to it — GitHub events now woke it up on every push, review and CI result. It reviewed the diff and left inline comments: the "selected" feedback on pin statuses was being greyed out because `ListTile(enabled: false)` paints over `selected`; the plan count would go stale after an upload; the new test checked a function that had never been broken. Meanwhile the local session ran `/loop 10m`, checking the PR for new comments every ten minutes.
+
+Thirteen minutes later there was a new commit answering all three comments, a reply on each thread, and a re-review. I hadn't typed anything.
+
+Two details made this work. Both sessions post as my GitHub account, so every comment carries a "Generated by Claude Code" footer — otherwise the PR history reads like I was arguing with myself. And the re-review has to say "the loop can stop" explicitly; the local session waited for one before it stood down.
+
+## The heartbeat
+
+The one thing the PR channel couldn't show was progress between pushes. The second audit round ran on the simulator for nearly an hour, and twice I found myself asking whether it had hung.
+
+So the cloud session asked the local one for a heartbeat: a `PROGRESS.md` on the branch with `Last heartbeat: <UTC time>`, a "now doing" line and a table of steps, committed and pushed after every step and at least every ten minutes. Long commands got hard timeouts — `maestro test` 5 minutes, builds 10, waiting for an OTP 2 — and a timeout became a ❌ with a reason instead of a silent stall. The cloud session scheduled itself to read the file every 30 minutes. I could open it on my phone.
+
+It caught the first real problem within minutes: the local session wasn't stuck, it was idle, because its old PR-watching loop had finished a turn and left the round-two task waiting. That loop, by the way, survived being "stopped" once and was still checking a merged PR two days later. **Background loops need an owner who checks they're actually dead.**
+
+## The CI that never ran
+
+A side quest, because it changed how much either agent could trust a green check. CI on FieldMark had been red on every run for weeks: the workflow pinned Flutter 3.32 while the project needed Dart 3.12, so it died on `pub get` before anything was tested.
+
+The cloud session bumped Flutter to the latest stable — and the job sat in code generation for 53 minutes. It cancelled the run, installed that Flutter version in its own container, and reproduced it: the new SDK uses dot-shorthand syntax that the project's code generator couldn't parse, and instead of failing it hung. Pinning 3.44.9 fixed it; job and step timeouts make sure a hang now fails in minutes. Then the next step ran for the first time ever and surfaced 7 warnings, 47 unformatted files and ~100 errors from Firebase plugin sources that macOS checks out under `build/`. Four commits later CI was green in two and a half minutes.
+
+## Who was wrong, and how we found out
+
+Two agents doesn't mean two right answers. It means each catches the other's confident mistakes — if the evidence is there to check.
+
+The cloud session got one badly wrong. In round two, "Confirm Blocked" didn't seem to do anything in Maestro, and the same symptom showed up in a screen recording of a real user. It read the code and concluded the save was failing, with the error hidden in a SnackBar behind the sheet. The local session ran it in debug, watched the database, and showed the pin was saved as blocked on the first tap. The real problem was different: reopening a blocked pin offered "Confirm Blocked" again, so it *looked* unsaved.
+
+The local session got some wrong too. It reported that a test covered the blocked-pin colour (no such test existed); that "Delete pin" had no confirmation (the button's callback leads to a dialog; it hadn't followed the call); that fixes were "confirmed for a live user" when two had only been read in code. Each one came back with a screenshot or a line number, and the report was corrected.
+
+The rule that came out of it: **every claim carries its evidence type — "screen", "code only", "test" — and "code only" means following the call to the end.**
+
+## What shipped
+
+Four pull requests in four days, each reviewed by one session and verified on an iPhone SE by the other before merge: scrollable sheets so 30 custom tags and the keyboard can't push the save button off-screen, a real plan count, visible feedback when you change a pin's status or notify the foreman, errors shown inside the sheet instead of behind it, a photo-first blocked flow, an honest message when you sign up with an email that already exists, a resend cooldown, and layouts that survive the largest text size. Tests went from one placeholder to fourteen. The installer journey — invite, signup with a code from Gmail, join, notify the foreman — was walked end to end for the first time.
+
+My part, by the end, was deciding what to fix and pressing merge. And answering "is it stuck?" by opening a markdown file.
+
+## If you're setting this up
+
+- **Give each agent the job its environment is good at.** The one with the simulator runs things; the one with time and distance reviews them.
+- **Use a pull request as the channel.** It's async, it's durable, both agents already speak it, and you can read the whole conversation later.
+- **Make progress observable.** A heartbeat file plus hard timeouts turns "is it hung?" into a glance.
+- **Tag every finding with how it was verified.** Screen, test or code — and if it's code, read to the end of the call.
+- **Kill your loops on purpose.** A watcher that outlives its PR is noise, and noise trains you to ignore the channel.

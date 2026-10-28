@@ -87,7 +87,7 @@ export const caseLenses: Record<string, CaseLensData> = {
       },
       hiring: {
         headline: "A solo build that keeps its own memory: every decision dated, every rule earned.",
-        stats: [s("DEVLOG entries", "80"), s("Promoted", "16.3%"), s("Active days", "27"), s("Case studies", "6")],
+        stats: [s("DEVLOG entries", "75"), s("Promoted", "17.3%"), s("Active days", "27"), s("Case studies", "6")],
       },
       engineer: {
         headline: "A persistence layer for a stateless model: typed memory, a one-line index, a promotion gate.",
