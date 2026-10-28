@@ -58,9 +58,15 @@ function readMdxDetails() {
   return details;
 }
 
+// publish-due.mjs appends a "## <date> — cron · cross-post batch" entry on
+// every scheduled cross-post. Those are machine log lines, not journal
+// entries: counting them made every cron publish drift the case-study
+// numbers and fail the Vercel build.
+const CRON_HEADING = /^## .*cron · cross-post batch/;
+
 function countHeadings(path) {
   const src = readFileSync(path, "utf8");
-  return (src.match(/^## /gm) ?? []).length;
+  return src.split("\n").filter((l) => l.startsWith("## ") && !CRON_HEADING.test(l)).length;
 }
 
 function distinctSprints() {
@@ -72,9 +78,9 @@ function distinctSprints() {
 
 function devlogDaySpan() {
   const src = readFileSync(DEVLOG, "utf8");
-  const dates = [...src.matchAll(/^## (2\d{3}-\d{2}-\d{2})/gm)].map(
-    (m) => m[1],
-  );
+  const dates = [...src.matchAll(/^## (2\d{3}-\d{2}-\d{2}).*$/gm)]
+    .filter((m) => !CRON_HEADING.test(m[0]))
+    .map((m) => m[1]);
   if (!dates.length) return 0;
   const sorted = [...new Set(dates)].sort();
   const first = new Date(sorted[0] + "T00:00:00Z");

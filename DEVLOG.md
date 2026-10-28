@@ -2611,6 +2611,8 @@ Bail-out triggered. Did not run the move script (A5). Spec §10.1 updated: Tier 
 - **Null in the schema is a design decision, not a type error to be eliminated.** The first-draft plan.md said all uiRework fields required when present. That rule collided with the honest answer for pre-rig posts. Mid-sprint amendment: `qaCatches: number | null` + validator that accepts both. The same rule governs the aggregator's output and the /tools dash. One null-is-honest rule, three places it shows up.
 - **Vendored-vs-canonical is a pattern, not a mandate.** Sprint 15 set up the mirror discipline for scorecard parsing. Sprint 17 skipped it because the aggregator is tied to a surface only hrekov-dev has. Scope-matched abstraction over doctrinal fidelity — the OSS consumers would have gotten dead code.
 
+**Follow-up (2026-10-28) — cron entries broke deploys:** every scheduled cross-post appends a `## … cron · cross-post batch` heading, and `verify:numbers` counted it as a journal entry, so each publish drifted the hrekov-dev numbers and failed the Vercel build (main was red since the 10-23 batch). The guardrail now skips cron headings in both the entry count and the day span; the case study is reconciled to 75 entries / 13 rules / 17.3%. Also drafted the journal post `two-claudes-one-app` (build-log, future-dated so it stays hidden until it gets a hero and a date).
+
 ---
 
 ## 2026-10-18 — /about redesign · editorial ledger variant
