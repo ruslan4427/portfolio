@@ -2780,15 +2780,15 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 
 ---
 
-### 2026-10-27 — publish: two-claudes-one-app/linkedin
+### 2026-10-27 — publish: two-claudes-one-app (LinkedIn + Dev.to)
 
-**Problem:** `two-claudes-one-app` build-log drafted and requested for release on the site and LinkedIn.
+**Problem:** `two-claudes-one-app` build-log drafted and requested for release on the site, LinkedIn, and Dev.to.
 
-**Decision:** Pushed to `main` for Vercel deployment; published live to LinkedIn via `/v2/ugcPosts` with studio hero image.
+**Decision:** Pushed to `main` for Vercel deployment; published live to LinkedIn via `/v2/ugcPosts` and to Dev.to via `/api/articles` with studio hero image and canonical URL.
 
-**Result:** Live on site at https://hrekov.dev/blog/two-claudes-one-app (200 OK); live on LinkedIn at https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7521080800813973506/.
+**Result:** Live on site at https://hrekov.dev/blog/two-claudes-one-app (200 OK); live on LinkedIn at https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7521080800813973506/; live on Dev.to at https://dev.to/hrekov/two-claudes-one-app-133l.
 
-**Lesson:** Frontmatter status updated to posted; distribution ledger entry appended.
+**Lesson:** Frontmatter status updated to posted across both channels; distribution ledger entries appended.
 
 ---
 
