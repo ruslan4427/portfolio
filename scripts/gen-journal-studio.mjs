@@ -91,6 +91,13 @@ export const JOURNAL_IMAGES = [
       "an open white ledger book with faint ruled lines and no writing, a plain white pen resting beside it, three-quarter view",
     alt: "An open ledger with faint ruled lines and a pen resting beside it.",
   },
+  {
+    slug: "two-claudes-one-app",
+    file: "hero-studio.jpg",
+    subject:
+      "two small white matte devices on the surface, a closed laptop on the left and a phone lying flat on the right, a single folded white paper note resting between them like a message passed across, long diagonal shadows",
+    alt: "A closed white laptop and a white phone side by side, a folded paper note resting between them, in long diagonal shadow.",
+  },
 ];
 
 const args = process.argv.slice(2);

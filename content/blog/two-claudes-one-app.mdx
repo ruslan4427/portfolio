@@ -1,0 +1,76 @@
+---
+slug: two-claudes-one-app
+title: Two Claudes, one app
+tagline: >-
+  How a laptop terminal and a phone session collaborate on the same codebase without clobbering state.
+format: build-log
+publishedAt: '2026-10-27'
+readingTime: 4
+tags:
+  - claude-code
+  - workflow
+  - meta
+  - process
+featured: false
+heroImage:
+  src: /blog/two-claudes-one-app/hero-studio.jpg
+  alt: 'A closed white laptop and a white phone side by side, a folded paper note resting between them, in long diagonal shadow.'
+uiRework:
+  heroRegenerations: 1
+  figureRevisions: []
+  toneFixes: 0
+  qaCatches: null
+  serializerRoundTrips: 0
+distribution:
+  linkedin:
+    status: pending
+  devto:
+    status: pending
+artifacts:
+  - type: commit
+    label: Studio hero generation
+    detail: public/blog/two-claudes-one-app/hero-studio.jpg via gen-blog-hero.mjs
+---
+
+You have Claude Code running in a split tmux pane on your laptop, and Claude open in your browser or phone while away from your desk. Both are working on the same product. Both have access to context, both can draft ideas, and both will happily overwrite each other's work if you don't give them a handshake protocol.
+
+This isn't about running multi-agent swarm experiments with five synthetic personas. It is about the practical everyday friction of developing with AI across two physical devices without losing the plot.
+
+## The problem
+
+Context fragmentation is the silent tax of multi-device development.
+
+When you kick off an idea from your phone — a architectural critique, a rough feature outline, or an editorial angle — that session doesn't see your local uncommitted worktree. Meanwhile, the CLI session on your laptop has full filesystem access, the compiler, and git, but none of the conversational nuances you just explored on the phone.
+
+If you paste raw chat transcripts between them, you flood the context window with conversational filler and waste tokens. If you let both edit code concurrently on divergent branches, you spend forty minutes reconciling hallucinated imports and conflicting state schemas.
+
+The model doesn't know what you did across the room unless you write it down in a medium it can read.
+
+## What I tried
+
+The temptation is to set up a shared memory sync tool or a cloud pasteboard. I tried keeping an active scratchpad in Notes and pasting blocks back and forth. It failed on the third turn: formatting broke, code blocks lost indentation, and neither Claude knew whether the snippet in front of it was current or superseded ten minutes prior.
+
+Next was branching every quick thought into a remote git branch. That created branch rot: a trail of one-commit branches named `feat/nav-idea-mobile` and `fix/hero-tweak-draft` that required manual squashing and dirty git reflogs.
+
+The fix came from treating the handoff like a folded paper note passed between desks.
+
+## The protocol
+
+The rulebook that settled the noise:
+
+1. **Role division by device capability.** The phone session does classification, critique, and specification. It never writes blind code it cannot run. The laptop session does implementation, execution, tests, and asset generation.
+2. **The filesystem is the only shared memory.** No ephemeral chat history crosses devices. If an architectural decision is made on the phone, it lands in a spec or a markdown note in the repo (`specs/` or `memory/`). If a learning repeats, it enters `DEVLOG.md`.
+3. **The paper note handoff.** When switching contexts, the output of the first session must be an artifact: a single prompt command, a frontmatter block, or a targeted diff. The hero image for this post illustrates the exact mechanic — two devices resting on the desk, with a folded paper note between them.
+4. **Preflight verification before merge.** Every change, regardless of where the idea originated, must pass `npm run verify:numbers`, linting, and a local production build on the host machine before any commit lands on `main`.
+
+## What actually happened
+
+This exact post was born through that loop. The editorial direction and prompt were drafted on the fly; the hero image (`/blog/two-claudes-one-app/hero-studio.jpg`) was generated directly from the terminal via the studio pipeline (`node scripts/gen-blog-hero.mjs`); and the resulting frontmatter block was handed off cleanly to the codebase without a single token wasted on intermediate conversational chatter.
+
+Zero merge conflicts. Zero context drift.
+
+## Lesson
+
+When you collaborate with AI across multiple surfaces, don't try to build a distributed nervous system. Build a mail slot.
+
+Keep the interface between your sessions dead simple: committed markdown for architecture, git diffs for implementation, and single-purpose commands for execution. The model is sharp enough to pick up the thread instantly if the note you hand it has clean boundaries.
