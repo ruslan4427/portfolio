@@ -1,0 +1,79 @@
+---
+slug: bridging-claude-design-and-code
+title: 'Bridging Claude Design and Claude Code'
+tagline: >-
+  Two sibling tools from the same company, one shared model, zero handshake —
+  and the five scripts we wrote to ferry 43 screens from canvas to repo.
+format: case-study
+publishedAt: '2026-11-10'
+readingTime: 5
+tags:
+  - claude-design
+  - claude-code
+  - design-system
+  - workflow
+  - handoff
+featured: true
+canonical: 'https://hrekov.dev/blog/bridging-claude-design-and-code'
+heroImage:
+  src: /blog/bridging-claude-design-and-code/hero-studio.jpg
+  alt: >-
+    Two small white blocks standing apart on the surface, a single folded strip
+    of white paper arched across spanning the gap between them, long diagonal
+    shadows.
+uiRework:
+  heroRegenerations: 1
+  figureRevisions: []
+  toneFixes: 0
+  qaCatches: 2
+  serializerRoundTrips: 0
+artifacts:
+  - type: commit
+    label: FieldMark design system PR
+    detail: docs/design-system/ tokens plus 43 HTML + PNG exports
+---
+
+FieldMark is the app we build for the people who install cameras, speakers, and cable runs on-site. A few weeks in, we started a full redesign: palette, type, spacing, status rules, 43 screens covering sign-in, projects, blueprint pins, tasks, team, profile, empty states, errors, iPad, and dark mode.
+
+The plan was dead simple. Draw everything in Claude Design. Let Claude Code port it to Flutter. Same company, same model under the hood, same account. What could possibly go wrong?
+
+A lot, as it turns out.
+
+## Two tools that don't know each other exists
+
+Claude Code can't see what you make in Claude Design. The canvas lives on a claude.ai page; Claude Code lives in the repo on my Mac. There is a share link, but Claude Code can't open it. No export button. No shared folder. No handoff at all.
+
+I still find this hard to accept. One company, one model, one account — and a wall between the two products that you cross by hand.
+
+## The five crutches
+
+We built the bridge ourselves. Here is what ended up inside it.
+
+**1. The repo is the shared language.** Design tokens and rules — color scale, type ramp, radii, status semantics — went into `docs/design-system/` and landed as a pull request. Now Claude Code knows which hex to reach for and which weight the title takes.
+
+**2. Turn canvases into files.** Screens in Claude Design save in a proprietary format you can't open outside their environment. We wrote a script that renders each screen as a plain HTML file. A second script screenshots those pages into PNG. Manrope from Google Fonts refused to load in the headless browser, so we pinned it via npm. The result: 43 HTML files with exact spacing and sizes, and 43 PNGs showing what the screen is supposed to look like.
+
+**3. Audit the "finished" art before you trust it.** Taking the screenshots surfaced two bugs nobody caught on the canvas. The tab bar bled through the modal scrim. One icon never rendered at all. If we had handed the designs over as-is, Claude Code would have faithfully reproduced both.
+
+**4. A translation README.** We wrote a short doc with two tables. Which screen maps to which Flutter file. Which CSS class becomes which widget. Without this, Claude Code would have had pretty pictures and no idea where to put them.
+
+**5. Rules for the screens nobody drew.** You can't mock every edge case. So we wrote a Claude Code skill — a small standalone rule file — that answers the questions a stray screen raises: where do colors come from, how do we render status, which widgets are canonical, how do you assemble a new screen from the closest existing mock. One wrinkle: `.claude/` was in `.gitignore`, so the skill had to be force-added.
+
+## What works now
+
+Claude Code gets one pull request carrying four things: the design system, the 43 screens as HTML plus PNG, the screen-to-file map, and the skill. From that bundle it builds screens one by one and stays within the system even on paths nobody drew.
+
+Honest accounting: the five crutches took about as long as the design itself.
+
+## What's missing
+
+I don't want anything fancy. An "Export to repo" button that drops mocks, tokens, and PNGs straight into my project. Or a Claude Code that can just open a canvas link under the same account.
+
+Until that exists, here is what we learned:
+
+- **The repo is the single source of truth.** If it isn't in code, it doesn't exist to Claude Code.
+- **Picture plus exact values.** The PNG shows intent. The HTML carries the numbers.
+- **Audit mocks before handoff.** "Done" on the canvas doesn't mean it's right.
+- **Write rules, not just screens.** You'll never draw everything. Rules cover the long tail.
+
+Claude Design and Claude Code are strong tools independently. It would be good if they worked as one.

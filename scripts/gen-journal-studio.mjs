@@ -98,6 +98,13 @@ export const JOURNAL_IMAGES = [
       "two small white matte devices on the surface, a closed laptop on the left and a phone lying flat on the right, a single folded white paper note resting between them like a message passed across, long diagonal shadows",
     alt: "A closed white laptop and a white phone side by side, a folded paper note resting between them, in long diagonal shadow.",
   },
+  {
+    slug: "bridging-claude-design-and-code",
+    file: "hero-studio.jpg",
+    subject:
+      "two small white matte blocks of equal height standing apart on the surface with a clear gap between them, a single folded strip of white paper arched across spanning the gap and resting on each block, raking side daylight, long diagonal shadows",
+    alt: "Two small white blocks standing apart on the surface, a single folded strip of white paper arched across spanning the gap between them, long diagonal shadows.",
+  },
 ];
 
 const args = process.argv.slice(2);
