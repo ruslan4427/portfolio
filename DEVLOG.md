@@ -2792,3 +2792,15 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 
 ---
 
+
+## 2026-11-12 — cron · cross-post batch
+
+**Problem:** 2 scheduled cross-post(s) reached publish time.
+
+**Decision:** publish-due.mjs fired via GH Actions hourly cron.
+
+**Result:** Published: bridging-claude-design-and-code/linkedin → https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A7526709128472252417/; bridging-claude-design-and-code/devto → https://dev.to/hrekov/bridging-claude-design-and-claude-code-3jbk. Failures: 0.
+
+**Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
+
+---
