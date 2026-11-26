@@ -102,10 +102,14 @@ export function ProjectCard({ project, total, lens }: { project: Project; total:
             <p className="text-[length:var(--type-body-l)] leading-[1.45] text-[color:var(--ink-body)]">{project.tagline}</p>
           </div>
           {lens && (
-            <p className="text-[length:var(--type-small)] leading-[1.55] text-[color:var(--ink-muted)]">
-              <span className="text-[color:var(--ink-primary)]">Outcome: </span>
-              {lens.glance.outcome}
-            </p>
+            <div className="relative border-l-2 border-[color:var(--accent)] pl-4">
+              <p className="font-sans text-[length:var(--type-caption)] font-medium uppercase tracking-[0.08em] text-[color:var(--accent)]">
+                Outcome
+              </p>
+              <p className="mt-1 text-[length:var(--type-small)] leading-[1.55] text-[color:var(--ink-primary)]">
+                {lens.glance.outcome}
+              </p>
+            </div>
           )}
           <dl className="mt-auto grid grid-cols-2 gap-x-5 gap-y-3">
             {facts.map((s) => (
