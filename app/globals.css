@@ -697,6 +697,14 @@ section[data-case-section] {
   scroll-margin-top: 96px;
 }
 
+/* When PodcastCompanion is mounted (case pages that have a podcast), the
+   bottom-right gutter belongs to it. BackToTop and FloatingEmailCTA both
+   anchor to that gutter too, so they'd fight — hide them for the duration. */
+body[data-podcast-companion="active"] [data-chrome="back-to-top"],
+body[data-podcast-companion="active"] [data-chrome="floating-email-cta"] {
+  display: none !important;
+}
+
 /* ---------- Print (résumé, Sprint 30) ---------- */
 @page {
   size: A4;

@@ -116,6 +116,7 @@ export function FloatingEmailCTA() {
   return (
     <div
       ref={containerRef}
+      data-chrome="floating-email-cta"
       className="pointer-events-none fixed bottom-6 left-1/2 z-30 -translate-x-1/2"
     >
       <AnimatePresence mode="wait" initial={false}>

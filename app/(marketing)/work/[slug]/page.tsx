@@ -6,6 +6,7 @@ import { BuildTimeline } from "@/components/case-study/BuildTimeline";
 import { CaseNav } from "@/components/case-study/CaseNav";
 import { CaseReader, LensControls } from "@/components/case-study/CaseReader";
 import { ChapterRail } from "@/components/case-study/ChapterRail";
+import { PodcastCompanion } from "@/components/case-study/PodcastCompanion";
 import { DevlogRefs } from "@/components/case-study/DevlogRefs";
 import { GlanceBento } from "@/components/case-study/GlanceBento";
 import { LensCTA } from "@/components/case-study/LensCTA";
@@ -17,6 +18,7 @@ import { MaskReveal } from "@/components/ui/MaskReveal";
 import { Reveal } from "@/components/ui/Reveal";
 import { caseLenses } from "@/content/case-lenses";
 import { getCaseStudy } from "@/content/case-studies";
+import { podcasts } from "@/content/case-studies/podcasts";
 import { projects } from "@/content/projects";
 import { extractChapters } from "@/lib/rehype-case-sections";
 
@@ -219,6 +221,7 @@ export default async function CaseStudyPage({
           </div>
         </article>
       </CaseReader>
+      {podcasts[slug] && <PodcastCompanion podcast={podcasts[slug]} />}
     </main>
   );
 }

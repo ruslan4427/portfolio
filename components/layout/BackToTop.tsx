@@ -31,6 +31,7 @@ export function BackToTop() {
     <button
       type="button"
       aria-label="Back to top"
+      data-chrome="back-to-top"
       onClick={handleClick}
       className={`fixed bottom-6 right-[var(--gutter)] z-50 inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--hairline)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)] shadow-[var(--shadow-card)] transition-[opacity,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-primary)]/40 ${
         visible
