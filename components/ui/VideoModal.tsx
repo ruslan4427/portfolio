@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { easeSmooth, usePrefersReducedMotion } from "@/lib/motion";
 
 type Props = {
   open: boolean;
-  onClose: () => void;
+  /** Receives the video's playhead so a caller can resume elsewhere from it. */
+  onClose: (currentTime?: number) => void;
   src: string;
   poster?: string;
   title?: string;
+  /** Seconds to seek to once metadata loads. */
+  startAt?: number;
 };
 
-export function VideoModal({ open, onClose, src, poster, title }: Props) {
+export function VideoModal({ open, onClose: onCloseProp, src, poster, title, startAt }: Props) {
   const reduced = usePrefersReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const onClose = useCallback(() => onCloseProp(videoRef.current?.currentTime), [onCloseProp]);
 
   useEffect(() => {
     if (!open) return;
@@ -60,7 +65,11 @@ export function VideoModal({ open, onClose, src, poster, title }: Props) {
               <span aria-hidden>×</span>
             </button>
             <video
+              ref={videoRef}
               key={src}
+              onLoadedMetadata={(e) => {
+                if (startAt) e.currentTarget.currentTime = startAt;
+              }}
               className="block h-auto w-full"
               src={src}
               poster={poster}

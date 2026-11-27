@@ -29,8 +29,10 @@ export type Podcast = {
   videoSrc: string;
   /** Poster for the video modal. */
   videoPoster: string;
-  /** Single character or "AI" shown in the avatar circle. */
+  /** Single character shown if the avatar image is missing. */
   avatarInitial: string;
+  /** Host portrait shown in the avatar circle. */
+  avatarSrc?: string;
   /** Short line describing the podcast (shown in the not-started state). */
   teaser: string;
   /** Chapters in play order. First chapter starts at 0. */
@@ -46,6 +48,7 @@ export const podcasts: Record<string, Podcast> = {
     videoSrc: "/videos/podcast-hrekov-dev-part1.mp4",
     videoPoster: "/videos/podcast-hrekov-dev-part1-poster.jpg",
     avatarInitial: "R",
+    avatarSrc: "/videos/hero-poster.jpg",
     teaser: "3 min · 5 chapters",
     chapters: [
       {

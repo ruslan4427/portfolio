@@ -697,12 +697,14 @@ section[data-case-section] {
   scroll-margin-top: 96px;
 }
 
-/* When PodcastCompanion is mounted (case pages that have a podcast), the
-   bottom-right gutter belongs to it. BackToTop and FloatingEmailCTA both
-   anchor to that gutter too, so they'd fight — hide them for the duration. */
-body[data-podcast-companion="active"] [data-chrome="back-to-top"],
-body[data-podcast-companion="active"] [data-chrome="floating-email-cta"] {
-  display: none !important;
+/* Below xl the PodcastCompanion is a full-width bottom bar; lift the other
+   floating chrome (BackToTop, FloatingEmailCTA) so it sits above the bar.
+   At xl+ the companion is a pill left of BackToTop and nothing moves. */
+@media (max-width: 1279.98px) {
+  body[data-podcast-companion="active"] [data-chrome="back-to-top"],
+  body[data-podcast-companion="active"] [data-chrome="floating-email-cta"] {
+    bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* ---------- Print (résumé, Sprint 30) ---------- */
