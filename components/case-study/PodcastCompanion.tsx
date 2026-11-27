@@ -276,9 +276,9 @@ export function PodcastCompanion({ podcast }: Props) {
             </span>
             <div className="min-w-0 flex-1">
               <div className="font-sans text-[10px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
-                {playing ? "Now playing" : "Companion podcast"}{" "}
-                · chapter {displayChapter ? podcast.chapters.indexOf(displayChapter) + 1 : 1}
-                {" "}of {podcast.chapters.length}
+                {playing ? "Now playing" : "Podcast"} · Ch.{" "}
+                {displayChapter ? podcast.chapters.indexOf(displayChapter) + 1 : 1} of{" "}
+                {podcast.chapters.length}
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap font-sans text-[14px] font-semibold text-[color:var(--ink-primary)]">
                 {displayChapter?.title ?? podcast.chapters[0].title}
