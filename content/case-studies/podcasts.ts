@@ -69,7 +69,7 @@ export const podcasts: Record<string, Podcast> = {
         startSec: 150,
         sectionIds: [
           "5-the-discipline-that-produces-memory",
-          "6-devlog-stable-logic-the-163-number",
+          "6-devlog-stablelogic-the-163-number",
         ],
       },
       {

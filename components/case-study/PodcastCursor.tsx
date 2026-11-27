@@ -30,6 +30,13 @@ function fmt(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/** "§ 5–6" from section ids like "5-the-…", "6-devlog-…". */
+function sectionRange(c: PodcastChapter): string {
+  const nums = c.sectionIds.map((id) => id.match(/^\d+/)?.[0]).filter(Boolean);
+  if (nums.length === 0) return c.title;
+  return nums.length === 1 ? `§ ${nums[0]}` : `§ ${nums[0]}–${nums[nums.length - 1]}`;
+}
+
 const INTERACTIVE = "a, button, summary, input, textarea, select, video, [role='button'], [data-no-podcast-cursor]";
 
 function Ring({ size, progress, stroke = 2 }: { size: number; progress: number; stroke?: number }) {
@@ -67,6 +74,8 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [inArticle, setInArticle] = useState(false);
+  // Mapped sections with any pixel on screen (for "you scrolled away" logic).
+  const [onScreen, setOnScreen] = useState<Set<string>>(() => new Set());
   const [hover, setHover] = useState<{ chapter: PodcastChapter | null; overInteractive: boolean; inside: boolean }>({
     chapter: null,
     overInteractive: false,
@@ -118,6 +127,14 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
       { rootMargin: "-25% 0px -60% 0px" },
     );
     sections.forEach((s) => io.observe(s));
+    const seenIo = new IntersectionObserver((entries) =>
+      setOnScreen((prev) => {
+        const next = new Set(prev);
+        entries.forEach((e) => (e.isIntersecting ? next.add(e.target.id) : next.delete(e.target.id)));
+        return next;
+      }),
+    );
+    sections.forEach((s) => seenIo.observe(s));
     const article = document.querySelector("article");
     const articleIo = article
       ? new IntersectionObserver(([e]) => setInArticle(e.isIntersecting), { rootMargin: "-10% 0px -10% 0px" })
@@ -125,6 +142,7 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
     if (article) articleIo?.observe(article);
     return () => {
       io.disconnect();
+      seenIo.disconnect();
       articleIo?.disconnect();
     };
   }, [podcast]);
@@ -276,6 +294,48 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [bubble.open, modal.open, openBubble, closeBubble]);
 
+  // Tie the podcast to the text: mark the sections (and rail links) the
+  // current chapter is about, so "this video is about this part" is visible.
+  const liveChapter =
+    [...podcast.chapters].reverse().find((c) => c.startSec <= currentTime) ?? podcast.chapters[0];
+  const liveId = playing || bubble.open || currentTime > 0 ? liveChapter.id : null;
+  useEffect(() => {
+    const idx = podcast.chapters.findIndex((c) => c.id === liveId);
+    if (idx < 0) return;
+    const ch = podcast.chapters[idx];
+    const end = podcast.chapters[idx + 1]?.startSec ?? podcast.totalSec;
+    const state = playing ? "playing" : "paused";
+    const touched: Element[] = [];
+    ch.sectionIds.forEach((id, i) => {
+      const section = document.getElementById(id);
+      if (section) {
+        section.setAttribute("data-podcast-now", state);
+        touched.push(section);
+        const h2 = i === 0 ? section.querySelector("h2") : null;
+        if (h2) {
+          h2.setAttribute(
+            "data-podcast-label",
+            `${playing ? "▶ Now playing" : "❚❚ Paused"} · podcast ch. ${idx + 1}/${podcast.chapters.length} · ${fmt(ch.startSec)}–${fmt(end)} · about ${sectionRange(ch)}`,
+          );
+          touched.push(h2);
+        }
+      }
+      document.querySelectorAll(`nav[aria-label="Chapters"] a[href="#${CSS.escape(id)}"]`).forEach((a) => {
+        a.setAttribute("data-podcast-now", state);
+        touched.push(a);
+      });
+    });
+    return () =>
+      touched.forEach((el) => {
+        el.removeAttribute("data-podcast-now");
+        el.removeAttribute("data-podcast-label");
+      });
+  }, [liveId, playing, podcast]);
+
+  const scrollToChapter = useCallback((c: PodcastChapter) => {
+    document.getElementById(c.sectionIds[0])?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   if (!mounted) return null;
 
   const total = podcast.totalSec;
@@ -297,6 +357,42 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
   const followerSize = big ? 56 : 12;
   const showDock = inArticle || playing || bubble.open;
   const dockMoment = started ? currentTime : readingChapter.startSec;
+  const dockChapter = started ? playbackChapter : readingChapter;
+  // Reader has scrolled away from the part the podcast is talking about.
+  const drifted =
+    started &&
+    !!activeSectionId &&
+    readingChapter.id !== playbackChapter.id &&
+    !playbackChapter.sectionIds.some((id) => onScreen.has(id));
+  const driftCard = drifted && (
+    <div className="w-[232px] rounded-[var(--radius-tile)] border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] p-3 shadow-[var(--shadow-float)]">
+      <div className="font-sans text-[11px] leading-snug text-[color:var(--ink-body)]">
+        You&apos;re reading <b>{sectionRange(readingChapter)}</b>. The podcast is on{" "}
+        <b className="text-[color:var(--accent)]">{sectionRange(playbackChapter)}</b>.
+      </div>
+      <div className="mt-2 flex gap-1.5">
+        <button
+          type="button"
+          onClick={() => scrollToChapter(playbackChapter)}
+          className="h-7 flex-1 rounded-[var(--radius-pill)] border border-[color:var(--outline)] font-sans text-[11px] text-[color:var(--ink-primary)] hover:bg-[color:var(--bg-page)]"
+        >
+          ↑ Back to {sectionRange(playbackChapter)}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const m = media();
+            if (!m) return;
+            m.currentTime = readingChapter.startSec;
+            m.play().catch(() => {});
+          }}
+          className="h-7 flex-1 rounded-[var(--radius-pill)] bg-[color:var(--cta)] font-sans text-[11px] text-[color:var(--cta-ink)]"
+        >
+          ▶ Play {sectionRange(readingChapter)}
+        </button>
+      </div>
+    </div>
+  );
 
   return createPortal(
     <>
@@ -335,8 +431,8 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
               : action === "resume"
                 ? `Resume · ${fmt(currentTime)}`
                 : action === "jump"
-                  ? `Jump to Ch. ${chapterNo(hover.chapter)} · ${fmt(hover.chapter.startSec)}`
-                  : `Listen · Ch. ${chapterNo(hover.chapter)} · ${fmt(hover.chapter.startSec)}`}
+                  ? `Jump to ${sectionRange(hover.chapter)} · ${fmt(hover.chapter.startSec)}`
+                  : `Listen to ${sectionRange(hover.chapter)} · ${fmt(hover.chapter.startSec)}`}
             {bubble.open && <span className="opacity-60"> (video)</span>}
           </div>
         )}
@@ -386,9 +482,13 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
                 <div className="font-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
                   Ch. {chapterNo(playbackChapter)} · {fmt(currentTime)} / {fmt(total)}
                 </div>
-                <div className="truncate font-sans text-[13px] font-semibold text-[color:var(--ink-primary)]">
-                  {playbackChapter.title}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => scrollToChapter(playbackChapter)}
+                  className="max-w-full truncate font-sans text-[13px] font-semibold text-[color:var(--ink-primary)] underline decoration-[color:var(--accent)] decoration-2 underline-offset-4"
+                >
+                  About {sectionRange(playbackChapter)} · {playbackChapter.title}
+                </button>
               </div>
               <div className="flex gap-2">
                 <button
@@ -417,7 +517,7 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
               className="group flex items-center gap-3"
             >
               <span className="pointer-events-none whitespace-nowrap rounded-[var(--radius-pill)] bg-[color:var(--ink-primary)] px-3 py-1.5 font-sans text-[11px] font-medium text-[color:var(--bg-page)] opacity-0 transition-opacity duration-[var(--dur-fast)] group-hover:opacity-100 group-focus-visible:opacity-100">
-                Watch this moment · {fmt(dockMoment)} <span className="opacity-60">(V)</span>
+                Watch {sectionRange(dockChapter)} · {dockChapter.title} · from {fmt(dockMoment)} <span className="opacity-60">(V)</span>
               </span>
               <span className="relative block h-[64px] w-[64px] transition-transform duration-[var(--dur-fast)] group-hover:scale-105">
                 <Ring size={64} progress={progress} />
@@ -434,6 +534,7 @@ export function PodcastCursor({ podcast }: { podcast: Podcast }) {
               </span>
             </button>
           )}
+          {driftCard}
         </div>
       )}
 
