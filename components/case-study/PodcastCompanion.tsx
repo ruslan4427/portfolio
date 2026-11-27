@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { VideoModal } from "@/components/ui/VideoModal";
+import { PodcastCursor } from "@/components/case-study/PodcastCursor";
 import type { Podcast, PodcastChapter } from "@/content/case-studies/podcasts";
 
 type Props = { podcast: Podcast };
@@ -36,7 +37,24 @@ function Avatar({ podcast, size, live }: { podcast: Podcast; size: number; live:
   );
 }
 
+/**
+ * Variant switch while we test the physics:
+ *   fine pointer (desktop) → PodcastCursor (cursor is the player, round video on the right)
+ *   touch, or ?companion=bar → the pill / bottom-bar player below
+ */
 export function PodcastCompanion({ podcast }: Props) {
+  const [variant, setVariant] = useState<"cursor" | "bar" | null>(null);
+  useEffect(() => {
+    const forced = new URLSearchParams(window.location.search).get("companion");
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount gate
+    setVariant(forced === "bar" || forced === "cursor" ? forced : fine ? "cursor" : "bar");
+  }, []);
+  if (variant === null) return null;
+  return variant === "cursor" ? <PodcastCursor podcast={podcast} /> : <PodcastBar podcast={podcast} />;
+}
+
+function PodcastBar({ podcast }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -46,6 +64,7 @@ export function PodcastCompanion({ podcast }: Props) {
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [inArticle, setInArticle] = useState(false);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount gate
   useEffect(() => setMounted(true), []);
 
   // Lets globals.css lift BackToTop / FloatingEmailCTA above the mobile bar.

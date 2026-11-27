@@ -721,3 +721,12 @@ section[data-case-section] {
     color: inherit;
   }
 }
+
+/* PodcastCursor prototype: the follower replaces the native cursor over
+   article text; links and controls keep theirs. */
+body[data-podcast-cursor="on"] article section[id] {
+  cursor: none;
+}
+body[data-podcast-cursor="on"] article section[id] :is(a, button, summary, input, textarea, select, video, [role="button"]) {
+  cursor: pointer;
+}
