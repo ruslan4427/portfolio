@@ -711,3 +711,31 @@ section[data-case-section] {
     color: inherit;
   }
 }
+
+/* Podcast ↔ text link: the sections the current podcast chapter is about
+   get a brick rule in the margin, and the matching chapter-rail links get
+   the same rule. PodcastCompanion sets data-podcast-now (spec 31). */
+article section[data-podcast-now] {
+  position: relative;
+}
+article section[data-podcast-now]::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 0.25em;
+  bottom: 0;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transition: opacity var(--dur-fast);
+}
+article section[data-podcast-now="paused"]::before {
+  opacity: 0.35;
+}
+nav[aria-label="Chapters"] a[data-podcast-now] {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+nav[aria-label="Chapters"] a[data-podcast-now] > span:first-child {
+  color: var(--accent);
+  font-weight: 600;
+}

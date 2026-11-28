@@ -2804,3 +2804,15 @@ Root cause found on the way: `MaskReveal` in-view mode watched the inner span, w
 **Lesson:** Frontmatter status flipped; ledger entry appended; commit follows.
 
 ---
+
+## 2026-11-27 — Podcast companion → template (spec 31)
+
+**Problem:** The 8-minute video chunks inside case bodies never said which part of the text they were about. Three widget iterations followed: a pill/bottom bar, then cursor-as-player, then semantic marks. Each one styled over audio that doesn't match the sections.
+
+**Decision:** Fix the format before the UI. Spec 31 defines the podcast template: ≤ 240 s, one 15–60 s chapter per 1–3 consecutive `##` sections, a one-line gist per chapter, a shared audio/video timeline, and square-safe framing. `validatePodcast()` enforces the mechanical rules in dev and in `prebuild` (`verify:podcasts`). UI: a chapter cue button above each chapter's first heading, a brick now-playing rule on the sections and rail links, a right-edge moment dock that opens a round video at the same second, and a drift card when the reader scrolls away. Cursor-as-player and click-on-text were dropped: they trigger by accident for skimming recruiters, replace the I-beam, and do nothing on touch.
+
+**Result:** One variant for desktop and phone, opt-in. The validator caught the old §6 id mismatch (`stablelogic`), which had silently never matched. Analytics events: `podcast_play`, `podcast_video_open`, `podcast_drift_action`. The hrekov-dev audio is still the legacy 8:15 cut on template timings.
+
+**Lesson:** When the content can't honestly support a UI claim ("this is about § 5"), write the content contract first and make the build check it.
+
+---
