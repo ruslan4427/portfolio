@@ -697,16 +697,6 @@ section[data-case-section] {
   scroll-margin-top: 96px;
 }
 
-/* Below xl the PodcastCompanion is a full-width bottom bar; lift the other
-   floating chrome (BackToTop, FloatingEmailCTA) so it sits above the bar.
-   At xl+ the companion is a pill left of BackToTop and nothing moves. */
-@media (max-width: 1279.98px) {
-  body[data-podcast-companion="active"] [data-chrome="back-to-top"],
-  body[data-podcast-companion="active"] [data-chrome="floating-email-cta"] {
-    bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
-  }
-}
-
 /* ---------- Print (résumé, Sprint 30) ---------- */
 @page {
   size: A4;
@@ -722,18 +712,9 @@ section[data-case-section] {
   }
 }
 
-/* PodcastCursor prototype: the follower replaces the native cursor over
-   article text; links and controls keep theirs. */
-body[data-podcast-cursor="on"] article section[id] {
-  cursor: none;
-}
-body[data-podcast-cursor="on"] article section[id] :is(a, button, summary, input, textarea, select, video, [role="button"]) {
-  cursor: pointer;
-}
-
-/* Podcast ↔ text link: the sections the current podcast chapter is about get
-   a brick rule in the margin and a label over their heading; the matching
-   chapter-rail links get the same rule. Set by PodcastCursor. */
+/* Podcast ↔ text link: the sections the current podcast chapter is about
+   get a brick rule in the margin, and the matching chapter-rail links get
+   the same rule. PodcastCompanion sets data-podcast-now (spec 31). */
 article section[data-podcast-now] {
   position: relative;
 }
@@ -750,18 +731,6 @@ article section[data-podcast-now]::before {
 }
 article section[data-podcast-now="paused"]::before {
   opacity: 0.35;
-}
-article h2[data-podcast-label]::before {
-  content: attr(data-podcast-label);
-  display: block;
-  margin-bottom: 0.9rem;
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
 }
 nav[aria-label="Chapters"] a[data-podcast-now] {
   box-shadow: inset 2px 0 0 var(--accent);

@@ -1,13 +1,26 @@
 "use client";
 
+// Podcast companion. The format template is in specs/31-podcast-companion.
+//
+//   • Chapter cue: a button above the heading of the first section each
+//     chapter covers ("▶ Podcast · ch. 3 of 5 · 2:30 · 45 s" plus the gist).
+//   • Now-playing rule: the sections the chapter covers, and their
+//     chapter-rail links, get a brick rule (CSS in globals.css, keyed on
+//     data-podcast-now).
+//   • Moment dock: avatar with a progress ring at the right edge. It opens
+//     the round video at the same second (the V key does too). On phones it
+//     appears only once playback has started.
+//   • Drift card: shown when none of the playing chapter's sections is on
+//     screen. It offers "back to that part" or "play the part I'm reading".
+// Opt-in throughout: nothing plays until the reader asks.
+
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { VideoModal } from "@/components/ui/VideoModal";
-import { PodcastCursor } from "@/components/case-study/PodcastCursor";
-import type { Podcast, PodcastChapter } from "@/content/case-studies/podcasts";
-
-type Props = { podcast: Podcast };
+import { track } from "@/lib/analytics";
+import { usePrefersReducedMotion } from "@/lib/motion";
+import { validatePodcast, type Podcast, type PodcastChapter } from "@/content/case-studies/podcasts";
 
 function fmt(sec: number): string {
   if (!Number.isFinite(sec)) return "0:00";
@@ -16,73 +29,99 @@ function fmt(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function Avatar({ podcast, size, live }: { podcast: Podcast; size: number; live: boolean }) {
+/** "§ 5–6" from section ids like "5-the-…", "6-devlog-…". */
+function sectionRange(c: PodcastChapter): string {
+  const nums = c.sectionIds.map((id) => id.match(/^\d+/)?.[0]).filter(Boolean);
+  if (nums.length === 0) return c.title;
+  return nums.length === 1 ? `§ ${nums[0]}` : `§ ${nums[0]}–${nums[nums.length - 1]}`;
+}
+
+/** Progress ring that scales with its box (viewBox 0–100). */
+function Ring({ progress, stroke = 3 }: { progress: number; stroke?: number }) {
+  const r = 50 - stroke;
+  const c = 2 * Math.PI * r;
   return (
-    <span
-      aria-hidden
-      className="relative grid flex-shrink-0 place-items-center rounded-full border-[1.5px] border-[color:var(--ink-primary)] bg-[color:var(--bg-page)] font-serif font-semibold text-[color:var(--ink-primary)]"
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}
-    >
-      {podcast.avatarSrc ? (
-        <span className="absolute inset-[2px] overflow-hidden rounded-full">
-          <Image src={podcast.avatarSrc} alt="" fill sizes={`${size}px`} className="object-cover" />
-        </span>
-      ) : (
-        podcast.avatarInitial
-      )}
-      {live && (
-        <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_0_2px_var(--bg-elevated)]" />
-      )}
-    </span>
+    <svg aria-hidden viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full -rotate-90">
+      <circle cx="50" cy="50" r={r} fill="none" stroke="var(--hairline)" strokeWidth={stroke} />
+      <circle
+        cx="50"
+        cy="50"
+        r={r}
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray={c}
+        strokeDashoffset={c * (1 - progress)}
+      />
+    </svg>
   );
 }
 
-/**
- * Variant switch while we test the physics:
- *   fine pointer (desktop) → PodcastCursor (cursor is the player, round video on the right)
- *   touch, or ?companion=bar → the pill / bottom-bar player below
- */
-export function PodcastCompanion({ podcast }: Props) {
-  const [variant, setVariant] = useState<"cursor" | "bar" | null>(null);
-  useEffect(() => {
-    const forced = new URLSearchParams(window.location.search).get("companion");
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount gate
-    setVariant(forced === "bar" || forced === "cursor" ? forced : fine ? "cursor" : "bar");
-  }, []);
-  if (variant === null) return null;
-  return variant === "cursor" ? <PodcastCursor podcast={podcast} /> : <PodcastBar podcast={podcast} />;
-}
-
-function PodcastBar({ podcast }: Props) {
+export function PodcastCompanion({ podcast }: { podcast: Podcast }) {
+  const reduced = usePrefersReducedMotion();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const bubbleRef = useRef<HTMLVideoElement>(null);
+
   const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [video, setVideo] = useState<{ open: boolean; startAt: number }>({ open: false, startAt: 0 });
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [inArticle, setInArticle] = useState(false);
+  const [onScreen, setOnScreen] = useState<Set<string>>(() => new Set());
+  const [cueHosts, setCueHosts] = useState<Record<string, HTMLElement>>({});
+  const [bubble, setBubble] = useState<{ open: boolean; startAt: number; resumeAudio: boolean }>({
+    open: false,
+    startAt: 0,
+    resumeAudio: false,
+  });
+  const [modal, setModal] = useState<{ open: boolean; startAt: number }>({ open: false, startAt: 0 });
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount gate
   useEffect(() => setMounted(true), []);
 
-  // Lets globals.css lift BackToTop / FloatingEmailCTA above the mobile bar.
-  useEffect(() => {
-    document.body.dataset.podcastCompanion = "active";
-    return () => {
-      delete document.body.dataset.podcastCompanion;
-    };
-  }, []);
+  const chapterOfSection = useCallback(
+    (id: string | null) => (id ? podcast.chapters.find((c) => c.sectionIds.includes(id)) ?? null : null),
+    [podcast],
+  );
 
-  // Scroll sync — which MDX section is in view?
+  /** What playback controls drive: the round video if open, else audio. */
+  const media = useCallback(
+    (): HTMLMediaElement | null => (bubble.open ? bubbleRef.current : audioRef.current),
+    [bubble.open],
+  );
+
+  // Dev-time template check against the rendered sections.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const ids = Array.from(document.querySelectorAll("article section[id]")).map((s) => s.id);
+    const errs = validatePodcast(podcast, ids);
+    if (errs.length) console.warn("[podcast] template violations:\n- " + errs.join("\n- "));
+  }, [podcast]);
+
+  // Cue hosts: one <div> inserted before each chapter's first heading.
+  useEffect(() => {
+    const hosts: Record<string, HTMLElement> = {};
+    podcast.chapters.forEach((c) => {
+      const section = document.getElementById(c.sectionIds[0]);
+      const h2 = section?.querySelector(":scope > h2");
+      if (!section || !h2) return;
+      const host = document.createElement("div");
+      host.dataset.podcastCue = c.id;
+      section.insertBefore(host, h2);
+      hosts[c.id] = host;
+    });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM hosts exist only after mount
+    setCueHosts(hosts);
+    return () => Object.values(hosts).forEach((h) => h.remove());
+  }, [podcast]);
+
+  // Reading position, plus which mapped sections are on screen.
   useEffect(() => {
     const ids = new Set(podcast.chapters.flatMap((c) => c.sectionIds));
     const sections = Array.from(ids)
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => !!el);
-    if (sections.length === 0) return;
-
     const io = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -92,298 +131,381 @@ function PodcastBar({ podcast }: Props) {
       },
       { rootMargin: "-25% 0px -60% 0px" },
     );
-    sections.forEach((s) => io.observe(s));
-
+    const seenIo = new IntersectionObserver((entries) =>
+      setOnScreen((prev) => {
+        const next = new Set(prev);
+        entries.forEach((e) => (e.isIntersecting ? next.add(e.target.id) : next.delete(e.target.id)));
+        return next;
+      }),
+    );
+    sections.forEach((s) => {
+      io.observe(s);
+      seenIo.observe(s);
+    });
     const article = document.querySelector("article");
     const articleIo = article
-      ? new IntersectionObserver(([entry]) => setInArticle(entry.isIntersecting), {
-          rootMargin: "-10% 0px -10% 0px",
-        })
+      ? new IntersectionObserver(([e]) => setInArticle(e.isIntersecting), { rootMargin: "-10% 0px -10% 0px" })
       : null;
     if (article) articleIo?.observe(article);
-
     return () => {
       io.disconnect();
+      seenIo.disconnect();
       articleIo?.disconnect();
     };
   }, [podcast]);
 
-  // The <audio> only exists once mounted; attach listeners after that.
+  // Time and play state follow whichever medium is active.
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const onTime = () => setCurrentTime(audio.currentTime);
+    const el = bubble.open ? bubbleRef.current : audioRef.current;
+    if (!el) return;
+    const onTime = () => setCurrentTime(el.currentTime);
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
-    audio.addEventListener("timeupdate", onTime);
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
+    el.addEventListener("ended", onPause);
+    setPlaying(!el.paused);
     return () => {
-      audio.removeEventListener("timeupdate", onTime);
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
+      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
+      el.removeEventListener("ended", onPause);
     };
-  }, [mounted]);
+  }, [mounted, bubble.open]);
 
-  const togglePlay = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.paused) audio.play().catch(() => {});
-    else audio.pause();
-  }, []);
+  const liveChapter =
+    [...podcast.chapters].reverse().find((c) => c.startSec <= currentTime) ?? podcast.chapters[0];
+  const started = playing || bubble.open || currentTime > 0;
 
-  const seek = useCallback((sec: number, play: boolean) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = Math.max(0, Math.min(podcast.totalSec, sec));
-    setCurrentTime(audio.currentTime);
-    if (play) audio.play().catch(() => {});
-  }, [podcast.totalSec]);
+  // Now-playing marks on sections and rail links (styled in globals.css).
+  useEffect(() => {
+    if (!started) return;
+    const state = playing ? "playing" : "paused";
+    const touched: Element[] = [];
+    liveChapter.sectionIds.forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) {
+        section.setAttribute("data-podcast-now", state);
+        touched.push(section);
+      }
+      document.querySelectorAll(`nav[aria-label="Chapters"] a[href="#${CSS.escape(id)}"]`).forEach((a) => {
+        a.setAttribute("data-podcast-now", state);
+        touched.push(a);
+      });
+    });
+    return () => touched.forEach((el) => el.removeAttribute("data-podcast-now"));
+  }, [liveChapter, started, playing]);
 
-  const openVideo = useCallback(() => {
-    const audio = audioRef.current;
-    const t = audio?.currentTime ?? 0;
-    audio?.pause();
-    setVideo({ open: true, startAt: t });
-  }, []);
-
-  const closeVideo = useCallback(
-    (t?: number) => {
-      setVideo((v) => ({ ...v, open: false }));
-      if (typeof t === "number") seek(t, false);
+  /** Cue click: play, pause or jump on whichever medium is active. */
+  const playChapter = useCallback(
+    (c: PodcastChapter) => {
+      const m = media();
+      if (!m) return;
+      const nowChapter =
+        [...podcast.chapters].reverse().find((x) => x.startSec <= m.currentTime) ?? podcast.chapters[0];
+      if (nowChapter.id === c.id && m.currentTime > 0) {
+        if (m.paused) m.play().catch(() => {});
+        else m.pause();
+        return;
+      }
+      m.currentTime = c.startSec;
+      m.play().catch(() => {});
+      track("podcast_play", { chapter: c.id, medium: bubble.open ? "video" : "audio" });
     },
-    [seek],
+    [media, podcast, bubble.open],
   );
 
-  const jumpToChapter = useCallback((c: PodcastChapter) => seek(c.startSec, true), [seek]);
+  const scrollToChapter = useCallback(
+    (c: PodcastChapter) => {
+      document
+        .getElementById(c.sectionIds[0])
+        ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    },
+    [reduced],
+  );
 
-  // Keep the <audio> mounted for the whole page so playback survives
-  // scrolling out of the article; only the chrome hides.
+  const openBubble = useCallback(() => {
+    const audio = audioRef.current;
+    const wasPlaying = !!audio && !audio.paused;
+    const fallback = chapterOfSection(activeSectionId)?.startSec ?? 0;
+    const startAt = audio && audio.currentTime > 0 ? audio.currentTime : fallback;
+    audio?.pause();
+    setBubble({ open: true, startAt, resumeAudio: wasPlaying });
+    track("podcast_video_open", { at: Math.round(startAt) });
+  }, [activeSectionId, chapterOfSection]);
+
+  const closeBubble = useCallback(() => {
+    const v = bubbleRef.current;
+    const audio = audioRef.current;
+    const t = v?.currentTime ?? bubble.startAt;
+    const keepPlaying = v ? !v.paused : bubble.resumeAudio;
+    v?.pause();
+    setBubble((b) => ({ ...b, open: false }));
+    if (audio) {
+      audio.currentTime = t;
+      setCurrentTime(t);
+      if (keepPlaying) audio.play().catch(() => {});
+    }
+  }, [bubble.startAt, bubble.resumeAudio]);
+
+  const expandBubble = useCallback(() => {
+    const v = bubbleRef.current;
+    const t = v?.currentTime ?? 0;
+    v?.pause();
+    setModal({ open: true, startAt: t });
+  }, []);
+
+  const closeModal = useCallback((t?: number) => {
+    setModal((m) => ({ ...m, open: false }));
+    const v = bubbleRef.current;
+    if (v && typeof t === "number") {
+      v.currentTime = t;
+      v.play().catch(() => {});
+    }
+  }, []);
+
+  // V toggles the round video; Esc closes it.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      if (modal.open) return;
+      if (e.key === "v" || e.key === "V") {
+        if (bubble.open) closeBubble();
+        else openBubble();
+      } else if (e.key === "Escape" && bubble.open) {
+        closeBubble();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [bubble.open, modal.open, openBubble, closeBubble]);
+
   if (!mounted) return null;
 
-  const scrollChapter = podcast.chapters.find(
-    (c) => activeSectionId && c.sectionIds.includes(activeSectionId),
-  );
-  const playbackChapter =
-    [...podcast.chapters].reverse().find((c) => c.startSec <= currentTime) ?? podcast.chapters[0];
-  const displayChapter = playing ? playbackChapter : scrollChapter ?? podcast.chapters[0];
-  const chapterNo = podcast.chapters.indexOf(displayChapter) + 1;
-  const totalSec = podcast.totalSec;
-  const progress = Math.min(1, Math.max(0, currentTime / totalSec));
-  const showChrome = inArticle || playing;
+  const total = podcast.totalSec;
+  const progress = Math.min(1, Math.max(0, currentTime / total));
+  const readingChapter = chapterOfSection(activeSectionId) ?? podcast.chapters[0];
+  const dockChapter = started ? liveChapter : readingChapter;
+  const dockMoment = started ? currentTime : readingChapter.startSec;
+  const chapterEnd = (c: PodcastChapter) =>
+    podcast.chapters[podcast.chapters.indexOf(c) + 1]?.startSec ?? total;
+  const drifted =
+    started &&
+    !!activeSectionId &&
+    readingChapter.id !== liveChapter.id &&
+    !liveChapter.sectionIds.some((id) => onScreen.has(id));
+  // Desktop: dock whenever in the article. Phone: only once started (the cues are the entry).
+  const dockVisibility = started ? "flex" : inArticle ? "hidden sm:flex" : "hidden";
 
-  return createPortal(
-    <>
-      <audio ref={audioRef} src={podcast.audioSrc} preload="metadata" />
-
-      {showChrome && (
-        <>
-          {/* xl+: pill sits left of BackToTop */}
-          {!open && (
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              aria-label="Open podcast companion"
-              className="fixed bottom-6 right-[calc(var(--gutter)+3.5rem)] z-50 hidden items-center gap-3 rounded-[var(--radius-pill)] border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] py-2 pl-2 pr-5 shadow-[var(--shadow-float)] transition-transform duration-[var(--dur-fast)] hover:-translate-y-0.5 focus-visible:shadow-[var(--focus-ring)] focus-visible:outline-none xl:inline-flex"
-            >
-              <Avatar podcast={podcast} size={44} live={playing} />
-              {playing && (
-                <span aria-hidden className="flex h-4 items-center gap-[3px] px-0.5">
-                  {[6, 12, 16, 10, 6].map((h, i) => (
-                    <span key={i} className="block w-0.5 rounded-full bg-[color:var(--accent)]" style={{ height: h }} />
-                  ))}
-                </span>
-              )}
-              <span className="min-w-0 text-left">
-                <span className="block font-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
-                  {playing ? `Ch. ${chapterNo} · ${fmt(currentTime)} / ${fmt(totalSec)}` : "Companion podcast"}
-                </span>
-                <span className="block max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap font-sans text-[13px] font-semibold text-[color:var(--ink-primary)]">
-                  {playing ? displayChapter.title : podcast.teaser}
-                </span>
-              </span>
-            </button>
+  const cues = podcast.chapters.map((c, i) => {
+    const host = cueHosts[c.id];
+    if (!host) return null;
+    const isLive = started && liveChapter.id === c.id;
+    const len = chapterEnd(c) - c.startSec;
+    const chProgress = isLive ? Math.min(1, Math.max(0, (currentTime - c.startSec) / len)) : 0;
+    return createPortal(
+      <button
+        type="button"
+        onClick={() => playChapter(c)}
+        aria-label={
+          isLive && playing
+            ? `Pause podcast chapter ${i + 1}`
+            : `Play podcast chapter ${i + 1}, ${c.title}, from ${fmt(c.startSec)}`
+        }
+        className="group mb-4 flex w-full max-w-[560px] items-start gap-3 rounded-[var(--radius-tile)] py-1 text-left focus-visible:shadow-[var(--focus-ring)] focus-visible:outline-none"
+      >
+        <span
+          aria-hidden
+          className={`mt-0.5 grid h-8 w-8 flex-shrink-0 place-items-center rounded-full border font-sans text-[11px] transition-colors duration-[var(--dur-fast)] ${
+            isLive && playing
+              ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--accent-ink)]"
+              : "border-[color:var(--outline)] bg-[color:var(--bg-elevated)] text-[color:var(--ink-primary)] group-hover:border-[color:var(--ink-primary)]"
+          }`}
+        >
+          {isLive && playing ? "❚❚" : "▶"}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span
+            className={`block font-sans text-[11px] font-semibold uppercase tracking-[0.08em] ${
+              isLive ? "text-[color:var(--accent)]" : "text-[color:var(--ink-muted)]"
+            }`}
+          >
+            {isLive
+              ? `${playing ? "Now playing" : "Paused"} · ${fmt(currentTime)} / ${fmt(chapterEnd(c))}`
+              : `Podcast · ch. ${i + 1} of ${podcast.chapters.length} · ${fmt(c.startSec)} · ${len} s`}
+            <span className="font-normal normal-case tracking-normal text-[color:var(--ink-muted)]">
+              {" "}
+              · about {sectionRange(c)}
+            </span>
+          </span>
+          <span className="mt-0.5 block font-sans text-[14px] leading-snug text-[color:var(--ink-body)]">{c.gist}</span>
+          {isLive && (
+            <span aria-hidden className="mt-2 block h-[2px] w-full max-w-[320px] rounded-full bg-[color:var(--hairline)]">
+              <span
+                className="block h-full rounded-full bg-[color:var(--accent)]"
+                style={{ width: `${(chProgress * 100).toFixed(1)}%` }}
+              />
+            </span>
           )}
+        </span>
+      </button>,
+      host,
+      c.id,
+    );
+  });
 
-          {/* < xl: full-width bottom bar */}
-          <div className="fixed inset-x-0 bottom-0 z-50 flex items-center gap-3 border-t border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-3.5 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] pt-2.5 shadow-[0_-1px_2px_rgba(0,0,0,0.03),0_-12px_32px_-12px_rgba(0,0,0,0.12)] xl:hidden">
-            <Avatar podcast={podcast} size={40} live={playing} />
-            <div className="min-w-0 flex-1">
-              <div className="font-sans text-[10px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
-                {playing ? `Ch. ${chapterNo} · ${fmt(currentTime)} / ${fmt(totalSec)}` : "Companion podcast"}
+  // On phones the open video already links back via "About § …", so the card would only crowd it.
+  const driftCard = drifted && (
+    <div className={`${bubble.open ? "hidden sm:block" : ""} w-[min(232px,calc(100vw-24px))] rounded-[var(--radius-tile)] border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] p-3 shadow-[var(--shadow-float)]`}>
+      <div className="font-sans text-[12px] leading-snug text-[color:var(--ink-body)]">
+        You&apos;re reading <b>{sectionRange(readingChapter)}</b>. The podcast is on{" "}
+        <b className="text-[color:var(--accent)]">{sectionRange(liveChapter)}</b>.
+      </div>
+      <div className="mt-2 flex gap-1.5">
+        <button
+          type="button"
+          onClick={() => {
+            scrollToChapter(liveChapter);
+            track("podcast_drift_action", { action: "back" });
+          }}
+          className="h-8 flex-1 rounded-[var(--radius-pill)] border border-[color:var(--outline)] font-sans text-[11px] text-[color:var(--ink-primary)] hover:bg-[color:var(--bg-page)]"
+        >
+          ↑ Back to {sectionRange(liveChapter)}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            playChapter(readingChapter);
+            track("podcast_drift_action", { action: "play_here" });
+          }}
+          className="h-8 flex-1 rounded-[var(--radius-pill)] bg-[color:var(--cta)] font-sans text-[11px] text-[color:var(--cta-ink)]"
+        >
+          ▶ Play {sectionRange(readingChapter)}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {cues}
+      {createPortal(
+        <>
+          <audio ref={audioRef} src={podcast.audioSrc} preload="metadata" />
+
+          <div
+            className={`${dockVisibility} fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[70] flex-col items-end gap-2 sm:bottom-auto sm:right-5 sm:top-1/2 sm:-translate-y-1/2`}
+          >
+            {bubble.open ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="relative h-[168px] w-[168px] sm:h-[232px] sm:w-[232px]">
+                  <Ring progress={progress} stroke={1.6} />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = bubbleRef.current;
+                      if (!v) return;
+                      if (v.paused) v.play().catch(() => {});
+                      else v.pause();
+                    }}
+                    aria-label={playing ? "Pause video" : "Play video"}
+                    className="absolute inset-[5px] overflow-hidden rounded-full bg-black shadow-[var(--shadow-float)]"
+                  >
+                    <video
+                      ref={bubbleRef}
+                      src={podcast.videoSrc}
+                      poster={podcast.videoPoster}
+                      playsInline
+                      autoPlay
+                      onLoadedMetadata={(e) => {
+                        e.currentTarget.currentTime = bubble.startAt;
+                        e.currentTarget.play().catch(() => {});
+                      }}
+                      className="h-full w-full object-cover"
+                    />
+                    {!playing && (
+                      <span className="absolute inset-0 grid place-items-center bg-[rgba(17,17,17,0.35)] font-sans text-[22px] text-white">
+                        ▶
+                      </span>
+                    )}
+                  </button>
+                </div>
+                <div className="w-[168px] text-center sm:w-[232px]">
+                  <div className="font-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
+                    {fmt(currentTime)} / {fmt(total)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => scrollToChapter(liveChapter)}
+                    className="max-w-full truncate font-sans text-[12px] font-semibold text-[color:var(--ink-primary)] underline decoration-[color:var(--accent)] decoration-2 underline-offset-4 sm:text-[13px]"
+                  >
+                    About {sectionRange(liveChapter)} · {liveChapter.title}
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={expandBubble}
+                    aria-label="Expand video"
+                    className="h-8 rounded-[var(--radius-pill)] border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-3 font-sans text-[12px] text-[color:var(--ink-primary)] hover:bg-[color:var(--bg-page)]"
+                  >
+                    ⤢ Expand
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeBubble}
+                    aria-label="Close video, keep listening"
+                    className="h-8 rounded-[var(--radius-pill)] border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] px-3 font-sans text-[12px] text-[color:var(--ink-primary)] hover:bg-[color:var(--bg-page)]"
+                  >
+                    × Audio only
+                  </button>
+                </div>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap font-sans text-[13px] font-semibold text-[color:var(--ink-primary)]">
-                {displayChapter.title}
-              </div>
-              <div className="mt-1.5 h-[2px] rounded-full bg-[color:var(--hairline)]">
-                <div className="h-full rounded-full bg-[color:var(--ink-primary)]" style={{ width: `${(progress * 100).toFixed(1)}%` }} />
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={togglePlay}
-              aria-label={playing ? "Pause" : "Play"}
-              className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-[color:var(--cta)] font-sans text-[12px] text-[color:var(--cta-ink)]"
-            >
-              {playing ? "❚❚" : "▶"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen((v) => !v)}
-              aria-label={open ? "Close chapter list" : "Open chapter list"}
-              aria-expanded={open}
-              className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full border border-[color:var(--hairline)] text-[color:var(--ink-muted)]"
-            >
-              {open ? (
-                <span aria-hidden className="font-sans text-[16px] leading-none">×</span>
-              ) : (
-                <svg aria-hidden width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M5 3.5h7M5 7h7M5 10.5h7" />
-                  <circle cx="2" cy="3.5" r="0.6" fill="currentColor" />
-                  <circle cx="2" cy="7" r="0.6" fill="currentColor" />
-                  <circle cx="2" cy="10.5" r="0.6" fill="currentColor" />
-                </svg>
-              )}
-            </button>
+            ) : (
+              <button
+                type="button"
+                onClick={openBubble}
+                aria-label={`Watch ${sectionRange(dockChapter)}, ${dockChapter.title}, from ${fmt(dockMoment)}`}
+                className="group flex items-center gap-3 focus-visible:outline-none"
+              >
+                <span className="pointer-events-none hidden whitespace-nowrap rounded-[var(--radius-pill)] bg-[color:var(--ink-primary)] px-3 py-1.5 font-sans text-[11px] font-medium text-[color:var(--bg-page)] opacity-0 transition-opacity duration-[var(--dur-fast)] group-hover:opacity-100 group-focus-visible:opacity-100 sm:inline">
+                  Watch {sectionRange(dockChapter)} · from {fmt(dockMoment)} <span className="opacity-60">(V)</span>
+                </span>
+                <span className="relative block h-14 w-14 rounded-full transition-transform duration-[var(--dur-fast)] group-hover:scale-105 group-focus-visible:shadow-[var(--focus-ring)] sm:h-16 sm:w-16">
+                  <Ring progress={progress} />
+                  <span className="absolute inset-[4px] overflow-hidden rounded-full bg-[color:var(--bg-page)] shadow-[var(--shadow-float)]">
+                    {podcast.avatarSrc ? (
+                      <Image src={podcast.avatarSrc} alt="" fill sizes="64px" className="object-cover" />
+                    ) : (
+                      <span className="grid h-full place-items-center font-serif text-xl">{podcast.avatarInitial}</span>
+                    )}
+                  </span>
+                  <span
+                    aria-hidden
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[var(--radius-pill)] bg-[color:var(--ink-primary)] px-1.5 py-px font-sans text-[9px] font-semibold uppercase tracking-[0.08em] text-[color:var(--bg-page)]"
+                  >
+                    {playing ? "● Live" : "▶ Video"}
+                  </span>
+                </span>
+              </button>
+            )}
+            {driftCard}
           </div>
 
-          {open && (
-            <div
-              role="dialog"
-              aria-label="Podcast player"
-              className="fixed inset-x-3 bottom-[76px] z-[60] flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[color:var(--outline)] bg-[color:var(--bg-elevated)] shadow-[var(--shadow-float)] sm:left-auto sm:w-[360px] xl:bottom-6 xl:right-[calc(var(--gutter)+3.5rem)] xl:w-[340px]"
-            >
-              <header className="flex items-center gap-3 border-b border-[color:var(--hairline)] px-4 py-3">
-                <Avatar podcast={podcast} size={44} live={playing} />
-                <div className="min-w-0 flex-1">
-                  <div className="font-sans text-[10px] uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
-                    {playing ? "Now playing" : "Podcast"} · Ch. {chapterNo} of {podcast.chapters.length}
-                  </div>
-                  <div className="overflow-hidden text-ellipsis whitespace-nowrap font-sans text-[14px] font-semibold text-[color:var(--ink-primary)]">
-                    {displayChapter.title}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Collapse"
-                  className="grid h-7 w-7 place-items-center rounded-full border border-[color:var(--hairline)] font-sans text-[14px] text-[color:var(--ink-muted)] hover:bg-[color:var(--bg-page)]"
-                >
-                  −
-                </button>
-              </header>
-
-              <ul className="max-h-[220px] overflow-y-auto py-2">
-                {podcast.chapters.map((c, i) => {
-                  const isCurrent = displayChapter.id === c.id;
-                  const isPlayed = playing && currentTime >= c.startSec && !isCurrent;
-                  return (
-                    <li key={c.id}>
-                      <button
-                        type="button"
-                        onClick={() => jumpToChapter(c)}
-                        className={`flex w-full items-center gap-3 border-l-2 px-4 py-2 text-left font-sans text-[13px] ${
-                          isCurrent
-                            ? "border-[color:var(--accent)] bg-[color:rgba(169,68,39,0.06)] pl-[14px]"
-                            : "border-transparent"
-                        }`}
-                      >
-                        <span
-                          className={`min-w-[20px] text-[11px] tabular-nums ${
-                            isCurrent
-                              ? "font-semibold text-[color:var(--accent)]"
-                              : isPlayed
-                                ? "text-[color:var(--ink-body)]"
-                                : "text-[color:var(--ink-faint)]"
-                          }`}
-                        >
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span
-                          className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap ${
-                            isCurrent
-                              ? "font-semibold text-[color:var(--ink-primary)]"
-                              : isPlayed
-                                ? "text-[color:var(--ink-body)]"
-                                : "text-[color:var(--ink-muted)]"
-                          }`}
-                        >
-                          {c.title}
-                        </span>
-                        <span className="text-[11px] tabular-nums text-[color:var(--ink-faint)]">{fmt(c.startSec)}</span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <div className="border-t border-[color:var(--hairline)] px-4 pb-4 pt-3">
-                <div className="relative mb-2 h-1 rounded-full bg-[color:var(--hairline)]">
-                  <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-[color:var(--ink-primary)]"
-                    style={{ width: `${(progress * 100).toFixed(1)}%` }}
-                  />
-                  {podcast.chapters.slice(1).map((c) => (
-                    <span
-                      key={c.id}
-                      aria-hidden
-                      className="absolute -top-0.5 h-2 w-[2px] bg-[color:var(--ink-muted)] opacity-50"
-                      style={{ left: `${((c.startSec / totalSec) * 100).toFixed(1)}%` }}
-                    />
-                  ))}
-                </div>
-                <div className="mb-3 flex justify-between font-sans text-[11px] tabular-nums text-[color:var(--ink-muted)]">
-                  <span>{fmt(currentTime)}</span>
-                  <span>−{fmt(Math.max(0, totalSec - currentTime))}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => seek(currentTime - 15, false)}
-                    aria-label="Rewind 15 seconds"
-                    className="font-sans text-[11px] text-[color:var(--ink-muted)] hover:text-[color:var(--ink-primary)]"
-                  >
-                    ⏮ 15
-                  </button>
-                  <button
-                    type="button"
-                    onClick={togglePlay}
-                    aria-label={playing ? "Pause" : "Play"}
-                    className="grid h-11 w-11 place-items-center rounded-full bg-[color:var(--cta)] font-sans text-[14px] text-[color:var(--cta-ink)]"
-                  >
-                    {playing ? "❚❚" : "▶"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => seek(currentTime + 30, false)}
-                    aria-label="Forward 30 seconds"
-                    className="font-sans text-[11px] text-[color:var(--ink-muted)] hover:text-[color:var(--ink-primary)]"
-                  >
-                    30 ⏭
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openVideo}
-                    className="ml-auto inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--outline)] px-3.5 py-1.5 font-sans text-[12px] font-medium text-[color:var(--ink-primary)] hover:bg-[color:var(--bg-page)]"
-                  >
-                    ▶ Watch {currentTime > 1 ? `from ${fmt(currentTime)}` : "video"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
+          <VideoModal
+            open={modal.open}
+            onClose={closeModal}
+            src={podcast.videoSrc}
+            poster={podcast.videoPoster}
+            startAt={modal.startAt}
+            title="Podcast — full video"
+          />
+        </>,
+        document.body,
       )}
-
-      <VideoModal
-        open={video.open}
-        onClose={closeVideo}
-        src={podcast.videoSrc}
-        poster={podcast.videoPoster}
-        startAt={video.startAt}
-        title="Podcast — full video"
-      />
-    </>,
-    document.body,
+    </>
   );
 }

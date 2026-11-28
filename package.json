@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run verify:numbers",
+    "prebuild": "npm run verify:numbers && npm run verify:podcasts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "verify:numbers": "node scripts/verify-case-study-numbers.mjs",
+    "verify:podcasts": "node scripts/verify-podcasts.mjs",
     "scorecard": "node scripts/scorecard-src/scorecard.mjs --out scorecard.json",
     "scorecard:snapshot": "node scripts/scorecard-src/scorecard.mjs --out scripts/__fixtures__/scorecard.expected.json",
     "scorecard:check": "node scripts/scorecard-src/snapshot-check.mjs",
